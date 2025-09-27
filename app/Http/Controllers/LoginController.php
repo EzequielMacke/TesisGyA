@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Persona;
+use App\Models\Proveedor;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -181,20 +182,50 @@ class LoginController extends Controller
         }
 
         // Si el usuario está verificado, validar el código de autenticación
-        if ($user->verificado == 1) {
-            if ($request->filled('codigo_autenticacion') && $user->codigo_autenticacion === $request->codigo_autenticacion) {
-                $user->acceso_intento = 0; // Reiniciar intentos al ingresar correctamente
-                $user->save();
-                session(['user_id' => $user->id]);
-                return redirect()->route('menu.index')->with('success', 'Bienvenido al sistema.');
-            } else {
-                $user->save();
-                return back()->with('error', 'El código de autenticación es incorrecto.');
-            }
-        }
+    if ($user->verificado == 1) {
+        if ($request->filled('codigo_autenticacion') && $user->codigo_autenticacion === $request->codigo_autenticacion) {
+            $user->acceso_intento = 0;
+            $user->save();
 
-        return back()->with('error', 'Debe ingresar un código.');
+            // Crear sesión básica
+            session([
+                'user_id' => $user->id,
+                'user_usuario' => $user->usuario,
+                'user_email' => $user->email,
+                'user_nombre' => $user->persona ? $user->persona->nombre : 'Usuario',
+                'user_apellido' => $user->persona ? $user->persona->apellido : '',
+                'user_sucursal_id' => $user->sucursal_id
+            ]);
+
+            // Verificar si tiene cargo asignado
+            if (!$user->cargo_id || !$user->cargo) {
+                return redirect()->route('espera');
+            }
+
+            // Agregar información del cargo a la sesión
+            session([
+                'user_cargo' => $user->cargo->descripcion,
+                'user_cargo_id' => $user->cargo_id,
+                'user_sucursal' => $user->sucursal ? $user->sucursal->descripcion : 'Sin sucursal',
+            ]);
+
+            // Si es proveedor (cargo_id = 3), verificar si tiene datos completos
+            if ($user->cargo_id == 3) {
+                $proveedor = Proveedor::where('usuario_id', $user->id)->first();
+
+                if (!$proveedor || !$this->proveedorTieneDatosCompletos($proveedor)) {
+                    return redirect()->route('datos.proveedor');
+                }
+            }
+
+            return redirect()->route('menu.index')->with('success', 'Bienvenido al sistema.');
+        } else {
+            return back()->with('error', 'El código de autenticación es incorrecto.');
+        }
     }
+
+    return back()->with('error', 'Debe ingresar un código.');
+}
 
     public function recuperarContraseña(Request $request)
     {
@@ -220,4 +251,119 @@ class LoginController extends Controller
         return redirect()->route('login')->with('success', 'Contraseña recuperada. Por favor actualiza tu contraseña desde las configuraciones de usuario.');
     }
 
+    public function mostrarEspera()
+    {
+        // Verificación simple
+        if (!session('user_id')) {
+            return redirect()->route('login');
+        }
+
+        return view('menu.espera');
+    }
+
+    /**
+     * Verificar si tiene cargo (AJAX)
+     */
+    public function verificarCargo()
+    {
+        // Verificación simple
+        if (!session('user_id')) {
+            return response()->json(['error' => 'No autorizado'], 401);
+        }
+
+        $user = User::find(session('user_id'));
+
+        if ($user && $user->cargo_id) {
+            return response()->json(['tiene_cargo' => true]);
+        }
+
+        return response()->json(['tiene_cargo' => false]);
+    }
+
+    private function proveedorTieneDatosCompletos($proveedor)
+    {
+        if (!$proveedor) {
+            return false;
+        }
+
+        // Verificar campos obligatorios
+        return !empty($proveedor->razon_social) &&
+            !empty($proveedor->ruc) &&
+            !empty($proveedor->direccion) &&
+            !empty($proveedor->telefono) &&
+            !empty($proveedor->email);
+    }
+
+    /**
+     * Mostrar formulario de datos del proveedor
+     */
+    public function mostrarDatosProveedor()
+    {
+        if (!session('user_id')) {
+            return redirect()->route('login');
+        }
+
+        // Verificar que sea proveedor
+        if (session('user_cargo_id') != 3) {
+            return redirect()->route('menu.index');
+        }
+
+        $user = User::find(session('user_id'));
+        $proveedor = Proveedor::where('usuario_id', $user->id)->first();
+
+        return view('menu.datos_proveedor', compact('proveedor', 'user'));
+    }
+
+    /**
+     * Guardar datos del proveedor
+     */
+    public function guardarDatosProveedor(Request $request)
+    {
+        if (!session('user_id')) {
+            return redirect()->route('login');
+        }
+
+        // Verificar que sea proveedor
+        if (session('user_cargo_id') != 3) {
+            return redirect()->route('menu.index');
+        }
+
+        $request->validate([
+            'razon_social' => 'required|string|max:255',
+            'ruc' => 'required|string|max:20',
+            'direccion' => 'required|string|max:500',
+            'telefono' => 'required|string|max:20',
+            'email' => 'required|email|max:255'
+        ]);
+
+        $user = User::find(session('user_id'));
+
+        // Buscar o crear proveedor
+        $proveedor = Proveedor::where('usuario_id', $user->id)->first();
+
+        if ($proveedor) {
+            // Actualizar datos existentes
+            $proveedor->update([
+                'razon_social' => $request->razon_social,
+                'ruc' => $request->ruc,
+                'direccion' => $request->direccion,
+                'telefono' => $request->telefono,
+                'email' => $request->email,
+            ]);
+        } else {
+            // Crear nuevo proveedor
+            Proveedor::create([
+                'razon_social' => $request->razon_social,
+                'ruc' => $request->ruc,
+                'direccion' => $request->direccion,
+                'telefono' => $request->telefono,
+                'email' => $request->email,
+                'estado_id' => 1, // Activo
+                'fecha' => now(),
+                'usuario_id' => $user->id
+            ]);
+        }
+
+        return redirect()->route('menu.index')->with('success', 'Datos del proveedor guardados correctamente.');
+    }
 }

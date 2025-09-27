@@ -28,6 +28,8 @@ return new class extends Migration
             $table->string('contraseña');
             $table->string('codigo_verificacion')->nullable();
             $table->string('codigo_autenticacion')->nullable();
+            $table->unsignedInteger('cargo_id')->nullable();
+            $table->foreign('cargo_id')->references('id')->on('cargo');
             $table->timestamps();
         });
     }

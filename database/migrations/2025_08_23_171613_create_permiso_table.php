@@ -15,6 +15,8 @@ return new class extends Migration
             $table->increments('id');
             $table->unsignedInteger('modulo_id');
             $table->foreign('modulo_id')->references('id')->on('modulo');
+            $table->unsignedInteger('cargo_id');
+            $table->foreign('cargo_id')->references('id')->on('cargo');
             $table->integer('ver');
             $table->integer('agregar');
             $table->integer('editar');

@@ -20,6 +20,7 @@ class User extends Model
         'contraseña',
         'codigo_verificacion',
         'codigo_autenticacion',
+        'cargo_id'
     ];
 
     public function sucursal()
@@ -40,5 +41,10 @@ class User extends Model
     public function empleado()
     {
         return $this->belongsTo(Empleado::class, 'empleado_id');
+    }
+
+    public function cargo()
+    {
+        return $this->belongsTo(Cargo::class, 'cargo_id');
     }
 }
