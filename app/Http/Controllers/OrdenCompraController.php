@@ -77,14 +77,13 @@ class OrdenCompraController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Validación dinámica basada en condición de pago
+        $rules = [
             'presupuesto_compra_aprobado_id' => 'required|exists:presupuesto_compra_aprobados,id',
             'condicion_pago_id' => 'required|exists:condicion_pago,id',
             'metodo_pago_id' => 'required|exists:metodo_pago,id',
             'fecha' => 'required|date',
             'monto' => 'required|numeric|min:0',
-            'intervalo' => 'nullable|integer|min:1',
-            'cuota' => 'nullable|integer|min:1',
             'observacion' => 'nullable|string|max:500',
             'detalles' => 'required|array|min:1',
             'detalles.*.insumo_id' => 'required|exists:insumo,id',
@@ -92,7 +91,15 @@ class OrdenCompraController extends Controller
             'detalles.*.precio_unitario' => 'required|numeric|min:0.01',
             'detalles.*.impuesto_id' => 'required|exists:impuestos,id',
             'detalles.*.observacion' => 'nullable|string|max:300'
-        ]);
+        ];
+
+        // Si NO es contado (condicion_pago_id != 1), validar cuotas e intervalo
+        if ($request->condicion_pago_id != 1) {
+            $rules['cuota'] = 'required|integer|min:1';
+            $rules['intervalo'] = 'required|integer|min:1';
+        }
+
+        $validated = $request->validate($rules);
 
         try {
             DB::beginTransaction();
@@ -103,6 +110,12 @@ class OrdenCompraController extends Controller
             // Verificar que esté pendiente
             if ($presupuestoAprobado->estado_id !== 3) {
                 throw new \Exception('El presupuesto aprobado no está en estado pendiente.');
+            }
+
+            // Ajustar valores para pago al contado
+            if ($validated['condicion_pago_id'] == 1) {
+                $validated['cuota'] = 1;
+                $validated['intervalo'] = 1;
             }
 
             // Crear la orden de compra
@@ -128,8 +141,8 @@ class OrdenCompraController extends Controller
                     'cantidad' => $detalle['cantidad'],
                     'precio_unitario' => $detalle['precio_unitario'],
                     'estado_id' => 3, // Pendiente
-                    'impuesto_id' => $detalle['impuesto_id'],
-                    'observacion' => $detalle['observacion'] ?? null
+                    'observacion' => $detalle['observacion'] ?? null,
+                    'impuesto_id' => $detalle['impuesto_id']
                 ]);
             }
 
@@ -173,5 +186,21 @@ class OrdenCompraController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function show($id)
+    {
+        $orden = OrdenCompra::with([
+            'proveedor',
+            'condicionPago',
+            'metodoPago',
+            'presupuestoCompraAprobado',
+            'detalles.insumo.marca',
+            'detalles.insumo.unidadMedida',
+            'detalles.impuesto',
+            'usuario'
+        ])->findOrFail($id);
+
+        return view('orden_compra.show', compact('orden'));
     }
 }

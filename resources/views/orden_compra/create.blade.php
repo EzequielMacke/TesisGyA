@@ -54,7 +54,7 @@
                                             data-proveedor="{{ $presupuesto->proveedor->razon_social ?? 'N/A' }}"
                                             data-ruc="{{ $presupuesto->proveedor->ruc ?? 'N/A' }}"
                                             data-fecha="{{ $presupuesto->fecha_emision }}"
-                                            data-sucursal="{{ $presupuesto->pedidoCompra->sucursal->nombre ?? 'N/A' }}"
+                                            data-sucursal="{{ $presupuesto->pedidoCompra->sucursal->descripcion ?? 'N/A' }}"
                                             data-detalles="{{ $presupuesto->detalles->count() }}">
                                         {{ $presupuesto->nombre }} - {{ $presupuesto->proveedor->razon_social ?? 'N/A' }}
                                         ({{ $presupuesto->detalles->count() }} items)
@@ -148,18 +148,20 @@
                                 <div class="mb-3">
                                     <label for="cuota" class="form-label">Número de Cuotas</label>
                                     <input type="number" class="form-control" id="cuota" name="cuota" min="1" value="1">
+                                    <small class="text-muted">Mínimo 1 cuota</small>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="intervalo" class="form-label">Intervalo (días)</label>
                                     <input type="number" class="form-control" id="intervalo" name="intervalo" min="1" value="30">
+                                    <small class="text-muted">Días entre cuotas</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="observacion" class="form-label">Observación</label>
-                                    <textarea class="form-control" id="observacion" name="observacion" rows="3" maxlength="500"></textarea>
+                                    <textarea class="form-control" id="observacion" name="observacion" rows="3" maxlength="500" placeholder="Observaciones adicionales sobre la orden..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -465,7 +467,36 @@ function ocultarSecciones() {
     $('#botones_accion').hide();
 }
 
-// Validación del formulario
+$('#condicion_pago_id').on('change', function() {
+    const condicionPagoId = $(this).val();
+
+    if (condicionPagoId === '1') { // Si es contado
+        // Deshabilitar y limpiar campos
+        $('#cuota').prop('disabled', true).val(1);
+        $('#intervalo').prop('disabled', true).val('');
+
+        // Agregar estilo visual de deshabilitado
+        $('#cuota').addClass('readonly-field');
+        $('#intervalo').addClass('readonly-field');
+
+        // Agregar texto informativo
+        if (!$('#info_contado').length) {
+            $('#cuota').closest('.col-md-3').append('<small id="info_contado" class="text-muted">Pago al contado - No aplica cuotas</small>');
+        }
+    } else {
+        // Habilitar campos
+        $('#cuota').prop('disabled', false).val(1);
+        $('#intervalo').prop('disabled', false).val(30);
+
+        // Quitar estilo visual
+        $('#cuota').removeClass('readonly-field');
+        $('#intervalo').removeClass('readonly-field');
+
+        // Quitar texto informativo
+        $('#info_contado').remove();
+    }
+});
+
 $('#ordenForm').on('submit', function(e) {
     const presupuestoId = $('#presupuesto_select').val();
     if (!presupuestoId) {
@@ -479,6 +510,30 @@ $('#ordenForm').on('submit', function(e) {
         e.preventDefault();
         alert('El monto total debe ser mayor a 0');
         return false;
+    }
+
+    // Validación adicional para condición de pago
+    const condicionPagoId = $('#condicion_pago_id').val();
+    if (condicionPagoId === '1') { // Si es contado
+        // Forzar valores para contado
+        $('#cuota').val(1);
+        $('#intervalo').val('');
+    } else {
+        // Validar que se hayan ingresado cuotas e intervalo
+        const cuotas = parseInt($('#cuota').val());
+        const intervalo = parseInt($('#intervalo').val());
+
+        if (cuotas <= 0) {
+            e.preventDefault();
+            alert('Debe ingresar un número válido de cuotas');
+            return false;
+        }
+
+        if (intervalo <= 0) {
+            e.preventDefault();
+            alert('Debe ingresar un intervalo válido en días');
+            return false;
+        }
     }
 
     // Confirmar creación

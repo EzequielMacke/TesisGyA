@@ -66,6 +66,14 @@
                                     <i class="fas fa-file-contract me-2 text-light" style="font-size: 0.8rem;"></i>
                                     <span class="text-light">Órdenes de Compra</span>
                                 </a>
+                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('nota_remision_compra.index') }}">
+                                    <i class="fas fa-truck me-2 text-light" style="font-size: 0.8rem;"></i>
+                                    <span class="text-light">Notas de Remisión</span>
+                                </a>
+                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('compras.index') }}">
+                                    <i class="fas fa-file-invoice-dollar me-2 text-light" style="font-size: 0.8rem;"></i>
+                                    <span class="text-light">Compras</span>
+                                </a>
                             </div>
                         </div>
                     </div>

@@ -1,9 +1,9 @@
-<!-- filepath: c:\laragon\www\TesisGyA\resources\views\orden_compra\index.blade.php -->
+<!-- filepath: c:\laragon\www\TesisGyA\resources\views\nota_remision_compra\index.blade.php -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Órdenes de Compra</title>
+    <title>Notas de Remisión de Compra</title>
     @include('partials.head')
 </head>
 <body>
@@ -15,14 +15,14 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2>
-                        <i class="fas fa-file-contract me-2 text-primary"></i>
-                        Órdenes de Compra
+                        <i class="fas fa-truck me-2 text-primary"></i>
+                        Notas de Remisión de Compra
                     </h2>
-                    <p class="text-muted mb-0">Gestión de órdenes de compra generadas desde presupuestos aprobados</p>
+                    <p class="text-muted mb-0">Gestión de notas de remisión de mercaderías recibidas</p>
                 </div>
                 <div class="d-flex gap-2">
-                    <a href="{{ route('orden_compra.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Nueva Orden
+                    <a href="{{ route('nota_remision_compra.create') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nueva Nota de Remisión
                     </a>
                 </div>
             </div>
@@ -49,7 +49,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="GET" action="{{ route('orden_compra.index') }}">
+                    <form method="GET" action="{{ route('nota_remision_compra.index') }}">
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="mb-3">
@@ -94,7 +94,7 @@
                                         <button type="submit" class="btn btn-primary">
                                             <i class="fas fa-search"></i>
                                         </button>
-                                        <a href="{{ route('orden_compra.index') }}" class="btn btn-secondary">
+                                        <a href="{{ route('nota_remision_compra.index') }}" class="btn btn-secondary">
                                             <i class="fas fa-times"></i>
                                         </a>
                                     </div>
@@ -105,55 +105,56 @@
                 </div>
             </div>
 
-            <!-- Tabla de Órdenes -->
+            <!-- Tabla de Notas de Remisión -->
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>Lista de Órdenes de Compra
+                            <i class="fas fa-list me-2"></i>Lista de Notas de Remisión
                         </h5>
-                        <span class="badge bg-light text-dark fs-6">{{ $ordenes->count() }} órdenes</span>
+                        <span class="badge bg-light text-dark fs-6">{{ $notas->count() }} notas</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    @if($ordenes->count() > 0)
+                    @if($notas->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
                                 <thead class="table-dark">
                                     <tr>
                                         <th>ID</th>
-                                        <th>Fecha</th>
+                                        <th>Nombre</th>
+                                        <th>Fecha Recibida</th>
                                         <th>Proveedor</th>
-                                        <th>Monto</th>
+                                        <th>Depósito</th>
                                         <th>Estado</th>
-                                        <th>Condición Pago</th>
                                         <th>Usuario</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($ordenes as $orden)
+                                    @foreach($notas as $nota)
                                         <tr class="orden-row">
                                             <td>
-                                                <strong class="text-primary">#{{ $orden->id }}</strong>
+                                                <strong class="text-primary">#{{ $nota->id }}</strong>
                                             </td>
                                             <td>
-                                                <div class="fw-bold">{{ \Carbon\Carbon::parse($orden->fecha)->format('d/m/Y') }}</div>
-                                                <small class="text-muted">{{ \Carbon\Carbon::parse($orden->created_at)->format('H:i') }}</small>
+                                                <div class="fw-bold">{{ $nota->nombre_remision ?? $nota->nombre ?? '-' }}</div>
+                                                <small class="text-muted">N° {{ $nota->numero_remision ?? $nota->nro ?? '-' }}</small>
                                             </td>
                                             <td>
-                                                <div class="fw-bold">{{ $orden->proveedor->razon_social ?? 'N/A' }}</div>
-                                                <small class="text-muted">{{ $orden->proveedor->ruc ?? 'Sin RUC' }}</small>
+                                                <div class="fw-bold">{{ \Carbon\Carbon::parse($nota->fecha_recepcion)->format('d/m/Y') }}</div>
+                                                <small class="text-muted">{{ \Carbon\Carbon::parse($nota->created_at)->format('H:i') }}</small>
                                             </td>
                                             <td>
-                                                <div class="fw-bold text-success">₲ {{ number_format($orden->monto, 0, ',', '.') }}</div>
-                                                @if($orden->condicionPago && $orden->cuota > 1)
-                                                    <small class="text-muted">{{ $orden->cuota }} cuotas</small>
-                                                @endif
+                                                <div class="fw-bold">{{ $nota->proveedor->razon_social ?? 'N/A' }}</div>
+                                                <small class="text-muted">{{ $nota->proveedor->ruc ?? 'Sin RUC' }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold">{{ $nota->deposito->descripcion ?? '-' }}</div>
                                             </td>
                                             <td>
                                                 @php
-                                                    $estadoClass = match($orden->estado_id) {
+                                                    $estadoClass = match($nota->estado_id) {
                                                         3 => 'bg-warning',
                                                         4 => 'bg-success',
                                                         5 => 'bg-danger',
@@ -161,31 +162,27 @@
                                                     };
                                                 @endphp
                                                 <span class="badge {{ $estadoClass }} fs-6">
-                                                    {{ $orden->estado->descripcion ?? 'Sin estado' }}
+                                                    {{ $nota->estado->descripcion ?? 'Sin estado' }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <div class="fw-bold">{{ $orden->condicionPago->descripcion ?? 'N/A' }}</div>
-                                                <small class="text-muted">{{ $orden->metodoPago->descripcion ?? 'N/A' }}</small>
-                                            </td>
-                                            <td>
-                                                <div class="fw-bold">{{ $orden->usuario->persona->nombre ?? 'N/A' }} {{ $orden->usuario->persona->apellido ?? '' }}</div>
-                                                <small class="text-muted">{{ \Carbon\Carbon::parse($orden->created_at)->format('d/m/Y') }}</small>
+                                                <div class="fw-bold">{{ $nota->usuario->persona->nombre ?? 'N/A' }} {{ $nota->usuario->persona->apellido ?? '' }}</div>
+                                                <small class="text-muted">{{ \Carbon\Carbon::parse($nota->created_at)->format('d/m/Y') }}</small>
                                             </td>
                                             <td>
                                                 <div class="d-flex gap-1">
-                                                    <a href="{{ route('orden_compra.show', $orden->id) }}"
+                                                    <a href="{{ route('nota_remision_compra.show', $nota->id) }}"
                                                         class="btn btn-sm btn-outline-primary"
                                                         title="Ver Detalles">
                                                             <i class="fas fa-eye"></i>
                                                     </a>
-                                                    @if($orden->estado_id == 3)
+                                                    @if($nota->estado_id == 3)
                                                         <a href="#"
                                                            class="btn btn-sm btn-outline-warning"
                                                            title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                        <button onclick="anularOrden({{ $orden->id }})"
+                                                        <button onclick="anularNota({{ $nota->id }})"
                                                                 class="btn btn-sm btn-outline-danger"
                                                                 title="Anular">
                                                             <i class="fas fa-ban"></i>
@@ -205,11 +202,11 @@
                         </div>
                     @else
                         <div class="text-center py-5">
-                            <i class="fas fa-file-contract fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No hay órdenes de compra</h5>
-                            <p class="text-muted">No se encontraron órdenes de compra con los filtros aplicados.</p>
-                            <a href="{{ route('orden_compra.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus me-2"></i>Crear Primera Orden
+                            <i class="fas fa-truck fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay notas de remisión</h5>
+                            <p class="text-muted">No se encontraron notas de remisión con los filtros aplicados.</p>
+                            <a href="{{ route('nota_remision_compra.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Crear Primera Nota
                             </a>
                         </div>
                     @endif
@@ -280,26 +277,3 @@
     width: calc(100vw - 280px);
 }
 </style>
-
-<script>
-function anularOrden(id) {
-    if (confirm('¿Está seguro de anular esta orden de compra?\n\nEsta acción no se puede deshacer.')) {
-        // Crear formulario para enviar POST
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/orden-compra/${id}/anular`;
-        form.style.display = 'none';
-
-        // Token CSRF
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        form.appendChild(csrfInput);
-
-        // Agregar al DOM y enviar
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-</script>

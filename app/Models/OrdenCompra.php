@@ -62,4 +62,12 @@ class OrdenCompra extends Model
     {
         return $this->belongsTo(PresupuestoCompraAprobado::class, 'presupuesto_compra_aprobado_id');
     }
+    public function detalles()
+    {
+        return $this->hasMany(OrdenCompraDetalle::class, 'orden_compra_id');
+    }
+    public function notasRemision()
+    {
+        return $this->hasMany(NotaRemisionCompra::class, 'orden_compra_id');
+    }
 }

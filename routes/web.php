@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\CompraController;
 use App\Http\Controllers\InsumoController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\NotaRemisionCompraController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\PedidoCompraController;
 use App\Http\Controllers\PresupuestoCompraAprobadoController;
@@ -124,3 +126,16 @@ Route::get('/orden-compra', [OrdenCompraController::class, 'index'])->name('orde
 Route::get('/orden-compra/create', [OrdenCompraController::class, 'create'])->name('orden_compra.create');
 Route::post('/orden-compra', [OrdenCompraController::class, 'store'])->name('orden_compra.store');
 Route::get('/orden-compra/presupuesto-detalle/{id}', [OrdenCompraController::class, 'getPresupuestoDetalle'])->name('orden_compra.presupuesto_detalle');
+Route::get('orden-compra/{ordenCompra}', [OrdenCompraController::class, 'show'])->name('orden_compra.show');
+
+// Rutas para notas de remisión de compra
+Route::get('nota-remision-compra', [NotaRemisionCompraController::class, 'index'])->name('nota_remision_compra.index');
+Route::get('nota-remision-compra/create', [NotaRemisionCompraController::class, 'create'])->name('nota_remision_compra.create');
+Route::post('nota-remision-compra', [NotaRemisionCompraController::class, 'store'])->name('nota_remision_compra.store');
+Route::get('nota-remision-compra/{id}', [NotaRemisionCompraController::class, 'show'])->name('nota_remision_compra.show');
+Route::get('api/orden-compra/{orden}/detalles-pendientes', [NotaRemisionCompraController::class, 'detallesPendientes']);
+
+// Rutas para compras (facturas de proveedor)
+Route::get('/compras', [CompraController::class, 'index'])->name('compras.index');
+Route::get('/compras/create/{orden_id?}', [CompraController::class, 'create'])->name('compras.create');
+Route::post('/compras', [CompraController::class, 'store'])->name('compras.store');
