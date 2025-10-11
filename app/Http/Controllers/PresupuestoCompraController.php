@@ -6,6 +6,7 @@ use App\Models\Impuesto;
 use App\Models\PedidoCompra;
 use App\Models\PresupuestoCompra;
 use App\Models\PresupuestoCompraDetalle;
+use App\Models\PresupuestoServicio;
 use App\Models\Proveedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -179,23 +180,17 @@ class PresupuestoCompraController extends Controller
 
     public function show($id)
     {
-        try {
-            $presupuesto = PresupuestoCompra::with([
-                'estado',
-                'proveedor',
-                'usuario.persona',
-                'pedidoCompra.sucursal',
-                'pedidoCompra.deposito',
-                'detalles.insumo.marca',
-                'detalles.insumo.unidadMedida',
-                'detalles.impuesto'
-            ])->findOrFail($id);
+        $presupuesto = PresupuestoServicio::with([
+            'cliente',
+            'obra',
+            'visitaPrevia.fotos',
+            'visitaPrevia.planos',
+            'visitaPrevia.estado',
+            'detalles.ensayo.servicio',
+            'detalles.impuesto',
+            'usuario'
+        ])->findOrFail($id);
 
-            return view('presupuesto_compra.show_presupuesto', compact('presupuesto'));
-
-        } catch (\Exception $e) {
-            return redirect()->route('presupuesto_compra.index')
-                            ->with('error', 'Error al cargar el presupuesto: ' . $e->getMessage());
-        }
+        return view('presupuesto_servicio.show', compact('presupuesto'));
     }
 }

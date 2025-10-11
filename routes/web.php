@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CompraController;
+use App\Http\Controllers\ContratoController;
 use App\Http\Controllers\InsumoController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\LoginController;
@@ -10,6 +11,9 @@ use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\PedidoCompraController;
 use App\Http\Controllers\PresupuestoCompraAprobadoController;
 use App\Http\Controllers\PresupuestoCompraController;
+use App\Http\Controllers\PresupuestoServicioController;
+use App\Http\Controllers\SolicitudServicioController;
+use App\Http\Controllers\VisitaPreviaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -139,3 +143,46 @@ Route::get('api/orden-compra/{orden}/detalles-pendientes', [NotaRemisionCompraCo
 Route::get('/compras', [CompraController::class, 'index'])->name('compras.index');
 Route::get('/compras/create/{orden_id?}', [CompraController::class, 'create'])->name('compras.create');
 Route::post('/compras', [CompraController::class, 'store'])->name('compras.store');
+
+
+// Rutas para solicitud de servicio
+Route::get('solicitud_servicio', [SolicitudServicioController::class, 'index'])->name('solicitud_servicio.index');
+Route::get('solicitud_servicio/create', [SolicitudServicioController::class, 'create'])->name('solicitud_servicio.create');
+Route::post('solicitud_servicio', [SolicitudServicioController::class, 'store'])->name('solicitud_servicio.store');
+Route::get('solicitud_servicio/{id}', [SolicitudServicioController::class, 'show'])->name('solicitud_servicio.show');
+Route::get('api/obras/{cliente_id}', [SolicitudServicioController::class, 'apiObras']);
+Route::get('api/obra/{obra_id}', [SolicitudServicioController::class, 'apiObraInfo']);
+
+
+// Rutas para visita previa
+Route::get('visita_previa', [VisitaPreviaController::class, 'index'])->name('visita_previa.index');
+Route::get('visita_previa/create', [VisitaPreviaController::class, 'create'])->name('visita_previa.create');
+Route::post('visita_previa', [VisitaPreviaController::class, 'store'])->name('visita_previa.store');
+Route::get('visita_previa/{id}', [VisitaPreviaController::class, 'show'])->name('visita_previa.show');
+Route::get('/ajax/obras/{clienteId}', [VisitaPreviaController::class, 'ajaxObras']);
+Route::get('/ajax/solicitudes/{obraId}', [VisitaPreviaController::class, 'ajaxSolicitudes']);
+Route::get('/ajax/solicitud/{id}', [VisitaPreviaController::class, 'ajaxSolicitud']);
+Route::post('/ajax/ensayos-por-solicitud', [VisitaPreviaController::class, 'ajaxEnsayosPorSolicitud']);
+
+
+//Rutas para presupuesto servicios
+Route::get('presupuesto_servicio', [PresupuestoServicioController::class, 'index'])->name('presupuesto_servicio.index');
+Route::get('presupuesto_servicio/create', [PresupuestoServicioController::class, 'create'])->name('presupuesto_servicio.create');
+Route::post('presupuesto_servicio', [PresupuestoServicioController::class, 'store'])->name('presupuesto_servicio.store');
+Route::get('presupuesto_servicio/{id}', [PresupuestoServicioController::class, 'show'])->name('presupuesto_servicio.show');
+Route::get('presupuesto_servicio/{id}/edit', [PresupuestoServicioController::class, 'edit'])->name('presupuesto_servicio.edit');
+Route::put('presupuesto_servicio/{id}', [PresupuestoServicioController::class, 'update'])->name('presupuesto_servicio.update');
+Route::delete('presupuesto_servicio/{id}', [PresupuestoServicioController::class, 'destroy'])->name('presupuesto_servicio.destroy');
+Route::get('ajax/obras/{clienteId}', [PresupuestoServicioController::class, 'ajaxObras']);
+Route::get('ajax/visitas-previas/{obraId}', [PresupuestoServicioController::class, 'ajaxVisitasPrevias']);
+Route::get('ajax/visita-previa/{id}', [PresupuestoServicioController::class, 'ajaxVisitaPrevia']);
+Route::get('ajax/ensayos-por-visita/{visitaId}', [PresupuestoServicioController::class, 'ajaxEnsayosPorVisita']);
+
+
+// Rutas para contratos
+Route::get('/contrato', [ContratoController::class, 'index'])->name('contrato.index');
+Route::get('/contrato/create', [ContratoController::class, 'create'])->name('contrato.create');
+Route::get('/contrato/{id}', [ContratoController::class, 'show'])->name('contrato.show');
+Route::post('/contrato', [ContratoController::class, 'store'])->name('contrato.store');
+Route::get('/obras-por-cliente/{cliente_id}', [ContratoController::class, 'obrasPorCliente'])->name('obras.por.cliente');
+Route::get('/presupuestos-por-obra/{obra_id}', [ContratoController::class, 'presupuestosPorObra'])->name('presupuestos.por.obra');

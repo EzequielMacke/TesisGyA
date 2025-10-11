@@ -81,6 +81,36 @@
 
                 <li class="nav-item mb-1">
                     <div class="dropdown-item-menu">
+                        <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="#" onclick="toggleServicioMenu(event)">
+                            <i class="fas fa-tools icon-fixed text-white"></i>
+                            <span class="menu-text text-white ms-3">Servicio</span>
+                            <i class="fas fa-chevron-down ms-auto menu-text transition-transform text-white" id="servicio-arrow"></i>
+                        </a>
+                        <div class="submenu-container" id="servicio-submenu" style="display: none;">
+                              <div class="mt-2 ms-3 menu-text">
+                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('solicitud_servicio.index') }}">
+                                    <i class="fas fa-file-alt me-2 text-light" style="font-size: 0.8rem;"></i>
+                                    <span class="text-light">Solicitud de Servicio</span>
+                                </a>
+                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('visita_previa.index') }}">
+                                    <i class="fas fa-clipboard-list me-2 text-light" style="font-size: 0.8rem;"></i>
+                                    <span class="text-light">Visitas Previas</span>
+                                </a>
+                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('presupuesto_servicio.index') }}">
+                                    <i class="fas fa-file-invoice-dollar me-2 text-light" style="font-size: 0.8rem;"></i>
+                                    <span class="text-light">Presupuestos de Servicio</span>
+                                </a>
+                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('contrato.index') }}">
+                                    <i class="fas fa-file-contract me-2 text-light" style="font-size: 0.8rem;"></i>
+                                    <span class="text-light">Contratos</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="nav-item mb-1">
+                    <div class="dropdown-item-menu">
                         <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="#" onclick="toggleMenu(event)">
                             <i class="fas fa-database icon-fixed text-white"></i>
                             <span class="menu-text text-white ms-3">Referenciales</span>
@@ -393,4 +423,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function toggleServicioMenu(event) {
+    event.preventDefault();
+    const submenu = document.getElementById('servicio-submenu');
+    const arrow = document.getElementById('servicio-arrow');
+    if (submenu.style.display === 'none' || submenu.style.display === '') {
+        submenu.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+    } else {
+        submenu.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+    }
+}
 </script>
