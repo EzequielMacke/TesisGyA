@@ -12,10 +12,12 @@ class InsumoController extends Controller
     public function index()
     {
         $insumos = Insumo::with(['marca', 'unidadMedida', 'estado', 'usuario'])
-                        ->orderBy('created_at', 'desc')
+                        ->orderBy('id')
                         ->get();
+        $marcas = Marca::where('estado_id', 1)->orderBy('descripcion')->get();
+        $unidadesMedida = UnidadMedida::where('estado_id', 1)->orderBy('descripcion')->get();
 
-        return view('insumo.index', compact('insumos'));
+        return view('insumo.index', compact('insumos', 'marcas', 'unidadesMedida'));
     }
 
     public function create()
@@ -63,6 +65,11 @@ class InsumoController extends Controller
             'estado_id.exists' => 'El estado seleccionado no es válido.'
         ]);
 
+        $usuarioId = session('user_id');
+        if (!$usuarioId) {
+            return redirect()->route('insumo.index')->with('error', 'Sesión expirada. Volvé a iniciar sesión.');
+        }
+
         try {
             // Verificar que la marca esté activa
             $marca = Marca::where('id', $request->marca_id)
@@ -101,7 +108,7 @@ class InsumoController extends Controller
                 'unidad_medida_id' => $request->unidad_medida_id,
                 'fecha' => $request->fecha,
                 'estado_id' => $request->estado_id,
-                'usuario_id' => session('user_id'),
+                'usuario_id' => $usuarioId,
             ]);
 
             return redirect()->route('insumo.index')
@@ -122,6 +129,25 @@ class InsumoController extends Controller
             return back()->withInput()
                     ->with('error', 'Error inesperado al crear el insumo: ' . $e->getMessage());
         }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'descripcion'      => 'required|string|max:255',
+            'marca_id'         => 'required|exists:marca,id',
+            'unidad_medida_id' => 'required|exists:unidad_medidas,id',
+            'fecha'            => 'required|date',
+        ]);
+
+        $insumo = Insumo::findOrFail($id);
+        $insumo->descripcion      = trim($request->descripcion);
+        $insumo->marca_id         = $request->marca_id;
+        $insumo->unidad_medida_id = $request->unidad_medida_id;
+        $insumo->fecha            = $request->fecha;
+        $insumo->save();
+
+        return redirect()->route('insumo.index')->with('success', 'Insumo actualizado exitosamente.');
     }
 
     public function destroy($id)

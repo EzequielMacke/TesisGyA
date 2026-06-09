@@ -13,11 +13,9 @@ class Insumo extends Model
 
     protected $fillable = [
         'descripcion',
-        'codigo',
         'marca_id',
         'unidad_medida_id',
         'usuario_id',
-        'sucursal_id',
         'estado_id',
         'fecha'
     ];

@@ -1,4 +1,3 @@
-<!-- filepath: c:\laragon\www\TesisGyA\resources\views\pedido_compra\index.blade.php -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,203 +10,201 @@
 
     <div class="main-content fade-in">
         <div class="content-wrapper">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-shopping-cart me-2"></i>Pedidos de Compra</h2>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('pedido_compra.create') }}" class="btn btn-success">
-                        <i class="fas fa-plus me-2"></i>Nuevo Pedido
-                    </a>
+
+            {{-- Cabecera --}}
+            <div class="page-header">
+                <div class="page-title">
+                    <div class="page-title-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div>
+                        <h2>Pedidos de Compra</h2>
+                        <small>Gestión y seguimiento de pedidos</small>
+                    </div>
                 </div>
+                <a href="{{ route('pedido_compra.create') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Nuevo Pedido
+                </a>
             </div>
 
+            {{-- Alerts --}}
             @if(session('success'))
-                <div class="alert alert-success">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-
             @if(session('error'))
-                <div class="alert alert-danger">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
-            <!-- Filtros -->
-            <div class="card mb-3">
-                <div class="card-body py-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-3">
-                            <label for="estado_filter" class="form-label mb-2">
-                                <i class="fas fa-filter me-1"></i>Estado:
-                            </label>
-                            <select class="form-select" id="estado_filter">
+            {{-- Filtros --}}
+            <div class="card filter-card">
+                <div class="card-header-section">
+                    <i class="fas fa-filter"></i> Filtros
+                </div>
+                <div class="card-body py-3 px-3">
+                    <div class="filter-grid">
+                        <div>
+                            <label class="form-label">Estado</label>
+                            <select class="form-select form-select-sm" id="estado_filter">
                                 <option value="">Todos los estados</option>
                                 <option value="3">Pendiente</option>
                                 <option value="4">Confirmado</option>
                                 <option value="5">Anulado</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label for="sucursal_filter" class="form-label mb-2">
-                                <i class="fas fa-building me-1"></i>Sucursal:
-                            </label>
-                            <select class="form-select" id="sucursal_filter">
-                                <option value="">Todas las sucursales</option>
+                        <div>
+                            <label class="form-label">Sucursal</label>
+                            <select class="form-select form-select-sm" id="sucursal_filter">
+                                <option value="">Todas</option>
                                 @foreach($sucursales as $sucursal)
                                     <option value="{{ $sucursal->id }}">{{ $sucursal->descripcion }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label for="fecha_filter" class="form-label mb-2">
-                                <i class="fas fa-calendar me-1"></i>Fecha desde:
-                            </label>
-                            <input type="date" class="form-control" id="fecha_filter">
+                        <div>
+                            <label class="form-label">Fecha desde</label>
+                            <input type="date" class="form-control form-control-sm" id="fecha_filter">
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label mb-2">&nbsp;</label>
-                            <div>
-                                <button type="button" id="filtrarBtn" class="btn btn-primary">
-                                    <i class="fas fa-filter me-2"></i>Filtrar
-                                </button>
-                                <button type="button" id="limpiarBtn" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-2"></i>Limpiar
-                                </button>
-                            </div>
+                        <div class="filter-actions">
+                            <button type="button" id="filtrarBtn" class="btn btn-primary btn-sm">
+                                <i class="fas fa-filter me-1"></i>Filtrar
+                            </button>
+                            <button type="button" id="limpiarBtn" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times me-1"></i>Limpiar
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Buscador -->
-            <div class="card mb-3">
-                <div class="card-body py-3">
-                    <div class="input-group">
-                        <span class="input-group-text bg-primary text-white">
+            {{-- Buscador --}}
+            <div class="card search-card">
+                <div class="card-body py-2 px-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text" style="background:#1a3461; color:white; border-color:#1a3461;">
                             <i class="fas fa-search"></i>
                         </span>
-                        <input type="text"
-                               class="form-control"
-                               id="searchInput"
+                        <input type="text" class="form-control" id="searchInput"
                                placeholder="Buscar por código, usuario, sucursal, depósito..."
                                autocomplete="off">
                         <button class="btn btn-outline-secondary" type="button" id="clearSearch">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <small class="text-muted mt-2 d-block">
-                        <span id="searchResults">Mostrando <span id="totalRows">{{ $pedidos->count() }}</span> pedido(s)</span>
-                    </small>
+                    <p class="search-meta mb-0">
+                        Mostrando <strong id="totalRows">{{ $pedidos->count() }}</strong> pedido(s)
+                    </p>
                 </div>
             </div>
 
-            <!-- Tabla de Pedidos - Ocupa todo el espacio disponible -->
-            <div class="card table-card flex-grow-1">
-                <div class="card-body p-0 h-100">
-                    <div class="table-responsive table-container h-100">
+            {{-- Tabla --}}
+            <div class="card table-card" id="tableCard">
+                <div class="card-header-section">
+                    <i class="fas fa-list"></i> Listado de Pedidos
+                </div>
+                <div class="card-body p-0" style="flex:1; display:flex; flex-direction:column;">
+                    <div class="table-container">
                         @if($pedidos->count() > 0)
-                            <table class="table table-striped table-hover mb-0 h-100" id="pedidosTable">
-                                <thead class="table-dark sticky-top">
+                            <table id="pedidosTable">
+                                <thead>
                                     <tr>
-                                        <th style="width: 80px; min-width: 80px;">Código</th>
-                                        <th style="width: calc((100% - 80px) / 8);">Pedido</th>
-                                        <th style="width: calc((100% - 80px) / 8);">Usuario</th>
-                                        <th style="width: calc((100% - 80px) / 8);">Fecha</th>
-                                        <th style="width: calc((100% - 80px) / 8);">Sucursal</th>
-                                        <th style="width: calc((100% - 80px) / 8);">Depósito</th>
-                                        <th style="width: calc((100% - 80px) / 8);">Estado</th>
-                                        <th style="width: calc((100% - 80px) / 8);">Observación</th>
-                                        <th style="width: calc((100% - 80px) / 8);">Acciones</th>
+                                        <th style="width:70px;">Código</th>
+                                        <th style="width:120px;">Pedido</th>
+                                        <th>Usuario</th>
+                                        <th style="width:100px;">Fecha</th>
+                                        <th>Sucursal</th>
+                                        <th>Depósito</th>
+                                        <th style="width:105px;">Estado</th>
+                                        <th>Observación</th>
+                                        <th style="width:120px;">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($pedidos as $pedido)
                                         <tr class="pedido-row">
                                             <td class="text-center">
-                                                <span class="badge bg-dark fs-6">
-                                                    #{{ str_pad($pedido->id, 3, '0', STR_PAD_LEFT) }}
-                                                </span>
+                                                <span class="badge-code">#{{ str_pad($pedido->id, 3, '0', STR_PAD_LEFT) }}</span>
                                             </td>
                                             <td>
-                                                <div class="d-flex flex-column">
-                                                    <strong class="text-primary text-truncate" style="max-width: 180px;">
-                                                        Pedido #{{ $pedido->id }}
-                                                    </strong>
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-clock me-1"></i>
-                                                        {{ $pedido->created_at->format('H:i') }}
-                                                    </small>
-                                                </div>
+                                                <strong style="color:#1a3461; font-size:0.82rem;">Pedido #{{ $pedido->id }}</strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>{{ $pedido->created_at->format('H:i') }}
+                                                </small>
                                             </td>
                                             <td>
-                                                <span class="badge bg-info text-wrap" title="{{ $pedido->usuario->usuario }}">
+                                                <span class="badge bg-info bg-opacity-15 text-info-emphasis text-wrap"
+                                                      title="{{ $pedido->usuario->usuario }}">
                                                     {{ Str::limit($pedido->usuario->usuario, 15) }}
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge bg-secondary">
+                                                <span class="badge bg-secondary bg-opacity-15 text-secondary-emphasis">
                                                     {{ $pedido->fecha->format('d/m/Y') }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary text-wrap" title="{{ $pedido->sucursal->descripcion }}">
+                                                <span class="badge bg-primary bg-opacity-15 text-primary text-wrap"
+                                                      title="{{ $pedido->sucursal->descripcion }}">
                                                     {{ Str::limit($pedido->sucursal->descripcion, 15) }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-info text-wrap" title="{{ $pedido->deposito->descripcion }}">
+                                                <span class="badge bg-info bg-opacity-15 text-info-emphasis text-wrap"
+                                                      title="{{ $pedido->deposito->descripcion }}">
                                                     {{ Str::limit($pedido->deposito->descripcion, 15) }}
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge
-                                                    @switch($pedido->estado_id)
-                                                        @case(3) bg-warning text-dark @break
-                                                        @case(4) bg-success @break
-                                                        @case(5) bg-danger @break
-                                                        @default bg-secondary @break
-                                                    @endswitch">
-                                                    @switch($pedido->estado_id)
-                                                        @case(3) Pendiente @break
-                                                        @case(4) Confirmado @break
-                                                        @case(5) Anulado @break
-                                                        @default {{ $pedido->estado->descripcion }} @break
-                                                    @endswitch
-                                                </span>
+                                                @switch($pedido->estado_id)
+                                                    @case(3)
+                                                        <span class="badge badge-pendiente">Pendiente</span>
+                                                        @break
+                                                    @case(4)
+                                                        <span class="badge badge-confirmado">Confirmado</span>
+                                                        @break
+                                                    @case(5)
+                                                        <span class="badge badge-anulado">Anulado</span>
+                                                        @break
+                                                    @default
+                                                        <span class="badge bg-secondary">{{ $pedido->estado->descripcion }}</span>
+                                                @endswitch
                                             </td>
-                                            <td title="{{ $pedido->observacion }}">
+                                            <td>
                                                 @if($pedido->observacion)
-                                                    <i class="fas fa-comment text-muted me-1" title="{{ $pedido->observacion }}"></i>
-                                                    <span class="text-truncate d-inline-block" style="max-width: 120px;">
-                                                        {{ Str::limit($pedido->observacion, 20) }}
+                                                    <span class="text-truncate d-inline-block" style="max-width:130px;"
+                                                          title="{{ $pedido->observacion }}">
+                                                        <i class="fas fa-comment text-muted me-1" style="font-size:0.7rem;"></i>
+                                                        {{ Str::limit($pedido->observacion, 22) }}
                                                     </span>
                                                 @else
-                                                    <span class="text-muted fst-italic">Sin observación</span>
+                                                    <span class="text-muted fst-italic" style="font-size:0.75rem;">—</span>
                                                 @endif
                                             </td>
                                             <td class="text-center">
                                                 <div class="btn-group" role="group">
                                                     <a href="{{ route('pedido_compra.show', $pedido->id) }}"
-                                                    class="btn btn-sm btn-outline-primary"
-                                                    title="Ver Detalle">
+                                                       class="btn btn-sm btn-outline-primary" title="Ver Detalle">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($pedido->estado_id == 3)
                                                         <a href="{{ route('pedido_compra.edit', $pedido->id) }}"
-                                                        class="btn btn-sm btn-outline-success"
-                                                        title="Editar">
+                                                           class="btn btn-sm btn-outline-success" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                         <button type="button"
                                                                 class="btn btn-sm btn-outline-danger"
-                                                                title="Anular Pedido"
+                                                                title="Anular"
                                                                 onclick="anularPedido({{ $pedido->id }})">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
                                                     @endif
-                                                    <button type="button"
-                                                            class="btn btn-sm btn-outline-info"
-                                                            title="Imprimir">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary" title="Imprimir">
                                                         <i class="fas fa-print"></i>
                                                     </button>
                                                 </div>
@@ -217,13 +214,13 @@
                                 </tbody>
                             </table>
                         @else
-                            <div class="empty-state d-flex flex-column align-items-center justify-content-center h-100">
-                                <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
-                                <h4 class="text-muted mb-3">No hay pedidos de compra</h4>
-                                <p class="text-muted mb-4 text-center">
-                                    Aún no se han creado pedidos de compra en el sistema.
+                            <div class="empty-state">
+                                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                                <h5 class="text-muted mb-2">Sin pedidos de compra</h5>
+                                <p class="text-muted mb-3" style="font-size:0.85rem;">
+                                    Aún no se han registrado pedidos en el sistema.
                                 </p>
-                                <a href="{{ route('pedido_compra.create') }}" class="btn btn-primary">
+                                <a href="{{ route('pedido_compra.create') }}" class="btn btn-primary btn-sm">
                                     <i class="fas fa-plus me-2"></i>Crear Primer Pedido
                                 </a>
                             </div>
@@ -232,19 +229,21 @@
                 </div>
             </div>
 
-            <!-- Mensaje de "no hay resultados" -->
-            <div id="noResults" class="card table-card flex-grow-1" style="display: none;">
-                <div class="card-body d-flex flex-column align-items-center justify-content-center h-100">
-                    <i class="fas fa-search fa-4x text-muted mb-4"></i>
-                    <h4 class="text-muted mb-3">No se encontraron resultados</h4>
-                    <p class="text-muted text-center">
-                        No se encontraron pedidos que coincidan con los criterios de búsqueda.
+            {{-- Sin resultados de búsqueda --}}
+            <div id="noResults" class="card" style="display:none; min-height:280px;">
+                <div class="empty-state">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <h5 class="text-muted mb-2">Sin resultados</h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        No hay pedidos que coincidan con los filtros aplicados.
                     </p>
-                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('limpiarBtn').click()">
+                    <button type="button" class="btn btn-outline-primary btn-sm"
+                            onclick="document.getElementById('limpiarBtn').click()">
                         <i class="fas fa-undo me-2"></i>Limpiar Filtros
                     </button>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -253,519 +252,302 @@
 </html>
 
 <style>
-/* Estilos base */
-.main-content {
-    margin-left: 60px;
-    width: calc(100vw - 60px);
-    min-height: 100vh;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
-    overflow-x: auto;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-
 .content-wrapper {
-    padding: 20px;
-    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 40px);
-    box-sizing: border-box;
+    gap: 1rem;
 }
 
-/* Estilos para cards */
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 0.25rem;
+}
+.page-title { display: flex; align-items: center; gap: 0.75rem; }
+.page-title-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #1a3461, #24508f);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.1rem; flex-shrink: 0;
+}
+.page-title h2 { margin: 0; font-size: 1.3rem; color: #1a3461; font-weight: 700; line-height: 1.2; }
+.page-title small { color: #64748b; font-size: 0.75rem; }
+
+/* ── Cards ── */
 .card {
     border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 14px rgba(0,0,0,0.04);
+    background: #fff;
 }
-
-.card:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+.card-header-section {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #f0f4f8;
+    display: flex; align-items: center; gap: 0.5rem;
+    font-weight: 600; font-size: 0.82rem; color: #1a3461;
 }
+.card-header-section i { color: #24508f; }
 
-/* Tabla que ocupa todo el espacio disponible */
+/* ── Filtros ── */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.65rem;
+    align-items: end;
+}
+.filter-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+/* ── Buscador ── */
+.search-meta { font-size: 0.73rem; color: #64748b; margin-top: 0.35rem; }
+
+/* ── Tabla ── */
 .table-card {
-    min-height: 400px;
     flex: 1;
+    min-height: 400px;
     display: flex;
     flex-direction: column;
 }
-
 .table-container {
     flex: 1;
-    overflow-y: auto;
-    overflow-x: auto;
-    position: relative;
+    overflow: auto;
+    min-height: 300px;
 }
+.table-container::-webkit-scrollbar { width: 5px; height: 5px; }
+.table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-/* Tabla responsiva que se ajusta al contenedor */
-.table {
+#pedidosTable {
     width: 100%;
-    min-width: 1000px;
-    margin-bottom: 0;
+    min-width: 860px;
+    border-collapse: collapse;
     table-layout: fixed;
 }
-
-.table th,
-.table td {
-    padding: 12px 8px;
-    border: none;
-    border-bottom: 1px solid #e9ecef;
-    vertical-align: middle;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    word-wrap: break-word;
-}
-
-.table th {
-    background-color: #343a40 !important;
+#pedidosTable thead th {
+    background: linear-gradient(135deg, #1a3461 0%, #24508f 100%);
     color: white;
+    font-size: 0.76rem;
     font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    font-size: 0.85rem;
+    padding: 0.7rem 0.65rem;
+    position: sticky; top: 0; z-index: 10;
+    border: none;
     white-space: nowrap;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
 }
-
-.table td {
-    font-size: 0.8rem;
+#pedidosTable tbody td {
+    padding: 0.55rem 0.65rem;
+    font-size: 0.79rem;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #374151;
 }
+#pedidosTable tbody tr { cursor: pointer; transition: background 0.12s; }
+#pedidosTable tbody tr:hover { background: #f0f6ff; }
+#pedidosTable tbody tr:last-child td { border-bottom: none; }
 
-/* Badges optimizados para espacios reducidos */
-.badge.text-wrap {
-    white-space: normal;
-    word-wrap: break-word;
-    max-width: 100%;
-    line-height: 1.2;
-    font-size: 0.7rem;
+/* Badges */
+.badge-code {
+    background: #1e293b; color: white;
+    font-weight: 700; font-size: 0.72rem;
+    padding: 0.28rem 0.5rem; border-radius: 6px;
 }
+.badge.text-wrap { white-space: normal; word-break: break-word; font-size: 0.68rem; line-height: 1.3; }
+.badge-pendiente  { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; font-size: 0.72rem; }
+.badge-confirmado { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; font-size: 0.72rem; }
+.badge-anulado    { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; font-size: 0.72rem; }
 
-.table td .badge.fs-6 {
-    font-size: 0.75rem !important;
-    padding: 0.3rem 0.5rem;
-    font-weight: 600;
-}
-
-/* Empty state centrado */
-.empty-state {
-    min-height: 400px;
-}
-
-/* Estilos para formularios */
-.form-control, .form-select {
-    border: 2px solid #e9ecef;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    transform: translateY(-1px);
-}
-
-/* Resaltado de búsqueda */
-.highlight {
-    background-color: #ffeb3b !important;
-    color: #000 !important;
-    font-weight: bold;
-    padding: 1px 3px;
-    border-radius: 2px;
-}
-
-/* Botones más compactos */
+/* Botones de acción */
+.btn-group { display: flex; flex-wrap: nowrap; gap: 2px; }
 .btn-group .btn-sm {
-    padding: 0.25rem 0.4rem;
-    font-size: 0.75rem;
+    padding: 0.25rem 0.42rem;
+    font-size: 0.72rem;
+    border-radius: 6px !important;
+    border-width: 1.5px;
 }
 
-/* Responsive optimizado */
-@media (max-width: 1400px) {
-    .table {
-        min-width: 900px;
-    }
-
-    .table th,
-    .table td {
-        padding: 8px 6px;
-        font-size: 0.75rem;
-    }
-
-    .badge {
-        font-size: 0.65rem !important;
-    }
+/* Búsqueda highlight */
+.highlight {
+    background: #fef08a; color: #713f12;
+    font-weight: 600; padding: 0 2px; border-radius: 2px;
 }
 
-@media (max-width: 1200px) {
-    .table {
-        min-width: 800px;
-    }
+/* Empty state */
+.empty-state {
+    min-height: 320px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; color: #94a3b8; text-align: center;
+}
+.empty-state i { color: #cbd5e1; }
 
-    .table th,
-    .table td {
-        padding: 6px 4px;
-        font-size: 0.7rem;
-    }
+/* Loading */
+.loading-state { opacity: 0.5; pointer-events: none; }
+
+/* Fade */
+.fade-in { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 768px) {
-    .main-content {
-        margin-left: 50px;
-        width: calc(100vw - 50px);
-    }
-
-    .content-wrapper {
-        padding: 15px;
-    }
-
-    .table {
-        min-width: 700px;
-    }
+    .filter-grid { grid-template-columns: 1fr 1fr; }
+    .page-header { flex-direction: column; align-items: flex-start; }
 }
-
-/* Ajuste del menú lateral */
-.sidebar-nav:hover ~ .main-content {
-    margin-left: 280px;
-    width: calc(100vw - 280px);
-}
-
-/* Scrollbar personalizado */
-.table-container::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-/* Efectos hover mejorados */
-.table tbody tr {
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.table tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.08);
-    transform: scale(1.002);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Optimización de texto truncado */
-.text-truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Estados de carga */
-.loading-state {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-/* Animaciones suaves */
-.fade-in {
-    animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+@media (max-width: 480px) {
+    .filter-grid { grid-template-columns: 1fr; }
 }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Elementos del DOM
-    const searchInput = document.getElementById('searchInput');
-    const clearButton = document.getElementById('clearSearch');
-    const table = document.getElementById('pedidosTable');
-    const filtrarBtn = document.getElementById('filtrarBtn');
-    const limpiarBtn = document.getElementById('limpiarBtn');
-    const estadoFilter = document.getElementById('estado_filter');
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput  = document.getElementById('searchInput');
+    const clearButton  = document.getElementById('clearSearch');
+    const table        = document.getElementById('pedidosTable');
+    const filtrarBtn   = document.getElementById('filtrarBtn');
+    const limpiarBtn   = document.getElementById('limpiarBtn');
+    const estadoFilter   = document.getElementById('estado_filter');
     const sucursalFilter = document.getElementById('sucursal_filter');
-    const fechaFilter = document.getElementById('fecha_filter');
+    const fechaFilter    = document.getElementById('fecha_filter');
 
     if (table) {
-        const rows = table.querySelectorAll('.pedido-row');
-        const noResults = document.getElementById('noResults');
-        const totalRowsSpan = document.getElementById('totalRows');
-        const tableCard = document.querySelector('.table-card');
-        const totalRows = rows.length;
+        const rows        = table.querySelectorAll('.pedido-row');
+        const noResults   = document.getElementById('noResults');
+        const tableCard   = document.getElementById('tableCard');
+        const totalRowsSp = document.getElementById('totalRows');
+        const totalRows   = rows.length;
 
-        // Función para resaltar texto
         function highlightText(text, search) {
             if (!search) return text;
-            const regex = new RegExp(`(${search})`, 'gi');
-            return text.replace(regex, '<span class="highlight">$1</span>');
+            return text.replace(new RegExp(`(${search})`, 'gi'), '<span class="highlight">$1</span>');
         }
 
-        // Función para remover resaltados
         function removeHighlights() {
-            const highlights = table.querySelectorAll('.highlight');
-            highlights.forEach(highlight => {
-                const parent = highlight.parentNode;
-                parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
-                parent.normalize();
+            table.querySelectorAll('.highlight').forEach(el => {
+                el.parentNode.replaceChild(document.createTextNode(el.textContent), el);
+                el.parentNode.normalize();
             });
         }
 
-        // Función para aplicar todos los filtros
         function applyAllFilters() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            const estadoSeleccionado = estadoFilter.value;
-            const sucursalSeleccionada = sucursalFilter.value;
-            const fechaDesde = fechaFilter.value;
-            let visibleCount = 0;
+            const term      = searchInput.value.toLowerCase().trim();
+            const estado    = estadoFilter.value;
+            const sucursal  = sucursalFilter.value;
+            const fecha     = fechaFilter.value;
+            let visible = 0;
 
-            // Agregar clase de carga
             tableCard.classList.add('loading-state');
-
             removeHighlights();
 
             rows.forEach(row => {
-                let mostrarFila = true;
+                let show = true;
 
-                // Filtro por búsqueda de texto
-                if (searchTerm) {
+                if (term) {
                     const cells = row.querySelectorAll('td');
                     let found = false;
-
-                    for (let i = 0; i < cells.length - 1; i++) { // Excluir columna de acciones
-                        const cellText = cells[i].textContent.toLowerCase();
-                        if (cellText.includes(searchTerm)) {
+                    for (let i = 0; i < cells.length - 1; i++) {
+                        if (cells[i].textContent.toLowerCase().includes(term)) {
                             found = true;
-                            const originalText = cells[i].innerHTML;
-                            if (!originalText.includes('<span class="badge') && !originalText.includes('<button')) {
-                                const highlightedText = highlightText(cells[i].textContent, searchTerm);
-                                cells[i].innerHTML = highlightedText;
+                            const html = cells[i].innerHTML;
+                            if (!html.includes('<span class="badge') && !html.includes('<button')) {
+                                cells[i].innerHTML = highlightText(cells[i].textContent, term);
                             }
                         }
                     }
-
-                    if (!found) {
-                        mostrarFila = false;
-                    }
+                    if (!found) show = false;
                 }
 
-                // Filtro por estado
-                if (estadoSeleccionado && mostrarFila) {
-                    const estadoBadge = row.querySelector('td:nth-child(7) .badge');
-                    if (estadoBadge) {
-                        const estadoTexto = estadoBadge.textContent.trim();
+                if (estado && show) {
+                    const badge = row.querySelector('td:nth-child(7) .badge');
+                    const map = { '3': 'Pendiente', '4': 'Confirmado', '5': 'Anulado' };
+                    if (badge && badge.textContent.trim() !== map[estado]) show = false;
+                }
 
-                        const estadoMap = {
-                            '3': 'Pendiente',
-                            '4': 'Confirmado',
-                            '5': 'Anulado'
-                        };
+                if (sucursal && show) {
+                    const badge = row.querySelector('td:nth-child(5) .badge');
+                    const opt   = sucursalFilter.querySelector(`option[value="${sucursal}"]`);
+                    if (badge && opt && !badge.getAttribute('title')?.includes(opt.textContent)) show = false;
+                }
 
-                        if (estadoTexto !== estadoMap[estadoSeleccionado]) {
-                            mostrarFila = false;
+                if (fecha && show) {
+                    const badge = row.querySelector('td:nth-child(4) .badge');
+                    if (badge) {
+                        const [d, m, y] = badge.textContent.trim().split('/');
+                        if (d && m && y) {
+                            const fp = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+                            if (fp < fecha) show = false;
                         }
                     }
                 }
 
-                // Filtro por sucursal
-                if (sucursalSeleccionada && mostrarFila) {
-                    const sucursalCell = row.querySelector('td:nth-child(5)');
-                    if (sucursalCell) {
-                        const sucursalBadge = sucursalCell.querySelector('.badge');
-                        if (sucursalBadge) {
-                            const sucursalTitle = sucursalBadge.getAttribute('title') || sucursalBadge.textContent;
-
-                            // Buscar la sucursal seleccionada en las opciones del select
-                            const sucursalOption = sucursalFilter.querySelector(`option[value="${sucursalSeleccionada}"]`);
-                            const sucursalNombre = sucursalOption ? sucursalOption.textContent : '';
-
-                            if (!sucursalTitle.includes(sucursalNombre)) {
-                                mostrarFila = false;
-                            }
-                        }
-                    }
-                }
-
-                // Filtro por fecha
-                if (fechaDesde && mostrarFila) {
-                    const fechaCell = row.querySelector('td:nth-child(4) .badge');
-                    if (fechaCell) {
-                        const fechaTexto = fechaCell.textContent.trim();
-
-                        // Convertir fecha dd/mm/yyyy a yyyy-mm-dd para comparar
-                        const [dia, mes, año] = fechaTexto.split('/');
-                        if (dia && mes && año) {
-                            const fechaPedido = `${año}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
-
-                            if (fechaPedido < fechaDesde) {
-                                mostrarFila = false;
-                            }
-                        }
-                    }
-                }
-
-                // Mostrar u ocultar la fila
-                if (mostrarFila) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
             });
 
-            // Actualizar contador
-            totalRowsSpan.textContent = visibleCount;
+            totalRowsSp.textContent = visible;
 
-            // Manejar mensaje "no hay resultados"
             setTimeout(() => {
-                if (visibleCount === 0 && totalRows > 0) {
+                if (visible === 0 && totalRows > 0) {
                     tableCard.style.display = 'none';
-                    noResults.style.display = 'flex';
+                    noResults.style.display = '';
                 } else {
-                    tableCard.style.display = 'flex';
+                    tableCard.style.display = '';
                     noResults.style.display = 'none';
                 }
-
-                // Remover clase de carga
                 tableCard.classList.remove('loading-state');
-            }, 100);
+            }, 80);
         }
 
-        // Event listeners para búsqueda en tiempo real
-        if (searchInput) {
-            // Debounce para mejor performance
-            let searchTimeout;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(applyAllFilters, 150);
-            });
+        let debounce;
+        searchInput.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(applyAllFilters, 150); });
+        clearButton.addEventListener('click', () => { searchInput.value = ''; applyAllFilters(); searchInput.focus(); });
+        searchInput.addEventListener('keydown', e => { if (e.key === 'Escape') { searchInput.value = ''; applyAllFilters(); } });
 
-            clearButton.addEventListener('click', function() {
-                searchInput.value = '';
-                applyAllFilters();
-                searchInput.focus();
-            });
+        filtrarBtn.addEventListener('click', applyAllFilters);
 
-            // Atajos de teclado
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.key === 'f') {
-                    e.preventDefault();
-                    searchInput.focus();
-                }
-
-                if (e.ctrlKey && e.key === 'k') {
-                    e.preventDefault();
-                    searchInput.focus();
-                }
-            });
-
-            searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    this.value = '';
-                    applyAllFilters();
-                    this.blur();
-                }
-            });
-        }
-
-        // Botón Filtrar
-        if (filtrarBtn) {
-            filtrarBtn.addEventListener('click', applyAllFilters);
-        }
-
-        // Botón Limpiar
-        if (limpiarBtn) {
-            limpiarBtn.addEventListener('click', function() {
-                if (estadoFilter) estadoFilter.value = '';
-                if (sucursalFilter) sucursalFilter.value = '';
-                if (fechaFilter) fechaFilter.value = '';
-                if (searchInput) searchInput.value = '';
-
-                applyAllFilters();
-
-                // Feedback visual
-                this.innerHTML = '<i class="fas fa-check me-2"></i>Limpiado';
-                this.classList.add('btn-success');
-                this.classList.remove('btn-outline-secondary');
-
-                setTimeout(() => {
-                    this.innerHTML = '<i class="fas fa-times me-2"></i>Limpiar';
-                    this.classList.remove('btn-success');
-                    this.classList.add('btn-outline-secondary');
-                }, 1000);
-            });
-        }
-
-        // Aplicar filtros automáticamente cuando cambian los selects
-        [estadoFilter, sucursalFilter, fechaFilter].forEach(filter => {
-            if (filter) {
-                filter.addEventListener('change', applyAllFilters);
-            }
+        limpiarBtn.addEventListener('click', function () {
+            [estadoFilter, sucursalFilter, fechaFilter].forEach(f => { if (f) f.value = ''; });
+            searchInput.value = '';
+            applyAllFilters();
+            this.innerHTML = '<i class="fas fa-check me-1"></i>Limpiado';
+            this.classList.replace('btn-outline-secondary', 'btn-success');
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-times me-1"></i>Limpiar';
+                this.classList.replace('btn-success', 'btn-outline-secondary');
+            }, 1000);
         });
 
-        // Filtro avanzado por combinación de teclas
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.key === 'F') {
-                e.preventDefault();
-                if (estadoFilter) estadoFilter.focus();
-            }
-        });
+        [estadoFilter, sucursalFilter, fechaFilter].forEach(f => f?.addEventListener('change', applyAllFilters));
 
-        // Click en filas para ir a detalle
         rows.forEach(row => {
-            row.addEventListener('click', function(e) {
-                if (e.target.closest('.btn-group')) return; // No activar si se hace click en botones
-
-                const verBtn = this.querySelector('a[title="Ver Detalle"]');
-                if (verBtn) {
-                    window.location.href = verBtn.href;
-                }
+            row.addEventListener('click', function (e) {
+                if (e.target.closest('.btn-group')) return;
+                const link = this.querySelector('a[title="Ver Detalle"]');
+                if (link) window.location.href = link.href;
             });
         });
     }
 
-    // Función adicional para exportar datos (para futuras implementaciones)
-    function exportarDatos() {
-        const filasVisibles = Array.from(document.querySelectorAll('.pedido-row')).filter(row => row.style.display !== 'none');
-        console.log(`Total de pedidos visibles: ${filasVisibles.length}`);
-        // Aquí se puede implementar funcionalidad de exportación
-    }
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey && e.key === 'f') || (e.ctrlKey && e.key === 'k')) {
+            e.preventDefault();
+            searchInput?.focus();
+        }
+    });
 
-    // Inicialización de tooltips de Bootstrap
-    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl, {
-                delay: { show: 500, hide: 100 }
-            });
-        });
-    }
-
-    // Performance monitoring
-    console.log('Pedidos de Compra - Index cargado correctamente');
-
-    window.anularPedido = function(pedidoId) {
-        // SweetAlert2 si está disponible, sino confirmación nativa
+    window.anularPedido = function (pedidoId) {
+        const confirm_ = () => enviarAnulacion(pedidoId);
         if (typeof Swal !== 'undefined') {
             Swal.fire({
                 title: '¿Anular Pedido?',
-                text: 'Esta acción cambiará el estado del pedido a "Anulado" y no se podrá deshacer.',
+                text: 'El pedido pasará a estado "Anulado" y no podrá revertirse.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
@@ -773,53 +555,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 confirmButtonText: 'Sí, Anular',
                 cancelButtonText: 'Cancelar',
                 reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    enviarAnulacion(pedidoId);
-                }
-            });
+            }).then(r => { if (r.isConfirmed) confirm_(); });
         } else {
-            // Confirmación nativa
-            if (confirm('¿Está seguro que desea anular este pedido?\n\nEsta acción cambiará el estado a "Anulado" y no se podrá deshacer.')) {
-                enviarAnulacion(pedidoId);
-            }
+            if (confirm('¿Anular este pedido?')) confirm_();
         }
     };
 
-    // Función para enviar la anulación
     function enviarAnulacion(pedidoId) {
-        // Crear formulario dinámico para envío
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/pedido_compra/${pedidoId}/anular`;
-
-        // Token CSRF
-        const csrfToken = document.querySelector('meta[name="csrf-token"]');
-        if (csrfToken) {
-            const tokenInput = document.createElement('input');
-            tokenInput.type = 'hidden';
-            tokenInput.name = '_token';
-            tokenInput.value = csrfToken.getAttribute('content');
-            form.appendChild(tokenInput);
+        const csrf = document.querySelector('meta[name="csrf-token"]');
+        if (csrf) {
+            const t = document.createElement('input');
+            t.type = 'hidden'; t.name = '_token'; t.value = csrf.content;
+            form.appendChild(t);
         }
-
-        // Método PATCH
-        const methodInput = document.createElement('input');
-        methodInput.type = 'hidden';
-        methodInput.name = '_method';
-        methodInput.value = 'PATCH';
-        form.appendChild(methodInput);
-
-        // Agregar al DOM y enviar
+        const m = document.createElement('input');
+        m.type = 'hidden'; m.name = '_method'; m.value = 'PATCH';
+        form.appendChild(m);
+        const btn = document.querySelector(`[onclick="anularPedido(${pedidoId})"]`);
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
         document.body.appendChild(form);
-
-        // Mostrar loading en el botón
-        const btnAnular = document.querySelector(`[onclick="anularPedido(${pedidoId})"]`);
-        if (btnAnular) {
-            btnAnular.disabled = true;
-            btnAnular.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        }
-
         form.submit();
     }
 });

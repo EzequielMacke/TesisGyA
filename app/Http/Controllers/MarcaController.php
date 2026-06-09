@@ -25,17 +25,38 @@ class MarcaController extends Controller
     {
         $request->validate([
             'descripcion' => 'required|string|max:255',
-            'fecha' => 'required|date',
+            'fecha'       => 'required|date',
         ]);
+
+        $usuarioId = session('user_id');
+
+        if (!$usuarioId) {
+            return redirect()->route('marca.index')->with('error', 'Sesión expirada. Volvé a iniciar sesión.');
+        }
 
         Marca::create([
             'descripcion' => $request->descripcion,
-            'fecha' => $request->fecha,
-            'estado_id' => $request->estado_id,
-            'usuario_id' => session('user_id')
+            'fecha'       => $request->fecha,
+            'estado_id'   => 1,
+            'usuario_id'  => $usuarioId,
         ]);
 
         return redirect()->route('marca.index')->with('success', 'Marca creada exitosamente.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'descripcion' => 'required|string|max:255',
+            'fecha'       => 'required|date',
+        ]);
+
+        $marca = Marca::findOrFail($id);
+        $marca->descripcion = $request->descripcion;
+        $marca->fecha       = $request->fecha;
+        $marca->save();
+
+        return redirect()->route('marca.index')->with('success', 'Marca actualizada exitosamente.');
     }
 
     public function destroy($id)

@@ -87,6 +87,7 @@ Route::post('/datos-proveedor', [LoginController::class, 'guardarDatosProveedor'
 Route::get('/marca', [MarcaController::class, 'index'])->name('marca.index');
 Route::get('/marca/create', [MarcaController::class, 'create'])->name('marca.create');
 Route::post('/marca', [MarcaController::class, 'store'])->name('marca.store');
+Route::put('/marca/{id}', [MarcaController::class, 'update'])->name('marca.update');
 Route::delete('/marca/{id}', [MarcaController::class, 'destroy'])->name('marca.destroy');
 Route::patch('/marca/{id}/activate', [MarcaController::class, 'activate'])->name('marca.activate');
 
@@ -94,6 +95,7 @@ Route::patch('/marca/{id}/activate', [MarcaController::class, 'activate'])->name
 Route::get('/insumos', [InsumoController::class, 'index'])->name('insumo.index');
 Route::get('/insumos/create', [InsumoController::class, 'create'])->name('insumo.create');
 Route::post('/insumos', [InsumoController::class, 'store'])->name('insumo.store');
+Route::put('/insumos/{id}', [InsumoController::class, 'update'])->name('insumo.update');
 Route::delete('/insumos/{id}', [InsumoController::class, 'destroy'])->name('insumo.destroy');
 Route::patch('/insumos/{id}/activate', [InsumoController::class, 'activate'])->name('insumo.activate');
 

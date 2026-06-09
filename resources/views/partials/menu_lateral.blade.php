@@ -1,439 +1,551 @@
-<!-- filepath: c:\laragon\www\TesisGyA\resources\views\partials\menu_lateral.blade.php -->
-<nav class="bg-gradient text-white vh-100 sidebar-nav" style="width: 60px; position: fixed; left: 0; top: 0; transition: width 0.3s ease; z-index: 9999;">
-    <div class="p-3 h-100 d-flex flex-column">
-        <!-- Logo/Título -->
-        <div class="text-center mb-4 brand-section">
-            <div class="brand-icon mb-2">
-                <i class="fas fa-cube text-light" style="font-size: 2rem;"></i>
-            </div>
-            <div class="menu-text">
-                <h5 class="text-light fw-bold mb-0 brand-text">TesisGyA</h5>
-                <small class="text-light">Sistema de Gestión</small>
-            </div>
-        </div>
+{{-- Botón hamburguesa para mobile --}}
+<button class="sidebar-mobile-btn d-lg-none" id="mobileTrigger" onclick="openMobileSidebar()">
+    <i class="fas fa-bars"></i>
+</button>
 
-        <!-- Datos del Usuario -->
-        <div class="user-section mb-4 p-3 rounded">
-            <div class="text-center">
-                <div class="user-avatar mb-2 position-relative">
-                    <div class="avatar-circle">
-                        <i class="fas fa-user text-white" style="font-size: 1.2rem;"></i>
-                    </div>
-                    <div class="status-indicator bg-success"></div>
-                </div>
-                <div class="menu-text user-info">
-                    <h6 class="mb-1 text-white fw-semibold">{{ session('user_usuario', 'Usuario') }}</h6>
-                    <small class="text-light">{{ session('user_cargo', 'Administrador') }}</small>
+{{-- Backdrop mobile --}}
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+{{-- Sidebar --}}
+<nav id="sidebarNav" class="sidebar-nav">
+    <div class="sidebar-inner">
+
+        {{-- Header --}}
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                
+                <div class="brand-texts">
+                    <span class="brand-name">TesisGyA</span>
+                    <span class="brand-sub">Sistema de Gestión</span>
                 </div>
             </div>
+            <button class="sidebar-collapse-btn d-none d-lg-flex" id="collapseBtn" onclick="toggleDesktopSidebar()" title="Colapsar">
+                <i class="fas fa-chevron-left" id="collapseIcon"></i>
+            </button>
+            <button class="sidebar-close-btn d-lg-none" onclick="closeMobileSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
-        <!-- Menú Principal -->
-        <div class="flex-grow-1">
-            <ul class="nav flex-column menu-items">
-                <li class="nav-item mb-1">
-                    <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="{{ route('menu.index') }}">
-                        <i class="fas fa-home icon-fixed text-white"></i>
-                        <span class="menu-text text-white ms-3">Dashboard</span>
-                    </a>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="{{ route('inventario.index') }}">
-                        <i class="fas fa-warehouse icon-fixed text-white"></i>
-                        <span class="menu-text text-white ms-3">Inventario</span>
-                    </a>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <div class="dropdown-item-menu">
-                        <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="#" onclick="toggleCompraMenu(event)">
-                            <i class="fas fa-shopping-cart icon-fixed text-white"></i>
-                            <span class="menu-text text-white ms-3">Compra</span>
-                            <i class="fas fa-chevron-down ms-auto menu-text transition-transform text-white" id="compra-arrow"></i>
-                        </a>
-                        <div class="submenu-container" id="compra-submenu" style="display: none;">
-                            <div class="mt-2 ms-3 menu-text">
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('pedido_compra.index') }}">
-                                    <i class="fas fa-file-alt me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Pedidos de Compra</span>
-                                </a>
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('presupuesto_compra_aprobado.index') }}">
-                                    <i class="fas fa-check-circle me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Presupuestos Aprobados</span>
-                                </a>
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('orden_compra.index') }}">
-                                    <i class="fas fa-file-contract me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Órdenes de Compra</span>
-                                </a>
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('nota_remision_compra.index') }}">
-                                    <i class="fas fa-truck me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Notas de Remisión</span>
-                                </a>
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('compras.index') }}">
-                                    <i class="fas fa-file-invoice-dollar me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Compras</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <div class="dropdown-item-menu">
-                        <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="#" onclick="toggleServicioMenu(event)">
-                            <i class="fas fa-tools icon-fixed text-white"></i>
-                            <span class="menu-text text-white ms-3">Servicio</span>
-                            <i class="fas fa-chevron-down ms-auto menu-text transition-transform text-white" id="servicio-arrow"></i>
-                        </a>
-                        <div class="submenu-container" id="servicio-submenu" style="display: none;">
-                              <div class="mt-2 ms-3 menu-text">
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('solicitud_servicio.index') }}">
-                                    <i class="fas fa-file-alt me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Solicitud de Servicio</span>
-                                </a>
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('visita_previa.index') }}">
-                                    <i class="fas fa-clipboard-list me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Visitas Previas</span>
-                                </a>
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('presupuesto_servicio.index') }}">
-                                    <i class="fas fa-file-invoice-dollar me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Presupuestos de Servicio</span>
-                                </a>
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('contrato.index') }}">
-                                    <i class="fas fa-file-contract me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Contratos</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <div class="dropdown-item-menu">
-                        <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="#" onclick="toggleMenu(event)">
-                            <i class="fas fa-database icon-fixed text-white"></i>
-                            <span class="menu-text text-white ms-3">Referenciales</span>
-                            <i class="fas fa-chevron-down ms-auto menu-text transition-transform text-white" id="arrow"></i>
-                        </a>
-                        <div class="submenu-container" id="submenu" style="display: none;">
-                            <div class="mt-2 ms-3 menu-text">
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('marca.index') }}">
-                                    <i class="fas fa-tag me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Marcas</span>
-                                </a>
-                                <a class="nav-link text-light d-flex align-items-center py-2 px-3 rounded-3 submenu-item" href="{{ route('insumo.index') }}">
-                                    <i class="fas fa-boxes me-2 text-light" style="font-size: 0.8rem;"></i>
-                                    <span class="text-light">Insumos</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="{{ route('presupuesto_compra.index') }}">
-                        <i class="fas fa-file-invoice-dollar icon-fixed text-white"></i>
-                        <span class="menu-text text-white ms-3">Presupuestar Pedidos</span>
-                    </a>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="#">
-                        <i class="fas fa-user icon-fixed text-white"></i>
-                        <span class="menu-text text-white ms-3">Mi Perfil</span>
-                    </a>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 menu-item" href="#">
-                        <i class="fas fa-cog icon-fixed text-white"></i>
-                        <span class="menu-text text-white ms-3">Configuración</span>
-                    </a>
-                </li>
-            </ul>
+        {{-- Usuario --}}
+        <div class="sidebar-user">
+            <div class="sidebar-avatar">
+                <i class="fas fa-user"></i>
+                <span class="avatar-online"></span>
+            </div>
+            <div class="sidebar-user-info">
+                <span class="user-name">{{ session('user_usuario', 'Usuario') }}</span>
+                <span class="user-role">{{ session('user_cargo', 'Administrador') }}</span>
+            </div>
         </div>
 
-        <!-- Logout Button -->
-        <div class="mt-auto">
-            <a class="nav-link text-white d-flex align-items-center py-3 px-3 rounded-3 logout-btn" href="{{ route('logout') }}">
-                <i class="fas fa-sign-out-alt icon-fixed text-white"></i>
-                <span class="menu-text text-white ms-3">Cerrar Sesión</span>
+        {{-- Menú --}}
+        <div class="sidebar-menu">
+
+            <a href="{{ route('menu.index') }}"
+               class="sidebar-link {{ request()->routeIs('menu.*') ? 'is-active' : '' }}">
+                <i class="fas fa-home sidebar-icon"></i>
+                <span class="sidebar-label">Dashboard</span>
+            </a>
+
+            <a href="{{ route('inventario.index') }}"
+               class="sidebar-link {{ request()->routeIs('inventario.*') ? 'is-active' : '' }}">
+                <i class="fas fa-warehouse sidebar-icon"></i>
+                <span class="sidebar-label">Inventario</span>
+            </a>
+
+            {{-- Compra --}}
+            @php $compraOpen = request()->routeIs('pedido_compra.*','presupuesto_compra_aprobado.*','orden_compra.*','nota_remision_compra.*','compras.*'); @endphp
+            <div class="sidebar-group {{ $compraOpen ? 'is-open' : '' }}">
+                <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
+                    <i class="fas fa-shopping-cart sidebar-icon"></i>
+                    <span class="sidebar-label">Compra</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-sublinks">
+                    <a href="{{ route('pedido_compra.index') }}" class="sidebar-sublink {{ request()->routeIs('pedido_compra.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-file-alt"></i><span>Pedidos de Compra</span>
+                    </a>
+                    <a href="{{ route('presupuesto_compra_aprobado.index') }}" class="sidebar-sublink {{ request()->routeIs('presupuesto_compra_aprobado.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-check-circle"></i><span>Presupuestos Aprobados</span>
+                    </a>
+                    <a href="{{ route('orden_compra.index') }}" class="sidebar-sublink {{ request()->routeIs('orden_compra.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-file-contract"></i><span>Órdenes de Compra</span>
+                    </a>
+                    <a href="{{ route('nota_remision_compra.index') }}" class="sidebar-sublink {{ request()->routeIs('nota_remision_compra.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-truck"></i><span>Notas de Remisión</span>
+                    </a>
+                    <a href="{{ route('compras.index') }}" class="sidebar-sublink {{ request()->routeIs('compras.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-file-invoice-dollar"></i><span>Compras</span>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Servicio --}}
+            @php $servicioOpen = request()->routeIs('solicitud_servicio.*','visita_previa.*','presupuesto_servicio.*','contrato.*'); @endphp
+            <div class="sidebar-group {{ $servicioOpen ? 'is-open' : '' }}">
+                <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
+                    <i class="fas fa-tools sidebar-icon"></i>
+                    <span class="sidebar-label">Servicio</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-sublinks">
+                    <a href="{{ route('solicitud_servicio.index') }}" class="sidebar-sublink {{ request()->routeIs('solicitud_servicio.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-file-alt"></i><span>Solicitud de Servicio</span>
+                    </a>
+                    <a href="{{ route('visita_previa.index') }}" class="sidebar-sublink {{ request()->routeIs('visita_previa.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-clipboard-list"></i><span>Visitas Previas</span>
+                    </a>
+                    <a href="{{ route('presupuesto_servicio.index') }}" class="sidebar-sublink {{ request()->routeIs('presupuesto_servicio.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-file-invoice-dollar"></i><span>Presupuestos de Servicio</span>
+                    </a>
+                    <a href="{{ route('contrato.index') }}" class="sidebar-sublink {{ request()->routeIs('contrato.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-file-contract"></i><span>Contratos</span>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Referenciales --}}
+            @php $refOpen = request()->routeIs('marca.*','insumo.*'); @endphp
+            <div class="sidebar-group {{ $refOpen ? 'is-open' : '' }}">
+                <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
+                    <i class="fas fa-database sidebar-icon"></i>
+                    <span class="sidebar-label">Referenciales</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-sublinks">
+                    <a href="{{ route('marca.index') }}" class="sidebar-sublink {{ request()->routeIs('marca.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-tag"></i><span>Marcas</span>
+                    </a>
+                    <a href="{{ route('insumo.index') }}" class="sidebar-sublink {{ request()->routeIs('insumo.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-boxes"></i><span>Insumos</span>
+                    </a>
+                </div>
+            </div>
+
+            <a href="{{ route('presupuesto_compra.index') }}"
+               class="sidebar-link {{ request()->routeIs('presupuesto_compra.*') ? 'is-active' : '' }}">
+                <i class="fas fa-file-invoice-dollar sidebar-icon"></i>
+                <span class="sidebar-label">Presupuestar Pedidos</span>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-user sidebar-icon"></i>
+                <span class="sidebar-label">Mi Perfil</span>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-cog sidebar-icon"></i>
+                <span class="sidebar-label">Configuración</span>
+            </a>
+
+        </div>
+
+        {{-- Logout --}}
+        <div class="sidebar-footer">
+            <a href="{{ route('logout') }}" class="sidebar-link sidebar-logout">
+                <i class="fas fa-sign-out-alt sidebar-icon"></i>
+                <span class="sidebar-label">Cerrar Sesión</span>
             </a>
         </div>
+
     </div>
 </nav>
 
 <style>
-/* Gradiente de fondo AZUL OSCURO - COMPLETAMENTE SÓLIDO */
-.bg-gradient {
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
-    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
-    opacity: 1 !important;
+:root {
+    --sb-width: 260px;
+    --sb-collapsed: 68px;
+    --sb-bg: #ffffff;
+    --sb-bg2: #f7f8fa;
+    --sb-border: #e8eaed;
+    --sb-hover: #f2f4f7;
+    --sb-active-bg: #eef1f8;
+    --sb-active-bar: #4a6fa5;
+    --sb-text: #5a6370;
+    --sb-text-active: #1e2530;
+    --sb-muted: #9ba3af;
+    --sb-ease: 0.25s ease;
 }
 
-/* Navegación principal - MÁXIMO Z-INDEX */
-.sidebar-nav {
-    overflow: visible;
-    border-right: 2px solid #0d47a1;
-    position: fixed !important;
-    z-index: 9999 !important;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
-}
-
-.sidebar-nav:hover {
-    width: 280px !important;
-    box-shadow: 2px 0 25px rgba(0, 0, 0, 0.3);
-}
-
-/* Sección de marca */
-.brand-section {
-    border-bottom: 2px solid #0d47a1;
-    padding-bottom: 1rem;
-}
-
-.brand-icon {
-    transition: transform 0.3s ease;
-}
-
-.sidebar-nav:hover .brand-icon {
-    transform: scale(1.1);
-}
-
-/* Sección de usuario - COMPLETAMENTE SÓLIDA */
-.user-section {
-    background: #0d47a1 !important;
-    border: 2px solid #1565c0;
-    transition: all 0.3s ease;
-    opacity: 1 !important;
-}
-
-.avatar-circle {
+/* ── Botón hamburguesa mobile ── */
+.sidebar-mobile-btn {
+    position: fixed;
+    top: 0.9rem;
+    left: 0.9rem;
+    z-index: 10001;
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    background: #fff;
+    border: 1px solid var(--sb-border);
+    border-radius: 8px;
+    color: var(--sb-text-active);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: background var(--sb-ease);
+}
+.sidebar-mobile-btn:hover { background: var(--sb-hover); }
+
+/* ── Backdrop ── */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    z-index: 9998;
+}
+.sidebar-backdrop.is-active { display: block; }
+
+/* ── Nav principal ── */
+.sidebar-nav {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: var(--sb-width);
+    background: var(--sb-bg);
+    border-right: 1px solid var(--sb-border);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.06);
+    z-index: 9999;
+    transition: width var(--sb-ease), transform var(--sb-ease);
+    overflow: hidden;
+}
+
+.sidebar-nav.is-collapsed { width: var(--sb-collapsed); }
+
+@media (max-width: 991px) {
+    .sidebar-nav {
+        transform: translateX(-100%);
+        width: var(--sb-width) !important;
+    }
+    .sidebar-nav.mobile-open { transform: translateX(0); }
+}
+
+/* ── Scroll interior ── */
+.sidebar-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #e0e2e6 transparent;
+}
+.sidebar-inner::-webkit-scrollbar { width: 3px; }
+.sidebar-inner::-webkit-scrollbar-thumb { background: #dde0e5; border-radius: 2px; }
+
+/* ── Header ── */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--sb-border);
+    min-height: 64px;
+    flex-shrink: 0;
+    gap: 0.5rem;
+    background: var(--sb-bg);
+}
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+}
+.brand-icon-box {
+    width: 32px;
+    height: 32px;
+    background: var(--sb-active-bg);
+    border: 1px solid #d6dde8;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: var(--sb-active-bar);
+    flex-shrink: 0;
+}
+.brand-texts {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+.brand-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--sb-text-active);
+    white-space: nowrap;
+    line-height: 1.2;
+}
+.brand-sub {
+    font-size: 0.67rem;
+    color: var(--sb-muted);
+    white-space: nowrap;
+    line-height: 1.3;
+}
+.sidebar-collapse-btn,
+.sidebar-close-btn {
+    width: 26px;
+    height: 26px;
+    background: transparent;
+    border: 1px solid var(--sb-border);
+    color: var(--sb-muted);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    transition: color var(--sb-ease), background var(--sb-ease);
+}
+.sidebar-collapse-btn:hover,
+.sidebar-close-btn:hover { background: var(--sb-hover); color: var(--sb-text-active); }
+
+/* ── Usuario ── */
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.875rem;
+    margin: 0.625rem;
+    background: var(--sb-bg2);
+    border: 1px solid var(--sb-border);
+    border-radius: 10px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.sidebar-avatar {
+    width: 34px;
+    height: 34px;
+    background: #e4e8f0;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto;
+    color: var(--sb-text);
+    font-size: 0.9rem;
+    flex-shrink: 0;
     position: relative;
 }
-
-.status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+.avatar-online {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    border: 2px solid #0d47a1;
+    bottom: 1px;
+    right: 1px;
+    width: 8px;
+    height: 8px;
+    background: #34d399;
+    border-radius: 50%;
+    border: 2px solid var(--sb-bg2);
 }
-
-/* Texto del menú - SIN OPACIDAD */
-.menu-text {
-    display: none;
+.sidebar-user-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+.user-name {
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: var(--sb-text-active);
     white-space: nowrap;
-    transition: all 0.3s ease;
-    opacity: 1 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+.user-role {
+    font-size: 0.68rem;
+    color: var(--sb-muted);
+    white-space: nowrap;
+    line-height: 1.3;
 }
 
-.sidebar-nav:hover .menu-text {
-    display: block !important;
-    opacity: 1 !important;
+/* ── Menú ── */
+.sidebar-menu {
+    flex: 1;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
 }
 
-/* Iconos fijos - CENTRADO PERFECTO */
-.icon-fixed {
-    width: 20px;
-    height: 20px;
+/* ── Links ── */
+.sidebar-link {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
+    gap: 0.75rem;
+    padding: 0.55rem 0.75rem;
+    color: var(--sb-text);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background var(--sb-ease), color var(--sb-ease);
+    white-space: nowrap;
+    overflow: hidden;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    font-size: 0.845rem;
+    line-height: 1;
+    position: relative;
+}
+.sidebar-link:hover {
+    background: var(--sb-hover);
+    color: var(--sb-text-active);
+    text-decoration: none;
+}
+.sidebar-link.is-active {
+    background: var(--sb-active-bg);
+    color: var(--sb-active-bar);
+    font-weight: 600;
+}
+.sidebar-link.is-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 3px;
+    background: var(--sb-active-bar);
+    border-radius: 0 2px 2px 0;
+}
+
+.sidebar-icon {
+    width: 18px;
+    text-align: center;
+    font-size: 0.9rem;
     flex-shrink: 0;
 }
 
-/* Items del menú - COMPLETAMENTE SÓLIDOS */
-.menu-item {
-    text-decoration: none !important;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
-    background: transparent !important;
-    justify-content: flex-start !important;
-}
-
-.menu-item:hover {
-    background: #1565c0 !important;
-    border-color: #0d47a1;
-    transform: translateX(5px);
-    opacity: 1 !important;
-}
-
-/* Cuando está colapsado, centrar los iconos */
-.sidebar-nav:not(:hover) .menu-item {
-    justify-content: center !important;
-}
-
-.sidebar-nav:not(:hover) .icon-fixed {
-    margin: 0 !important;
-}
-
-/* Submenu - COMPLETAMENTE SÓLIDO */
-.submenu-container {
-    transition: all 0.3s ease;
+.sidebar-label {
+    flex: 1;
     overflow: hidden;
-    background: transparent !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.submenu-item {
-    background: #0d47a1 !important;
-    border-left: 3px solid transparent;
-    transition: all 0.3s ease;
-    opacity: 1 !important;
+/* ── Grupos con submenú ── */
+.group-chevron {
+    font-size: 0.62rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    color: var(--sb-muted);
+    transition: transform var(--sb-ease);
+}
+.sidebar-group.is-open > .sidebar-group-btn .group-chevron {
+    transform: rotate(180deg);
+}
+.sidebar-sublinks {
+    display: none;
+    flex-direction: column;
+    gap: 1px;
+    padding: 3px 0 3px 6px;
+    margin-left: 18px;
+    border-left: 1px solid var(--sb-border);
+}
+.sidebar-group.is-open > .sidebar-sublinks { display: flex; }
+.sidebar-sublink {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.7rem;
+    color: var(--sb-muted);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: background var(--sb-ease), color var(--sb-ease);
+}
+.sidebar-sublink i {
+    font-size: 0.68rem;
+    width: 13px;
+    text-align: center;
+    flex-shrink: 0;
+}
+.sidebar-sublink:hover {
+    background: var(--sb-hover);
+    color: var(--sb-text-active);
+    text-decoration: none;
+}
+.sidebar-sublink.is-active {
+    color: var(--sb-active-bar);
+    background: var(--sb-active-bg);
+    font-weight: 500;
 }
 
-.submenu-item:hover {
-    background: #1565c0 !important;
-    border-left-color: #ffffff;
-    transform: translateX(3px);
-    opacity: 1 !important;
+/* ── Footer / Logout ── */
+.sidebar-footer {
+    padding: 0.5rem;
+    border-top: 1px solid var(--sb-border);
+    flex-shrink: 0;
 }
+.sidebar-logout { color: #e05c5c !important; }
+.sidebar-logout:hover { background: #fff5f5 !important; color: #c0392b !important; }
 
-/* Botón de logout - COMPLETAMENTE SÓLIDO */
-.logout-btn {
-    background: #d32f2f !important;
-    border: 2px solid #b71c1c;
-    transition: all 0.3s ease;
-    opacity: 1 !important;
-    justify-content: flex-start !important;
+/* ══ ESTADO COLAPSADO ══ */
+.sidebar-nav.is-collapsed .brand-texts,
+.sidebar-nav.is-collapsed .sidebar-user-info,
+.sidebar-nav.is-collapsed .sidebar-label,
+.sidebar-nav.is-collapsed .group-chevron { display: none; }
+.sidebar-nav.is-collapsed .sidebar-user { justify-content: center; padding: 0.65rem 0.4rem; }
+.sidebar-nav.is-collapsed .sidebar-link { justify-content: center; padding: 0.6rem; }
+.sidebar-nav.is-collapsed .sidebar-brand { justify-content: center; }
+.sidebar-nav.is-collapsed .sidebar-header { justify-content: center; }
+.sidebar-nav.is-collapsed #collapseIcon { transform: rotate(180deg); }
+.sidebar-nav.is-collapsed .sidebar-group.is-open > .sidebar-sublinks { display: none; }
+.sidebar-nav.is-collapsed .sidebar-link.is-active::before { display: none; }
+
+/* ══ MAIN CONTENT ══ */
+.main-content { transition: margin-left var(--sb-ease); }
+@media (min-width: 992px) {
+    .main-content { margin-left: var(--sb-width); }
+    body.sidebar-is-collapsed .main-content { margin-left: var(--sb-collapsed); }
 }
-
-.logout-btn:hover {
-    background: #b71c1c !important;
-    border-color: #8e0000;
-    transform: translateX(5px);
-    opacity: 1 !important;
-}
-
-/* Cuando está colapsado, centrar el logout también */
-.sidebar-nav:not(:hover) .logout-btn {
-    justify-content: center !important;
-}
-
-/* Contenido principal - MENOR Z-INDEX */
-.main-content {
-    margin-left: 60px;
-    transition: margin-left 0.3s ease;
-    padding: 2rem;
-    position: relative;
-    z-index: 1;
-}
-
-/* Animación del chevron */
-.transition-transform {
-    transition: transform 0.3s ease;
-}
-
-/* Efectos responsive */
-@media (max-width: 768px) {
-    .sidebar-nav {
-        width: 50px !important;
-        z-index: 9999 !important;
-    }
-
-    .sidebar-nav:hover {
-        width: 250px !important;
-    }
-
-    .main-content {
-        margin-left: 50px;
-        z-index: 1;
-    }
-}
-
-/* Scrollbar personalizado */
-.sidebar-nav::-webkit-scrollbar {
-    width: 6px;
-}
-
-.sidebar-nav::-webkit-scrollbar-track {
-    background: #0d47a1;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb {
-    background: #1565c0;
-    border-radius: 3px;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: #1976d2;
-}
-
-/* FORZAR SOLIDEZ COMPLETA */
-.sidebar-nav * {
-    opacity: 1 !important;
+@media (max-width: 991px) {
+    .main-content { margin-left: 0 !important; padding-top: 64px; }
 }
 </style>
 
 <script>
-function toggleMenu(event) {
-    // Prevenir el comportamiento por defecto del enlace
-    event.preventDefault();
-
-    const submenu = document.getElementById('submenu');
-    const arrow = document.getElementById('arrow');
-
-    if (submenu.style.display === 'none' || submenu.style.display === '') {
-        submenu.style.display = 'block';
-        arrow.style.transform = 'rotate(180deg)';
-    } else {
-        submenu.style.display = 'none';
-        arrow.style.transform = 'rotate(0deg)';
+document.addEventListener('DOMContentLoaded', function () {
+    // Restaurar estado colapsado en desktop
+    if (window.innerWidth >= 992 && localStorage.getItem('sidebarCollapsed') === 'true') {
+        document.getElementById('sidebarNav').classList.add('is-collapsed');
+        document.body.classList.add('sidebar-is-collapsed');
     }
-}
-
-function toggleCompraMenu(event) {
-    // Prevenir el comportamiento por defecto del enlace
-    event.preventDefault();
-
-    const submenu = document.getElementById('compra-submenu');
-    const arrow = document.getElementById('compra-arrow');
-
-    if (submenu.style.display === 'none' || submenu.style.display === '') {
-        submenu.style.display = 'block';
-        arrow.style.transform = 'rotate(180deg)';
-    } else {
-        submenu.style.display = 'none';
-        arrow.style.transform = 'rotate(0deg)';
-    }
-}
-
-// Efecto de hover mejorado
-document.addEventListener('DOMContentLoaded', function() {
-    const menuItems = document.querySelectorAll('.menu-item, .submenu-item');
-
-    menuItems.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
-        });
-
-        item.addEventListener('mouseleave', function() {
-            this.style.boxShadow = 'none';
-        });
-    });
 });
 
-function toggleServicioMenu(event) {
-    event.preventDefault();
-    const submenu = document.getElementById('servicio-submenu');
-    const arrow = document.getElementById('servicio-arrow');
-    if (submenu.style.display === 'none' || submenu.style.display === '') {
-        submenu.style.display = 'block';
-        arrow.style.transform = 'rotate(180deg)';
-    } else {
-        submenu.style.display = 'none';
-        arrow.style.transform = 'rotate(0deg)';
-    }
+function toggleDesktopSidebar() {
+    const nav = document.getElementById('sidebarNav');
+    nav.classList.toggle('is-collapsed');
+    document.body.classList.toggle('sidebar-is-collapsed');
+    localStorage.setItem('sidebarCollapsed', nav.classList.contains('is-collapsed'));
+}
+
+function openMobileSidebar() {
+    document.getElementById('sidebarNav').classList.add('mobile-open');
+    document.getElementById('sidebarBackdrop').classList.add('is-active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileSidebar() {
+    document.getElementById('sidebarNav').classList.remove('mobile-open');
+    document.getElementById('sidebarBackdrop').classList.remove('is-active');
+    document.body.style.overflow = '';
+}
+
+function toggleGroup(btn) {
+    const nav = document.getElementById('sidebarNav');
+    if (nav.classList.contains('is-collapsed')) return;
+    btn.closest('.sidebar-group').classList.toggle('is-open');
 }
 </script>

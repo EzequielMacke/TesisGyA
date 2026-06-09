@@ -10,25 +10,22 @@
 <style>
 /* Estilos globales para el contenido principal */
 .main-content {
-    margin-left: 60px;
-    transition: margin-left 0.3s ease;
+    margin-left: var(--sb-width, 260px);
+    transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1);
     min-height: 100vh;
-    background-color: #f8f9fa;
-    padding: 20px;
+    background-color: #f0f2f5;
+    padding: 24px;
 }
 
-/* Responsive para móviles */
-@media (max-width: 768px) {
-    .main-content {
-        margin-left: 50px;
-        padding: 15px;
-    }
+body.sidebar-is-collapsed .main-content {
+    margin-left: var(--sb-collapsed, 68px);
 }
 
-@media (max-width: 576px) {
+@media (max-width: 991px) {
     .main-content {
-        margin-left: 45px;
-        padding: 10px;
+        margin-left: 0 !important;
+        padding: 16px;
+        padding-top: 68px;
     }
 }
 
@@ -156,17 +153,21 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Estilos para el footer */
 .footer {
-    margin-left: 60px;
-    transition: margin-left 0.3s ease;
+    margin-left: var(--sb-width, 260px);
+    transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1);
     background-color: #343a40;
     color: white;
     padding: 1rem 0;
     margin-top: auto;
 }
 
-@media (max-width: 768px) {
+body.sidebar-is-collapsed .footer {
+    margin-left: var(--sb-collapsed, 68px);
+}
+
+@media (max-width: 991px) {
     .footer {
-        margin-left: 50px;
+        margin-left: 0 !important;
     }
 }
 
