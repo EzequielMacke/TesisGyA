@@ -122,11 +122,11 @@ class CompraController extends Controller
 
                 foreach ($articulos as $art) {
                     $totalSubtotales += $art['subtotal'];
-                    if ($art['impuesto_id'] == 3) { // IVA 5%
+                    if ($art['impuesto_id'] == 2) { // IVA 5%
                         $iva5 += $art['subtotal'] / 21;
-                    } elseif ($art['impuesto_id'] == 2) { // IVA 10%
+                    } elseif ($art['impuesto_id'] == 3) { // IVA 10%
                         $iva10 += $art['subtotal'] / 11;
-                    } elseif ($art['impuesto_id'] == 1) { // Exento
+                    } elseif ($art['impuesto_id'] == 0) { // Exento
                         $exento += $art['subtotal'];
                     }
                 }
@@ -247,9 +247,9 @@ class CompraController extends Controller
             ]);
 
             // Calcular impuestos
-            if ($item['impuesto_id'] == 3) { // IVA 5%
+            if ($item['impuesto_id'] == 2) { // IVA 5%
                 $iva5 += $subtotal / 21;
-            } elseif ($item['impuesto_id'] == 2) { // IVA 10%
+            } elseif ($item['impuesto_id'] == 3) { // IVA 10%
                 $iva10 += $subtotal / 11;
             } elseif ($item['impuesto_id'] == 1) { // Exento
                 $iva_exento += $subtotal;

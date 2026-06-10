@@ -3,193 +3,146 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Aprobar Presupuesto</title>
+    <title>Aprobar Presupuesto - TesisGyA</title>
     @include('partials.head')
 </head>
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+
+            {{-- Cabecera --}}
+            <div class="page-header">
                 <div>
-                    <h2>
-                        <i class="fas fa-check-double me-2 text-success"></i>
-                        Aprobar Presupuesto
-                    </h2>
-                    <p class="text-muted mb-0">Seleccione un pedido y apruebe uno de sus presupuestos</p>
+                    <h2><i class="fas fa-check-double"></i> Aprobar Presupuesto</h2>
+                    <small>Seleccione un pedido y apruebe uno de sus presupuestos</small>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('presupuesto_compra_aprobado.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Volver
-                    </a>
-                </div>
+                <a href="{{ route('presupuesto_compra_aprobado.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </a>
             </div>
 
+            {{-- Alerts --}}
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
-            <!-- Debug Info -->
-            <div class="alert alert-info">
-                <strong>Debug:</strong> Total de pedidos disponibles: {{ count($pedidos) }}
-            </div>
-
-            <!-- Selector de Pedido -->
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-search me-2"></i>Seleccionar Pedido de Compra
-                    </h5>
+            {{-- Selector de Pedido --}}
+            <div class="card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-search me-2"></i>Seleccionar Pedido de Compra</span>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label for="pedido_select" class="form-label">Pedido de Compra *</label>
-                                <select class="form-control" id="pedido_select" name="pedido_id" required>
-                                    <option value="">Seleccione un pedido pendiente...</option>
-                                    @foreach($pedidos as $pedido)
-                                        <option value="{{ $pedido->id }}"
-                                                data-sucursal="{{ $pedido->sucursal->descripcion ?? 'N/A' }}"
-                                                data-deposito="{{ $pedido->deposito->descripcion ?? 'N/A' }}"
-                                                data-fecha="{{ $pedido->fecha }}"
-                                                data-usuario="{{ ($pedido->usuario->persona->nombre ?? 'N/A') . ' ' . ($pedido->usuario->persona->apellido ?? '') }}"
-                                                data-observacion="{{ $pedido->observacion ?? '' }}"
-                                                data-presupuestos="{{ $pedido->presupuestos_count }}">
-                                            Pedido #{{ $pedido->id }} - {{ $pedido->sucursal->descripcion ?? 'N/A' }}
-                                            ({{ $pedido->presupuestos_count }} presupuestos)
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <small class="text-muted">Solo se muestran pedidos en estado "Pendiente" con presupuestos</small>
-                            </div>
-                        </div>
-                    </div>
+                    <label for="pedido_select" class="form-label">Pedido de Compra *</label>
+                    <select class="form-select form-select-sm" id="pedido_select" name="pedido_id" required>
+                        <option value="">Seleccione un pedido pendiente...</option>
+                        @foreach($pedidos as $pedido)
+                            <option value="{{ $pedido->id }}"
+                                    data-sucursal="{{ $pedido->sucursal->descripcion ?? 'N/A' }}"
+                                    data-deposito="{{ $pedido->deposito->descripcion ?? 'N/A' }}"
+                                    data-fecha="{{ $pedido->fecha }}"
+                                    data-usuario="{{ ($pedido->usuario->persona->nombre ?? 'N/A') . ' ' . ($pedido->usuario->persona->apellido ?? '') }}"
+                                    data-observacion="{{ $pedido->observacion ?? '' }}"
+                                    data-presupuestos="{{ $pedido->presupuestos_count }}">
+                                Pedido #{{ $pedido->id }} - {{ $pedido->sucursal->descripcion ?? 'N/A' }}
+                                ({{ $pedido->presupuestos_count }} presupuestos)
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted">Solo se muestran pedidos en estado "Pendiente" con presupuestos</small>
                 </div>
             </div>
 
-            <!-- Información del Pedido Seleccionado -->
-            <div class="card mb-4" id="pedido_info" style="display: none;">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>Información del Pedido
-                    </h5>
+            {{-- Información del Pedido --}}
+            <div class="card" id="pedido_info" style="display: none;">
+                <div class="card-header-section">
+                    <span><i class="fas fa-info-circle me-2"></i>Información del Pedido</span>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Pedido ID:</label>
-                                <div class="fw-bold" id="pedido_id_display">#</div>
-                            </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label class="form-label">Pedido</label>
+                            <div class="info-value"><i class="fas fa-hashtag"></i><span id="pedido_id_display">-</span></div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Sucursal:</label>
-                                <div class="fw-bold" id="pedido_sucursal_display">-</div>
-                            </div>
+                        <div class="info-item">
+                            <label class="form-label">Sucursal</label>
+                            <div class="info-value"><i class="fas fa-building"></i><span id="pedido_sucursal_display">-</span></div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Depósito:</label>
-                                <div class="fw-bold" id="pedido_deposito_display">-</div>
-                            </div>
+                        <div class="info-item">
+                            <label class="form-label">Depósito</label>
+                            <div class="info-value"><i class="fas fa-warehouse"></i><span id="pedido_deposito_display">-</span></div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Fecha:</label>
-                                <div class="fw-bold" id="pedido_fecha_display">-</div>
-                            </div>
+                        <div class="info-item">
+                            <label class="form-label">Fecha</label>
+                            <div class="info-value"><i class="fas fa-calendar"></i><span id="pedido_fecha_display">-</span></div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Creado por:</label>
-                                <div class="fw-bold" id="pedido_usuario_display">-</div>
-                            </div>
+                        <div class="info-item">
+                            <label class="form-label">Creado por</label>
+                            <div class="info-value"><i class="fas fa-user"></i><span id="pedido_usuario_display">-</span></div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Presupuestos:</label>
-                                <div class="fw-bold text-success" id="pedido_presupuestos_display">0</div>
-                            </div>
+                        <div class="info-item">
+                            <label class="form-label">Presupuestos</label>
+                            <div class="info-value"><i class="fas fa-file-invoice-dollar"></i><span id="pedido_presupuestos_display">0</span></div>
                         </div>
                     </div>
-                    <div class="row" id="pedido_observacion_row" style="display: none;">
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Observación:</label>
-                                <div class="bg-light p-3 rounded" id="pedido_observacion_display">-</div>
-                            </div>
-                        </div>
+                    <div class="mt-3" id="pedido_observacion_row" style="display: none;">
+                        <label class="form-label">Observación</label>
+                        <div class="info-value observation-box" id="pedido_observacion_display">-</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Detalle del Pedido -->
-            <div class="card mb-4" id="pedido_detalle" style="display: none;">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>Detalle del Pedido
-                    </h5>
+            {{-- Detalle del Pedido --}}
+            <div class="card table-card" id="pedido_detalle" style="display: none;">
+                <div class="card-header-section">
+                    <span><i class="fas fa-list me-2"></i>Detalle del Pedido</span>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-dark">
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
                                 <tr>
                                     <th>Insumo</th>
-                                    <th>Cantidad Solicitada</th>
+                                    <th style="width:140px;" class="text-center">Cantidad Solicitada</th>
                                     <th>Observación</th>
                                 </tr>
                             </thead>
                             <tbody id="pedido_detalle_tbody">
-                                <!-- Se cargarán dinámicamente -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Presupuestos del Pedido -->
+            {{-- Presupuestos del Pedido --}}
             <div class="card" id="presupuestos_container" style="display: none;">
-                <div class="card-header bg-success text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-file-invoice-dollar me-2"></i>Presupuestos Disponibles
-                        </h5>
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="badge bg-light text-dark fs-6" id="presupuesto_counter">1 de 1</span>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-light btn-sm" id="btn_prev" onclick="cambiarPresupuesto(-1)">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <button type="button" class="btn btn-light btn-sm" id="btn_next" onclick="cambiarPresupuesto(1)">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
+                <div class="card-header-section">
+                    <span><i class="fas fa-file-invoice-dollar me-2"></i>Presupuestos Disponibles</span>
+                    <div class="presupuesto-nav">
+                        <span class="results-count" id="presupuesto_counter">1 de 1</span>
+                        <div class="btn-group">
+                            <button type="button" class="btn-icon" id="btn_prev" onclick="cambiarPresupuesto(-1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button type="button" class="btn-icon" id="btn_next" onclick="cambiarPresupuesto(1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div id="presupuesto_viewer">
-                        <!-- Aquí se cargarán los presupuestos dinámicamente -->
-                    </div>
+                    <div id="presupuesto_viewer"></div>
 
-                    <!-- Botón de Aprobación -->
                     <div class="text-center mt-4">
                         <button type="button" class="btn btn-success btn-lg" id="btn_aprobar" onclick="aprobarPresupuesto()">
                             <i class="fas fa-check-double me-2"></i>Aprobar Este Presupuesto
@@ -197,6 +150,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -205,75 +159,199 @@
 </html>
 
 <style>
-.main-content {
-    margin-left: 60px;
-    width: calc(100vw - 60px);
-    min-height: 100vh;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
-    overflow-x: hidden;
-    box-sizing: border-box;
-}
-
 .content-wrapper {
-    padding: 20px;
-    max-width: 100%;
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+
+/* ── Cards ── */
 .card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.presupuesto-item {
-    border: 2px solid #e9ecef;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
+    box-shadow: none;
+}
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
+}
+.results-count { font-weight: 400; font-size: 0.78rem; color: #94a3b8; }
+
+.select2-container--bootstrap-5 .select2-selection {
+    min-height: calc(1.5em + 0.5rem + 2px);
 }
 
-.presupuesto-item.active {
-    border-color: #28a745;
-    background-color: rgba(40, 167, 69, 0.05);
+/* ── Información del pedido ── */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
 }
-
-.table th {
-    font-size: 0.875rem;
-    font-weight: 600;
+.info-item .form-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
-
-.table td {
-    vertical-align: middle;
-}
-
-.observacion-detalle {
-    background-color: #f8f9fa;
-    border-left: 4px solid #007bff;
-    padding: 8px 12px;
-    margin-top: 5px;
-    border-radius: 4px;
-    font-style: italic;
+.info-value {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
     font-size: 0.85rem;
+    color: #374151;
 }
+.info-value i { color: #94a3b8; margin-right: 0.5rem; width: 14px; text-align: center; }
+.observation-box {
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+    .info-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Tablas ── */
+.table-card { display: flex; flex-direction: column; }
+.table-container { overflow: auto; }
+
+.data-table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+.data-table thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.6rem 0.65rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.data-table tbody td {
+    padding: 0.6rem 0.65rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #374151;
+}
+.data-table tbody tr:hover { background: #f8fafc; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.empty-cell {
+    text-align: center;
+    color: #94a3b8;
+    padding: 2.5rem 1rem;
+}
+.empty-cell i { color: #cbd5e1; }
+
+/* Tags */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+}
+.tag-secondary { background: #f1f5f9; color: #64748b; }
+.tag-warning { background: #fef3c7; color: #b45309; }
+.amount { font-weight: 700; color: #10b981; }
+
+/* ── Navegación de presupuestos ── */
+.presupuesto-nav { display: flex; align-items: center; gap: 0.75rem; }
+.btn-group { display: flex; gap: 4px; }
+.btn-icon {
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid #e2e8f0; border-radius: 6px;
+    color: #64748b; background: #fff; font-size: 0.78rem;
+    cursor: pointer;
+}
+.btn-icon:hover { background: #f1f5f9; color: #1e293b; }
+.btn-icon:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-icon:disabled:hover { background: #fff; color: #64748b; }
+
+/* ── Estados de carga / error del visor ── */
+.viewer-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #94a3b8;
+}
+.viewer-state i { display: block; margin-bottom: 0.75rem; font-size: 2rem; }
+
+/* ── Encabezado del presupuesto ── */
+.presupuesto-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.presupuesto-title { margin: 0 0 0.4rem; font-size: 1.05rem; font-weight: 600; color: #1e293b; }
+.presupuesto-meta { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.82rem; color: #64748b; }
+.presupuesto-meta i { width: 14px; color: #94a3b8; margin-right: 0.35rem; }
+.presupuesto-meta-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
 
 @media (max-width: 768px) {
-    .main-content {
-        margin-left: 50px;
-        width: calc(100vw - 50px);
-    }
-
-    .content-wrapper {
-        padding: 15px;
-    }
+    .presupuesto-meta-right { align-items: flex-start; }
 }
 
-.sidebar-nav:hover ~ .main-content {
-    margin-left: 280px;
-    width: calc(100vw - 280px);
+/* ── Totales ── */
+.totals-box {
+    margin-top: 1rem;
+    margin-left: auto;
+    max-width: 320px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+.totals-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #374151; padding: 0.25rem 0; }
+.totals-row.totals-final {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+.totals-final strong { color: #10b981; }
+
+@media (max-width: 768px) {
+    .table-container { font-size: 0.875rem; }
+    .totals-box { max-width: 100%; }
 }
 </style>
 
@@ -281,11 +359,7 @@
 let presupuestosData = [];
 let currentPresupuestoIndex = 0;
 
-// Inicializar cuando el DOM esté listo
 $(document).ready(function() {
-    console.log('DOM Ready - Inicializando...');
-
-    // Inicializar Select2
     $('#pedido_select').select2({
         placeholder: 'Seleccione un pedido pendiente...',
         allowClear: true,
@@ -293,12 +367,8 @@ $(document).ready(function() {
         theme: 'bootstrap-5'
     });
 
-    console.log('Select2 inicializado');
-
-    // Evento change del select
     $('#pedido_select').on('change', function() {
         const pedidoId = $(this).val();
-        console.log('Pedido seleccionado:', pedidoId);
 
         if (pedidoId) {
             mostrarInformacionPedido();
@@ -308,47 +378,18 @@ $(document).ready(function() {
             ocultarSecciones();
         }
     });
-
-    // También escuchar el evento select2:select
-    $('#pedido_select').on('select2:select', function (e) {
-        const pedidoId = e.params.data.id;
-        console.log('Select2 select event:', pedidoId);
-
-        if (pedidoId) {
-            mostrarInformacionPedido();
-            cargarDetallePedido(pedidoId);
-            cargarPresupuestos(pedidoId);
-        }
-    });
 });
 
 function mostrarInformacionPedido() {
-    console.log('Mostrando información del pedido...');
-
     const selectedOption = $('#pedido_select option:selected');
     const pedidoId = $('#pedido_select').val();
-
-    console.log('Pedido seleccionado:', pedidoId);
-    console.log('Data del option:', {
-        sucursal: selectedOption.data('sucursal'),
-        deposito: selectedOption.data('deposito'),
-        fecha: selectedOption.data('fecha'),
-        usuario: selectedOption.data('usuario'),
-        observacion: selectedOption.data('observacion'),
-        presupuestos: selectedOption.data('presupuestos')
-    });
 
     $('#pedido_id_display').text('#' + pedidoId);
     $('#pedido_sucursal_display').text(selectedOption.data('sucursal') || 'N/A');
     $('#pedido_deposito_display').text(selectedOption.data('deposito') || 'N/A');
 
-    // Formatear fecha
     const fecha = selectedOption.data('fecha');
-    if (fecha) {
-        $('#pedido_fecha_display').text(new Date(fecha).toLocaleDateString('es-PY'));
-    } else {
-        $('#pedido_fecha_display').text('N/A');
-    }
+    $('#pedido_fecha_display').text(fecha ? new Date(fecha).toLocaleDateString('es-PY') : 'N/A');
 
     $('#pedido_usuario_display').text(selectedOption.data('usuario') || 'N/A');
     $('#pedido_presupuestos_display').text((selectedOption.data('presupuestos') || 0) + ' presupuestos');
@@ -362,29 +403,24 @@ function mostrarInformacionPedido() {
     }
 
     $('#pedido_info').show();
-    console.log('Información del pedido mostrada');
 }
 
 function cargarDetallePedido(pedidoId) {
-    console.log('Cargando detalle del pedido:', pedidoId);
+    $('#pedido_detalle_tbody').html('<tr><td colspan="3" class="empty-cell"><i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>Cargando detalle...</td></tr>');
+    $('#pedido_detalle').show();
 
     $.ajax({
         url: `/pedido-compra/detalle/${pedidoId}`,
         method: 'GET',
         success: function(response) {
-            console.log('Detalle del pedido cargado:', response);
-
             if (response.success && response.detalles) {
                 mostrarDetallePedido(response.detalles);
             } else {
-                $('#pedido_detalle_tbody').html('<tr><td colspan="3" class="text-center">No se pudo cargar el detalle del pedido</td></tr>');
+                $('#pedido_detalle_tbody').html('<tr><td colspan="3" class="empty-cell">No se pudo cargar el detalle del pedido</td></tr>');
             }
-            $('#pedido_detalle').show();
         },
-        error: function(xhr, status, error) {
-            console.error('Error al cargar detalle del pedido:', error);
-            $('#pedido_detalle_tbody').html('<tr><td colspan="3" class="text-center text-danger">Error al cargar el detalle</td></tr>');
-            $('#pedido_detalle').show();
+        error: function() {
+            $('#pedido_detalle_tbody').html('<tr><td colspan="3" class="empty-cell text-danger">Error al cargar el detalle</td></tr>');
         }
     });
 }
@@ -397,16 +433,14 @@ function mostrarDetallePedido(detalles) {
             <tr>
                 <td>
                     <strong>${detalle.insumo?.descripcion || 'N/A'}</strong><br>
-                    <small class="text-muted">
-                        <span class="badge bg-primary me-1">${detalle.insumo?.marca?.descripcion || 'N/A'}</span>
-                        <span class="badge bg-secondary">${detalle.insumo?.unidad_medida?.abreviatura || detalle.insumo?.unidad_medida?.descripcion || 'N/A'}</span>
-                    </small>
+                    <span class="tag me-1">${detalle.insumo?.marca?.descripcion || 'N/A'}</span>
+                    <span class="tag tag-secondary">${detalle.insumo?.unidad_medida?.abreviatura || detalle.insumo?.unidad_medida?.descripcion || 'N/A'}</span>
                 </td>
                 <td class="text-center">
-                    <span class="badge bg-info fs-6">${parseInt(detalle.cantidad).toLocaleString('es-PY')}</span>
+                    <span class="tag">${parseInt(detalle.cantidad).toLocaleString('es-PY')}</span>
                 </td>
                 <td>
-                    ${detalle.observacion ? `<div class="observacion-detalle">${detalle.observacion}</div>` : '<span class="text-muted">Sin observación</span>'}
+                    ${detalle.observacion ? detalle.observacion : '<span class="text-muted">—</span>'}
                 </td>
             </tr>
         `;
@@ -416,18 +450,13 @@ function mostrarDetallePedido(detalles) {
 }
 
 function cargarPresupuestos(pedidoId) {
-    console.log('Cargando presupuestos para pedido:', pedidoId);
-
-    // Mostrar loading
-    $('#presupuesto_viewer').html('<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Cargando presupuestos...</div>');
+    $('#presupuesto_viewer').html('<div class="viewer-state"><i class="fas fa-spinner fa-spin"></i>Cargando presupuestos...</div>');
     $('#presupuestos_container').show();
 
     $.ajax({
         url: `/presupuesto-compra-aprobado/presupuestos/${pedidoId}`,
         method: 'GET',
         success: function(response) {
-            console.log('Respuesta del servidor:', response);
-
             if (response.success && response.presupuestos) {
                 presupuestosData = response.presupuestos;
                 currentPresupuestoIndex = 0;
@@ -435,82 +464,64 @@ function cargarPresupuestos(pedidoId) {
                 if (presupuestosData.length > 0) {
                     mostrarPresupuesto();
                 } else {
-                    $('#presupuesto_viewer').html('<div class="text-center p-4"><i class="fas fa-exclamation-triangle fa-2x text-warning"></i><br>No hay presupuestos disponibles para este pedido.</div>');
+                    $('#presupuesto_viewer').html('<div class="viewer-state"><i class="fas fa-exclamation-triangle text-warning"></i>No hay presupuestos disponibles para este pedido.</div>');
                 }
             } else {
-                $('#presupuesto_viewer').html('<div class="text-center p-4"><i class="fas fa-exclamation-triangle fa-2x text-danger"></i><br>Error: ' + (response.message || 'No se pudieron cargar los presupuestos') + '</div>');
+                $('#presupuesto_viewer').html('<div class="viewer-state"><i class="fas fa-exclamation-triangle text-danger"></i>Error: ' + (response.message || 'No se pudieron cargar los presupuestos') + '</div>');
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error AJAX:', {
-                status: status,
-                error: error,
-                response: xhr.responseText
-            });
-
-            $('#presupuesto_viewer').html('<div class="text-center p-4"><i class="fas fa-exclamation-circle fa-2x text-danger"></i><br>Error al cargar los presupuestos: ' + error + '</div>');
+            $('#presupuesto_viewer').html('<div class="viewer-state"><i class="fas fa-exclamation-circle text-danger"></i>Error al cargar los presupuestos: ' + error + '</div>');
         }
     });
 }
 
 function mostrarPresupuesto() {
-    if (presupuestosData.length === 0) {
-        console.log('No hay presupuestos para mostrar');
-        return;
-    }
+    if (presupuestosData.length === 0) return;
 
     const presupuesto = presupuestosData[currentPresupuestoIndex];
     const total = presupuestosData.length;
 
-    console.log('Mostrando presupuesto:', presupuesto);
-
-    // Actualizar contador
     $('#presupuesto_counter').text(`${currentPresupuestoIndex + 1} de ${total}`);
-
-    // Actualizar botones de navegación
     $('#btn_prev').prop('disabled', currentPresupuestoIndex === 0);
     $('#btn_next').prop('disabled', currentPresupuestoIndex === total - 1);
 
-    // Generar HTML del presupuesto
     let html = `
-        <div class="presupuesto-item active">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <h5 class="text-primary">${presupuesto.nombre || 'Sin nombre'}</h5>
-                    <p class="text-muted mb-1"><strong>Proveedor:</strong> ${presupuesto.proveedor?.razon_social || 'N/A'}</p>
-                    <p class="text-muted mb-1"><strong>RUC:</strong> ${presupuesto.proveedor?.ruc || 'N/A'}</p>
-                </div>
-                <div class="col-md-6 text-end">
-                    <div class="mb-2">
-                        <span class="badge bg-warning fs-6">${presupuesto.estado?.descripcion || 'Sin estado'}</span>
-                    </div>
-                    <p class="text-muted mb-1"><strong>Emisión:</strong> ${presupuesto.fecha_emision ? new Date(presupuesto.fecha_emision).toLocaleDateString('es-PY') : 'N/A'}</p>
-                    <p class="text-muted mb-1"><strong>Vencimiento:</strong> ${presupuesto.fecha_vencimiento ? new Date(presupuesto.fecha_vencimiento).toLocaleDateString('es-PY') : 'N/A'}</p>
+        <div class="presupuesto-header">
+            <div>
+                <h5 class="presupuesto-title">${presupuesto.nombre || 'Sin nombre'}</h5>
+                <div class="presupuesto-meta">
+                    <span><i class="fas fa-building"></i>${presupuesto.proveedor?.razon_social || 'N/A'}</span>
+                    <span><i class="fas fa-id-card"></i>RUC: ${presupuesto.proveedor?.ruc || 'N/A'}</span>
                 </div>
             </div>
-
-            ${presupuesto.descripcion ? `
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <div class="bg-light p-3 rounded">
-                            <strong>Descripción:</strong> ${presupuesto.descripcion}
-                        </div>
-                    </div>
+            <div class="presupuesto-meta-right">
+                <span class="tag tag-warning">${presupuesto.estado?.descripcion || 'Sin estado'}</span>
+                <div class="presupuesto-meta">
+                    <span><i class="fas fa-calendar-plus"></i>Emisión: ${presupuesto.fecha_emision ? new Date(presupuesto.fecha_emision).toLocaleDateString('es-PY') : 'N/A'}</span>
+                    <span><i class="fas fa-calendar-times"></i>Vencimiento: ${presupuesto.fecha_vencimiento ? new Date(presupuesto.fecha_vencimiento).toLocaleDateString('es-PY') : 'N/A'}</span>
                 </div>
-            ` : ''}
+            </div>
+        </div>
+    `;
 
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Insumo</th>
-                            <th>Cantidad</th>
-                            <th>Precio Unit.</th>
-                            <th>Impuesto</th>
-                            <th>Total Item</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+    if (presupuesto.descripcion) {
+        html += `<div class="info-value observation-box mb-3">${presupuesto.descripcion}</div>`;
+    }
+
+    html += `
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Insumo</th>
+                        <th style="width:100px;" class="text-center">Cantidad</th>
+                        <th style="width:130px;" class="text-end">Precio Unit.</th>
+                        <th style="width:110px;" class="text-center">Impuesto</th>
+                        <th style="width:140px;" class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
     `;
 
     let subtotalGeneral = 0;
@@ -533,61 +544,46 @@ function mostrarPresupuesto() {
                 <tr>
                     <td>
                         <strong>${detalle.insumo?.descripcion || 'N/A'}</strong><br>
-                        <small class="text-muted">
-                            <span class="badge bg-primary me-1">${detalle.insumo?.marca?.descripcion || 'N/A'}</span>
-                            <span class="badge bg-secondary">${detalle.insumo?.unidad_medida?.abreviatura || detalle.insumo?.unidad_medida?.descripcion || 'N/A'}</span>
-                        </small>
-                        ${detalle.observacion ? `<div class="observacion-detalle mt-2"><i class="fas fa-comment me-1"></i>${detalle.observacion}</div>` : ''}
+                        <span class="tag me-1">${detalle.insumo?.marca?.descripcion || 'N/A'}</span>
+                        <span class="tag tag-secondary">${detalle.insumo?.unidad_medida?.abreviatura || detalle.insumo?.unidad_medida?.descripcion || 'N/A'}</span>
+                        ${detalle.observacion ? `<div class="text-muted mt-1" style="font-size:0.78rem;"><i class="fas fa-comment me-1"></i>${detalle.observacion}</div>` : ''}
                     </td>
                     <td class="text-center">
-                        <span class="badge bg-info fs-6">${parseInt(detalle.cantidad).toLocaleString('es-PY')}</span>
+                        <span class="tag">${parseInt(detalle.cantidad).toLocaleString('es-PY')}</span>
                     </td>
+                    <td class="text-end">₲ ${parseInt(detalle.precio_unitario).toLocaleString('es-PY')}</td>
                     <td class="text-center">
-                        <strong>₲ ${parseInt(detalle.precio_unitario).toLocaleString('es-PY')}</strong>
+                        <span class="tag tag-secondary">${detalle.impuesto?.descripcion || 'N/A'}</span>
                     </td>
-                    <td class="text-center">
-                        <span class="badge bg-secondary">${detalle.impuesto?.descripcion || 'N/A'}</span>
-                    </td>
-                    <td class="text-center">
-                        <strong class="text-success">₲ ${totalItem.toLocaleString('es-PY')}</strong>
+                    <td class="text-end">
+                        <span class="amount">₲ ${totalItem.toLocaleString('es-PY')}</span>
                     </td>
                 </tr>
             `;
         });
     } else {
-        html += `
-            <tr>
-                <td colspan="5" class="text-center">No hay detalles disponibles</td>
-            </tr>
-        `;
+        html += `<tr><td colspan="5" class="empty-cell">No hay detalles disponibles</td></tr>`;
     }
 
     const totalFinal = subtotalGeneral + impuestosGeneral;
 
     html += `
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
+        </div>
 
-            <div class="row mt-3">
-                <div class="col-md-6"></div>
-                <div class="col-md-6">
-                    <div class="bg-primary text-white p-3 rounded">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal:</span>
-                            <strong>₲ ${subtotalGeneral.toLocaleString('es-PY')}</strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Impuestos:</span>
-                            <strong>₲ ${impuestosGeneral.toLocaleString('es-PY')}</strong>
-                        </div>
-                        <hr style="border-color: rgba(255,255,255,0.3);">
-                        <div class="d-flex justify-content-between">
-                            <span class="h5">TOTAL:</span>
-                            <strong class="h4">₲ ${totalFinal.toLocaleString('es-PY')}</strong>
-                        </div>
-                    </div>
-                </div>
+        <div class="totals-box">
+            <div class="totals-row">
+                <span>Subtotal</span>
+                <strong>₲ ${subtotalGeneral.toLocaleString('es-PY')}</strong>
+            </div>
+            <div class="totals-row">
+                <span>Impuestos</span>
+                <strong>₲ ${impuestosGeneral.toLocaleString('es-PY')}</strong>
+            </div>
+            <div class="totals-row totals-final">
+                <span>Total</span>
+                <strong>₲ ${totalFinal.toLocaleString('es-PY')}</strong>
             </div>
         </div>
     `;
@@ -609,27 +605,23 @@ function aprobarPresupuesto() {
     const presupuesto = presupuestosData[currentPresupuestoIndex];
 
     if (confirm(`¿Está seguro de aprobar el presupuesto "${presupuesto.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
-        // Crear un formulario dinámico para enviar
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ route("presupuesto_compra_aprobado.store") }}';
         form.style.display = 'none';
 
-        // Token CSRF
         const csrfInput = document.createElement('input');
         csrfInput.type = 'hidden';
         csrfInput.name = '_token';
         csrfInput.value = $('meta[name="csrf-token"]').attr('content');
         form.appendChild(csrfInput);
 
-        // Presupuesto ID
         const presupuestoInput = document.createElement('input');
         presupuestoInput.type = 'hidden';
         presupuestoInput.name = 'presupuesto_id';
         presupuestoInput.value = presupuesto.id;
         form.appendChild(presupuestoInput);
 
-        // Agregar al DOM y enviar
         document.body.appendChild(form);
         form.submit();
     }

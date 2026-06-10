@@ -9,7 +9,7 @@ class EstadoSeeder extends Seeder
 {
     public function run(): void
     {
-        $estados = ['Activo', 'Inactivo', 'Pendiete', 'Confirmado', 'Anulado'];
+        $estados = ['Activo', 'Inactivo', 'Pendiente', 'Confirmado', 'Anulado'];
 
         foreach ($estados as $descripcion) {
             Estado::firstOrCreate(['descripcion' => $descripcion]);

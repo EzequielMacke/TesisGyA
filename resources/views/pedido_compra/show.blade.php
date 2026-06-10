@@ -9,26 +9,16 @@
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+
+            {{-- Cabecera --}}
+            <div class="page-header">
                 <div>
-                    <h2><i class="fas fa-eye me-2"></i>Detalle del Pedido</h2>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item">
-                                <a href="{{ route('pedido_compra.index') }}" class="text-decoration-none">
-                                    <i class="fas fa-shopping-cart me-1"></i>Pedidos de Compra
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page">
-                                Pedido #{{ str_pad($pedido->id, 3, '0', STR_PAD_LEFT) }}
-                            </li>
-                        </ol>
-                    </nav>
+                    <h2><i class="fas fa-eye"></i> Pedido de Compra #{{ str_pad($pedido->id, 3, '0', STR_PAD_LEFT) }}</h2>
+                    <small>Detalle del pedido y productos solicitados</small>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="header-actions">
                     @if($pedido->estado_id == 3)
                         <a href="{{ route('pedido_compra.edit', $pedido->id) }}" class="btn btn-warning">
                             <i class="fas fa-edit me-2"></i>Editar
@@ -37,7 +27,7 @@
                             <i class="fas fa-ban me-2"></i>Anular Pedido
                         </button>
                     @endif
-                    <button type="button" class="btn btn-info" onclick="window.print()">
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
                         <i class="fas fa-print me-2"></i>Imprimir
                     </button>
                     <a href="{{ route('pedido_compra.index') }}" class="btn btn-secondary">
@@ -46,13 +36,13 @@
                 </div>
             </div>
 
+            {{-- Alerts --}}
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
@@ -60,264 +50,183 @@
                 </div>
             @endif
 
-            <div class="row">
-                <!-- Información General -->
-                <div class="col-lg-8">
-                    <div class="card mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Información General
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="info-item mb-3">
-                                        <label class="fw-bold text-muted small">CÓDIGO DEL PEDIDO</label>
-                                        <div class="info-value">
-                                            <span class="badge bg-dark fs-6 px-3 py-2">
-                                                #{{ str_pad($pedido->id, 3, '0', STR_PAD_LEFT) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item mb-3">
-                                        <label class="fw-bold text-muted small">ESTADO</label>
-                                        <div class="info-value">
-                                            <span class="badge fs-6 px-3 py-2
-                                                @switch($pedido->estado_id)
-                                                    @case(3) bg-warning text-dark @break
-                                                    @case(4) bg-success @break
-                                                    @case(5) bg-danger @break
-                                                    @default bg-secondary @break
-                                                @endswitch">
-                                                @switch($pedido->estado_id)
-                                                    @case(3)
-                                                        <i class="fas fa-clock me-1"></i>Pendiente
-                                                    @break
-                                                    @case(4)
-                                                        <i class="fas fa-check me-1"></i>Confirmado
-                                                    @break
-                                                    @case(5)
-                                                        <i class="fas fa-times me-1"></i>Anulado
-                                                    @break
-                                                    @default
-                                                        {{ $pedido->estado->descripcion }}
-                                                    @break
-                                                @endswitch
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item mb-3">
-                                        <label class="fw-bold text-muted small">USUARIO SOLICITANTE</label>
-                                        <div class="info-value">
-                                            <i class="fas fa-user me-2 text-primary"></i>
-                                            <span class="fw-bold">{{ $pedido->usuario->usuario }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item mb-3">
-                                        <label class="fw-bold text-muted small">FECHA DE PEDIDO</label>
-                                        <div class="info-value">
-                                            <i class="fas fa-calendar me-2 text-primary"></i>
-                                            <span class="fw-bold">{{ $pedido->fecha->format('d/m/Y') }}</span>
-                                            <small class="text-muted ms-2">{{ $pedido->created_at->format('H:i') }}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item mb-3">
-                                        <label class="fw-bold text-muted small">SUCURSAL</label>
-                                        <div class="info-value">
-                                            <i class="fas fa-building me-2 text-primary"></i>
-                                            <span class="fw-bold">{{ $pedido->sucursal->descripcion }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item mb-3">
-                                        <label class="fw-bold text-muted small">DEPÓSITO</label>
-                                        <div class="info-value">
-                                            <i class="fas fa-warehouse me-2 text-primary"></i>
-                                            <span class="fw-bold">{{ $pedido->deposito->descripcion }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            @if($pedido->observacion)
-                                <div class="mt-4">
-                                    <label class="fw-bold text-muted small">OBSERVACIONES</label>
-                                    <div class="bg-light p-3 rounded border-start border-4 border-info">
-                                        <i class="fas fa-comment me-2 text-info"></i>
-                                        {{ $pedido->observacion }}
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Estadísticas Rápidas -->
-                <div class="col-lg-4">
-                    <div class="row">
-                        <div class="col-12 mb-3">
-                            <div class="card bg-gradient-primary text-white">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-boxes fa-3x mb-3 opacity-75"></i>
-                                    <h3 class="mb-1">{{ $pedido->detalles->count() }}</h3>
-                                    <p class="mb-0">Productos Solicitados</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 mb-3">
-                            <div class="card bg-gradient-success text-white">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-sort-numeric-up fa-3x mb-3 opacity-75"></i>
-                                    <h3 class="mb-1">{{ number_format($pedido->detalles->sum('cantidad'), 0, ',', '.') }}</h3>
-                                    <p class="mb-0">Cantidad Total</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 mb-3">
-                            <div class="card bg-gradient-info text-white">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-clock fa-3x mb-3 opacity-75"></i>
-                                    <h4 class="mb-1">{{ $pedido->created_at->diffForHumans() }}</h4>
-                                    <p class="mb-0">Tiempo Transcurrido</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Detalle de Productos -->
+            {{-- Información General --}}
             <div class="card">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>Detalle de Productos
-                    </h5>
-                    <span class="badge bg-light text-dark">
-                        {{ $pedido->detalles->count() }} producto(s)
-                    </span>
+                <div class="card-header-section">
+                    <span><i class="fas fa-info-circle me-2"></i>Información General</span>
                 </div>
-                <div class="card-body p-0">
-                    @if($pedido->detalles->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover mb-0">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th width="5%" class="text-center">#</th>
-                                        <th width="40%">Producto</th>
-                                        <th width="15%" class="text-center">Cantidad</th>
-                                        <th width="20%" class="text-center">Unidad</th>
-                                        <th width="20%" class="text-center">Observación</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($pedido->detalles as $index => $detalle)
-                                        <tr class="align-middle">
-                                            <td class="text-center">
-                                                <span class="badge bg-secondary">{{ $index + 1 }}</span>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="product-icon me-3">
-                                                        <i class="fas fa-cube fa-2x text-primary"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h6 class="mb-1 fw-bold text-primary">
-                                                            {{ $detalle->insumo->descripcion }}
-                                                        </h6>
-                                                        @if($detalle->insumo->marca->descripcion)
-                                                            <small class="text-muted">
-                                                                <i class="fas fa-tag me-1"></i>{{ $detalle->insumo->marca->descripcion }}
-                                                            </small>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge bg-primary fs-6 px-3 py-2">
-                                                    {{ number_format($detalle->cantidad, 0, ',', '.') }}
-                                                </span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="text-muted">
-                                                    {{ $detalle->insumo->UnidadMedida->descripcion ?? 'Unidad' }}
-                                                </span>
-                                            </td>
-                                            <td class="text-center">
-                                                @if($detalle->observacion)
-                                                    <div class="bg-light p-2 rounded border-start border-3 border-info">
-                                                        <small class="text-muted d-block mb-1">
-                                                            <i class="fas fa-comment me-1"></i>Observación:
-                                                        </small>
-                                                        <span class="text-dark">{{ $detalle->observacion }}</span>
-                                                    </div>
-                                                @else
-                                                    <span class="text-muted small">
-                                                        <i class="fas fa-minus me-1"></i>Sin observación
-                                                    </span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot class="table-secondary">
-                                    <tr>
-                                        <th colspan="3" class="text-end">TOTAL:</th>
-                                        <th class="text-center">
-                                            <span class="badge bg-dark fs-6 px-3 py-2">
-                                                {{ number_format($pedido->detalles->sum('cantidad'), 0, ',', '.') }}
-                                            </span>
-                                        </th>
-                                        <th colspan="2"></th>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label class="form-label">Código del Pedido</label>
+                            <div class="info-value"><i class="fas fa-hashtag"></i>{{ str_pad($pedido->id, 3, '0', STR_PAD_LEFT) }}</div>
                         </div>
-                    @else
-                        <div class="text-center py-5">
-                            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
-                            <h4 class="text-muted">No hay productos en este pedido</h4>
-                            <p class="text-muted">Este pedido no tiene productos asociados.</p>
+                        <div class="info-item">
+                            <label class="form-label">Estado</label>
+                            <div class="info-value">
+                                @switch($pedido->estado_id)
+                                    @case(3)
+                                        <span class="estado estado-pendiente"><i class="estado-dot"></i>Pendiente</span>
+                                        @break
+                                    @case(4)
+                                        <span class="estado estado-confirmado"><i class="estado-dot"></i>Confirmado</span>
+                                        @break
+                                    @case(5)
+                                        <span class="estado estado-anulado"><i class="estado-dot"></i>Anulado</span>
+                                        @break
+                                    @default
+                                        <span class="estado"><i class="estado-dot"></i>{{ $pedido->estado->descripcion }}</span>
+                                @endswitch
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Usuario Solicitante</label>
+                            <div class="info-value"><i class="fas fa-user"></i>{{ $pedido->usuario->usuario }}</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Fecha de Pedido</label>
+                            <div class="info-value">
+                                <i class="fas fa-calendar"></i>{{ $pedido->fecha->format('d/m/Y') }}
+                                <span class="text-muted ms-1">{{ $pedido->created_at->format('H:i') }}</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Sucursal</label>
+                            <div class="info-value"><i class="fas fa-building"></i>{{ $pedido->sucursal->descripcion }}</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Depósito</label>
+                            <div class="info-value"><i class="fas fa-warehouse"></i>{{ $pedido->deposito->descripcion }}</div>
+                        </div>
+                    </div>
+
+                    @if($pedido->observacion)
+                        <div class="mt-3">
+                            <label class="form-label">Observación General</label>
+                            <div class="info-value observation-box">{{ $pedido->observacion }}</div>
                         </div>
                     @endif
                 </div>
             </div>
 
-            <!-- Información de Auditoría -->
-            <div class="card mt-4">
-                <div class="card-header bg-secondary text-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-history me-2"></i>Información de Auditoría
-                    </h6>
+            {{-- Estadísticas --}}
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $pedido->detalles->count() }}</div>
+                        <div class="stat-label">Productos Solicitados</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon"><i class="fas fa-sort-numeric-up"></i></div>
+                    <div>
+                        <div class="stat-value">{{ number_format($pedido->detalles->sum('cantidad'), 0, ',', '.') }}</div>
+                        <div class="stat-label">Cantidad Total</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $pedido->created_at->diffForHumans() }}</div>
+                        <div class="stat-label">Tiempo Transcurrido</div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Detalle de Productos --}}
+            <div class="card table-card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-list me-2"></i>Detalle de Productos</span>
+                    <span class="results-count">{{ $pedido->detalles->count() }} producto(s)</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        @if($pedido->detalles->count() > 0)
+                            <table id="detalleTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:50px;" class="text-center">#</th>
+                                        <th>Producto</th>
+                                        <th style="width:120px;" class="text-center">Cantidad</th>
+                                        <th style="width:100px;" class="text-center">Unidad</th>
+                                        <th>Observación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($pedido->detalles as $index => $detalle)
+                                        <tr>
+                                            <td class="text-center">{{ $index + 1 }}</td>
+                                            <td>
+                                                <i class="fas fa-cube text-muted me-2"></i><strong>{{ $detalle->insumo->descripcion }}</strong>
+                                                @if($detalle->insumo->marca->descripcion)
+                                                    <br><span class="tag tag-secondary mt-1">{{ $detalle->insumo->marca->descripcion }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="tag">{{ number_format($detalle->cantidad, 0, ',', '.') }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="tag tag-secondary">{{ $detalle->insumo->unidadMedida->descripcion ?? 'Unidad' }}</span>
+                                            </td>
+                                            <td>
+                                                @if($detalle->observacion)
+                                                    {{ $detalle->observacion }}
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="2" class="text-end">Total</th>
+                                        <th class="text-center">
+                                            <span class="tag">{{ number_format($pedido->detalles->sum('cantidad'), 0, ',', '.') }}</span>
+                                        </th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        @else
+                            <div class="empty-state">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <h5 class="text-muted mb-2">Sin productos</h5>
+                                <p class="text-muted mb-0" style="font-size:0.85rem;">
+                                    Este pedido no tiene productos asociados.
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Auditoría --}}
+            <div class="card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-history me-2"></i>Información de Auditoría</span>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <small class="text-muted">
-                                <i class="fas fa-plus-circle me-1"></i>
+                    <div class="audit-grid">
+                        <div class="audit-item">
+                            <i class="fas fa-plus-circle"></i>
+                            <div>
                                 <strong>Creado:</strong> {{ $pedido->created_at->format('d/m/Y H:i:s') }}
-                                ({{ $pedido->created_at->diffForHumans() }})
-                            </small>
+                                <span class="text-muted">({{ $pedido->created_at->diffForHumans() }})</span>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <small class="text-muted">
-                                <i class="fas fa-edit me-1"></i>
+                        <div class="audit-item">
+                            <i class="fas fa-edit"></i>
+                            <div>
                                 <strong>Última modificación:</strong> {{ $pedido->updated_at->format('d/m/Y H:i:s') }}
-                                ({{ $pedido->updated_at->diffForHumans() }})
-                            </small>
+                                <span class="text-muted">({{ $pedido->updated_at->diffForHumans() }})</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -326,342 +235,208 @@
 </html>
 
 <style>
-/* Estilos base */
-.main-content {
-    margin-left: 60px;
-    width: calc(100vw - 60px);
-    min-height: 100vh;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
-    overflow-x: auto;
-    box-sizing: border-box;
-}
-
 .content-wrapper {
-    padding: 20px;
-    min-height: calc(100vh - 40px);
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-/* Cards con sombras suaves */
-.card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    overflow: hidden;
-}
-
-.card:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
-}
-
-/* Headers de cards */
-.card-header {
-    border: none;
-    font-weight: 600;
-    padding: 1rem 1.5rem;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-/* Elementos de información */
-.info-item {
-    position: relative;
-}
-
-.info-item label {
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.25rem;
-    display: block;
-}
-
-.info-value {
-    font-size: 0.95rem;
-    color: #495057;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #e9ecef;
-}
-
-/* Badges mejorados */
-.badge {
-    font-weight: 500;
-    letter-spacing: 0.3px;
-}
-
-.badge.fs-6 {
-    font-size: 0.875rem !important;
-    padding: 0.5rem 0.75rem;
-}
-
-/* Cards con gradientes */
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-}
-
-.bg-gradient-success {
-    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-}
-
-.bg-gradient-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
-}
-
-/* Tabla de productos */
-.table th {
-    border: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 1rem 0.75rem;
-}
-
-.table td {
-    border: none;
-    border-bottom: 1px solid #e9ecef;
-    padding: 1rem 0.75rem;
-    vertical-align: middle;
-}
-
-.table tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.05);
-    transform: scale(1.001);
-    transition: all 0.2s ease;
-}
-
-/* Ícono de producto */
-.product-icon {
-    width: 40px;
-    height: 40px;
+/* ── Cabecera ── */
+.page-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background: rgba(0, 123, 255, 0.1);
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+.header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ── Cards ── */
+.card {
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
+    box-shadow: none;
 }
-
-/* Breadcrumb personalizado */
-.breadcrumb {
-    background: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.875rem;
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
 }
+.results-count { font-weight: 400; font-size: 0.78rem; color: #94a3b8; }
 
-.breadcrumb-item + .breadcrumb-item::before {
-    content: "›";
-    color: #6c757d;
-    font-weight: bold;
+/* ── Información general ── */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
 }
-
-/* Botones mejorados */
-.btn {
-    border-radius: 8px;
+.info-item .form-label {
+    display: block;
+    font-size: 0.7rem;
     font-weight: 500;
-    padding: 0.625rem 1.25rem;
-    transition: all 0.3s ease;
-    border: none;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.info-value {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    color: #374151;
+}
+.info-value i { color: #94a3b8; margin-right: 0.5rem; width: 14px; text-align: center; }
+.observation-box {
+    white-space: pre-wrap;
+    line-height: 1.5;
 }
 
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+@media (max-width: 900px) {
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+    .info-grid { grid-template-columns: 1fr; }
 }
 
-/* Font monospace para códigos */
-.font-monospace {
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-}
+/* ── Estado ── */
+.estado { display: inline-flex; align-items: center; gap: 0.4rem; }
+.estado-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+.estado-pendiente .estado-dot  { background: #f59e0b; }
+.estado-confirmado .estado-dot { background: #10b981; }
+.estado-anulado .estado-dot    { background: #ef4444; }
 
-/* Responsive */
+/* ── Estadísticas ── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+.stat-box {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+.stat-icon {
+    width: 42px; height: 42px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    background: #eff6ff; color: #2563eb;
+    font-size: 1.1rem; flex-shrink: 0;
+}
+.stat-value { font-size: 1.3rem; font-weight: 700; color: #1e293b; line-height: 1.2; }
+.stat-label { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.4px; }
+
 @media (max-width: 768px) {
-    .main-content {
-        margin-left: 50px;
-        width: calc(100vw - 50px);
-    }
-
-    .content-wrapper {
-        padding: 15px;
-    }
-
-    .d-flex.justify-content-between {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .d-flex.gap-2 {
-        justify-content: center;
-    }
-
-    .table-responsive {
-        font-size: 0.875rem;
-    }
+    .stats-grid { grid-template-columns: 1fr; }
 }
 
-/* Ajuste del menú lateral */
-.sidebar-nav:hover ~ .main-content {
-    margin-left: 280px;
-    width: calc(100vw - 280px);
+/* ── Tabla de productos ── */
+.table-card { display: flex; flex-direction: column; }
+.table-container { overflow: auto; }
+
+#detalleTable {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+#detalleTable thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.6rem 0.65rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+#detalleTable tbody td {
+    padding: 0.6rem 0.65rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #374151;
+}
+#detalleTable tbody tr:hover { background: #f8fafc; }
+#detalleTable tbody tr:last-child td { border-bottom: none; }
+#detalleTable tfoot th {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 0.6rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
 
-/* Animaciones */
-.fade-in {
-    animation: fadeIn 0.5s ease-in;
+/* Tags */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+}
+.tag-secondary { background: #f1f5f9; color: #64748b; }
+
+/* Empty state */
+.empty-state {
+    min-height: 240px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; color: #94a3b8; text-align: center;
+}
+.empty-state i { color: #cbd5e1; }
+
+/* ── Auditoría ── */
+.audit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    color: #374151;
+}
+.audit-item { display: flex; align-items: flex-start; gap: 0.5rem; }
+.audit-item i { color: #94a3b8; margin-top: 2px; }
+
+@media (max-width: 768px) {
+    .audit-grid { grid-template-columns: 1fr; }
+    .table-container { font-size: 0.875rem; }
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Estilos para impresión */
+/* ── Impresión ── */
 @media print {
-    .main-content {
-        margin-left: 0 !important;
-        width: 100% !important;
-    }
-
-    .btn, .breadcrumb {
-        display: none !important;
-    }
-
-    .card {
-        box-shadow: none !important;
-        border: 1px solid #dee2e6 !important;
-    }
-
-    .card-header {
-        background: #f8f9fa !important;
-        color: #333 !important;
-    }
-}
-
-/* Estados de hover para cards estadísticas */
-.bg-gradient-primary:hover,
-.bg-gradient-success:hover,
-.bg-gradient-info:hover {
-    transform: scale(1.05);
-    transition: transform 0.3s ease;
-}
-
-/* Espaciado mejorado */
-.mb-4 {
-    margin-bottom: 2rem !important;
-}
-
-.mt-4 {
-    margin-top: 2rem !important;
+    .main-content { margin-left: 0 !important; width: 100% !important; }
+    .header-actions { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
 }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Animación de entrada para las estadísticas
-    const statsCards = document.querySelectorAll('.bg-gradient-primary, .bg-gradient-success, .bg-gradient-info');
-
-    statsCards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-        card.classList.add('fade-in');
-    });
-
-    // Animación de entrada para las filas de la tabla
-    const tableRows = document.querySelectorAll('.table tbody tr');
-
-    tableRows.forEach((row, index) => {
-        row.style.opacity = '0';
-        row.style.transform = 'translateX(-20px)';
-
-        setTimeout(() => {
-            row.style.transition = 'all 0.3s ease';
-            row.style.opacity = '1';
-            row.style.transform = 'translateX(0)';
-        }, index * 50);
-    });
-
-    // Funcionalidad de impresión mejorada
-    const printBtn = document.querySelector('[onclick="window.print()"]');
-    if (printBtn) {
-        printBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            // Agregar clase para ocultar elementos no deseados
-            document.body.classList.add('printing');
-
-            // Pequeña pausa para que se apliquen los estilos
-            setTimeout(() => {
-                window.print();
-                document.body.classList.remove('printing');
-            }, 100);
-        });
-    }
-
-    // Tooltips para badges
-    const badges = document.querySelectorAll('.badge[title]');
-    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-        badges.forEach(badge => {
-            new bootstrap.Tooltip(badge, {
-                delay: { show: 500, hide: 100 }
-            });
-        });
-    }
-
-    // Copiar código al hacer click
-    const codigoBadges = document.querySelectorAll('.font-monospace');
-    codigoBadges.forEach(badge => {
-        badge.style.cursor = 'pointer';
-        badge.title = 'Click para copiar';
-
-        badge.addEventListener('click', function() {
-            const text = this.textContent.trim();
-
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    // Feedback visual
-                    const original = this.textContent;
-                    this.textContent = '¡Copiado!';
-                    this.classList.add('bg-success');
-
-                    setTimeout(() => {
-                        this.textContent = original;
-                        this.classList.remove('bg-success');
-                        this.classList.add('bg-info');
-                    }, 1000);
-                });
-            }
-        });
-    });
-
-    // Auto-refresh de timestamps relativos cada minuto
-    setInterval(() => {
-        const timeElements = document.querySelectorAll('[data-time]');
-        timeElements.forEach(element => {
-            // Aquí se podría actualizar el tiempo relativo
-            // Por ahora solo actualiza el título si existe
-            if (element.title) {
-                element.title = 'Actualizado: ' + new Date().toLocaleString();
-            }
-        });
-    }, 60000);
-
-    console.log('Detalle de Pedido de Compra cargado correctamente');
-
-    window.anularPedido = function(pedidoId) {
+document.addEventListener('DOMContentLoaded', function () {
+    window.anularPedido = function (pedidoId) {
+        const confirm_ = () => enviarAnulacion(pedidoId);
         if (typeof Swal !== 'undefined') {
             Swal.fire({
                 title: '¿Anular Pedido?',
-                text: 'Esta acción cambiará el estado del pedido a "Anulado" y no se podrá deshacer.',
+                text: 'El pedido pasará a estado "Anulado" y no podrá revertirse.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
@@ -669,15 +444,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 confirmButtonText: 'Sí, Anular',
                 cancelButtonText: 'Cancelar',
                 reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    enviarAnulacion(pedidoId);
-                }
-            });
+            }).then(r => { if (r.isConfirmed) confirm_(); });
         } else {
-            if (confirm('¿Está seguro que desea anular este pedido?\n\nEsta acción no se podrá deshacer.')) {
-                enviarAnulacion(pedidoId);
-            }
+            if (confirm('¿Anular este pedido?')) confirm_();
         }
     };
 
@@ -685,22 +454,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/pedido_compra/${pedidoId}/anular`;
-
-        const csrfToken = document.querySelector('meta[name="csrf-token"]');
-        if (csrfToken) {
-            const tokenInput = document.createElement('input');
-            tokenInput.type = 'hidden';
-            tokenInput.name = '_token';
-            tokenInput.value = csrfToken.getAttribute('content');
-            form.appendChild(tokenInput);
+        const csrf = document.querySelector('meta[name="csrf-token"]');
+        if (csrf) {
+            const t = document.createElement('input');
+            t.type = 'hidden'; t.name = '_token'; t.value = csrf.content;
+            form.appendChild(t);
         }
-
-        const methodInput = document.createElement('input');
-        methodInput.type = 'hidden';
-        methodInput.name = '_method';
-        methodInput.value = 'PATCH';
-        form.appendChild(methodInput);
-
+        const m = document.createElement('input');
+        m.type = 'hidden'; m.name = '_method'; m.value = 'PATCH';
+        form.appendChild(m);
         document.body.appendChild(form);
         form.submit();
     }

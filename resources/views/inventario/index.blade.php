@@ -9,32 +9,49 @@
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-warehouse me-2"></i>Inventario</h2>
+
+            {{-- Cabecera --}}
+            <div class="page-header">
+                <div>
+                    <h2><i class="fas fa-warehouse"></i> Inventario</h2>
+                    <small>Consulta de existencias por depósito y sucursal</small>
+                </div>
             </div>
 
+            {{-- Alerts --}}
             @if(session('success'))
-                <div class="alert alert-success">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-
             @if(session('error'))
-                <div class="alert alert-danger">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
-            <div class="card mb-3">
-                <div class="card-body py-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <label for="sucursal_filter" class="form-label mb-2">
-                                <i class="fas fa-building me-1"></i>Filtrar por Sucursal:
-                            </label>
-                            <select class="form-select" id="sucursal_filter">
+            {{-- Búsqueda y filtros --}}
+            <div class="card">
+                <div class="card-body py-3 px-3">
+                    <div class="toolbar-grid">
+                        <div class="toolbar-item search-item">
+                            <label class="form-label">Buscar</label>
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" class="form-control form-control-sm" id="searchInput"
+                                       placeholder="Insumo, marca, depósito, cantidad..." autocomplete="off">
+                                <button type="button" class="search-clear" id="clearSearch" title="Limpiar búsqueda">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="toolbar-item">
+                            <label class="form-label">Sucursal</label>
+                            <select class="form-select form-select-sm" id="sucursal_filter">
                                 <option value="">Todas las sucursales</option>
                                 @foreach($sucursales as $sucursal)
                                     <option value="{{ $sucursal->id }}"
@@ -44,65 +61,48 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label mb-2">&nbsp;</label>
-                            <div>
-                                <button type="button" id="filtrarBtn" class="btn btn-primary">
-                                    <i class="fas fa-filter me-2"></i>Filtrar
+                        <div class="toolbar-item toolbar-actions">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="button" id="filtrarBtn" class="btn btn-primary btn-sm flex-fill">
+                                    <i class="fas fa-filter me-1"></i>Filtrar
                                 </button>
-                                <a href="{{ route('inventario.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-2"></i>Limpiar
+                                <a href="{{ route('inventario.index') }}" class="btn btn-outline-secondary btn-sm" title="Limpiar filtros">
+                                    <i class="fas fa-eraser"></i>
                                 </a>
                             </div>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <small class="text-muted">
-                                @if($sucursalSeleccionada)
-                                    Mostrando: {{ $sucursales->find($sucursalSeleccionada)->descripcion ?? 'Sucursal' }}
-                                @else
-                                    Mostrando: Todas las sucursales
-                                @endif
-                            </small>
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-body py-3">
-                    <div class="input-group">
-                        <span class="input-group-text bg-primary text-white">
-                            <i class="fas fa-search"></i>
-                        </span>
-                        <input type="text"
-                               class="form-control"
-                               id="searchInput"
-                               placeholder="Buscar por insumo, marca, depósito, cantidad..."
-                               autocomplete="off">
-                        <button class="btn btn-outline-secondary" type="button" id="clearSearch">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <small class="text-muted mt-2 d-block">
-                        <span id="searchResults">Mostrando <span id="totalRows">{{ $inventarios->count() }}</span> registro(s)</span>
-                    </small>
+            {{-- Tabla --}}
+            <div class="card table-card" id="tableCard">
+                <div class="card-header-section">
+                    <span>
+                        @if($sucursalSeleccionada)
+                            Mostrando: {{ $sucursales->find($sucursalSeleccionada)->descripcion ?? 'Sucursal' }}
+                        @else
+                            Mostrando: Todas las sucursales
+                        @endif
+                    </span>
+                    <span class="results-count">
+                        Mostrando <strong id="totalRows">{{ $inventarios->count() }}</strong> de {{ $inventarios->count() }}
+                    </span>
                 </div>
-            </div>
-
-            <div class="card table-card">
-                <div class="card-body p-0">
-                    <div class="table-responsive table-container">
+                <div class="card-body p-0" style="flex:1; display:flex; flex-direction:column;">
+                    <div class="table-container">
                         @if($inventarios->count() > 0)
-                            <table class="table table-striped table-hover mb-0" id="inventarioTable">
-                                <thead class="table-dark sticky-top">
+                            <table id="inventarioTable">
+                                <thead>
                                     <tr>
-                                        <th style="width: 60px; min-width: 60px;">ID</th>
-                                        <th style="width: 120px; min-width: 120px;">Depósito</th>
-                                        <th style="min-width: 200px;">Insumo</th>
-                                        <th style="width: 120px; min-width: 120px;">Marca</th>
-                                        <th style="width: 100px; min-width: 100px;">Unidad</th>
-                                        <th style="width: 100px; min-width: 100px;">Cantidad</th>
-                                        <th style="width: 80px; min-width: 80px;">Estado</th>
+                                        <th style="width:60px;">ID</th>
+                                        <th style="width:140px;">Depósito</th>
+                                        <th>Insumo</th>
+                                        <th style="width:130px;">Marca</th>
+                                        <th style="width:90px;">Unidad</th>
+                                        <th style="width:110px;" class="text-center">Cantidad</th>
+                                        <th style="width:100px;">Estado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -110,67 +110,73 @@
                                         <tr class="inventario-row">
                                             <td><strong>{{ $inventario->id }}</strong></td>
                                             <td>
-                                                <span class="badge bg-info text-wrap" title="{{ $inventario->deposito->descripcion }}">
-                                                    {{ Str::limit($inventario->deposito->descripcion, 15) }}
-                                                </span>
-                                            </td>
-                                            <td title="{{ $inventario->insumo->descripcion }}">
-                                                {{ $inventario->insumo->descripcion }}
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-primary text-wrap" title="{{ $inventario->insumo->marca->descripcion }}">
-                                                    {{ $inventario->insumo->marca->descripcion }}
+                                                <span class="cell-text" title="{{ $inventario->deposito->descripcion }}">
+                                                    {{ $inventario->deposito->descripcion }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-secondary text-wrap" title="{{ $inventario->insumo->unidadMedida->descripcion }}">
-                                                    {{ $inventario->insumo->unidadMedida->abreviatura ?? $inventario->insumo->unidadMedida->descripcion }}
+                                                <span class="cell-text" title="{{ $inventario->insumo->descripcion }}">
+                                                    {{ $inventario->insumo->descripcion }}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                <span class="tag tag-secondary">{{ $inventario->insumo->marca->descripcion }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="tag tag-secondary">{{ $inventario->insumo->unidadMedida->abreviatura ?? $inventario->insumo->unidadMedida->descripcion }}</span>
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge {{ $inventario->cantidad > 0 ? 'bg-success' : 'bg-warning text-dark' }} fs-6">
+                                                <span class="tag {{ $inventario->cantidad > 0 ? 'tag-success' : 'tag-warning' }}">
                                                     {{ number_format($inventario->cantidad, 2, ',', '.') }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge {{ $inventario->estado->id == 1 ? 'bg-success' : 'bg-danger' }}">
-                                                    {{ $inventario->estado->id == 1 ? 'Activo' : 'Inactivo' }}
-                                                </span>
+                                                @if($inventario->estado->id == 1)
+                                                    <span class="estado estado-confirmado"><i class="estado-dot"></i>Activo</span>
+                                                @else
+                                                    <span class="estado estado-anulado"><i class="estado-dot"></i>Inactivo</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
-                                    <!-- Fila para "no hay resultados de búsqueda" - MOVIDA DENTRO DEL TBODY -->
-                                    <tr id="noResults" style="display: none;">
-                                        <td colspan="7" class="text-center py-5">
-                                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                                            <p class="text-muted">No se encontraron resultados para la búsqueda</p>
-                                        </td>
-                                    </tr>
                                 </tbody>
                             </table>
                         @else
-                            <div class="text-center py-5">
-                                <i class="fas fa-box-open fa-4x text-muted mb-4"></i>
-                                <h4 class="text-muted mb-3">No hay inventario disponible</h4>
+                            <div class="empty-state">
+                                <i class="fas fa-box-open fa-3x mb-3"></i>
+                                <h5 class="text-muted mb-2">No hay inventario disponible</h5>
                                 @if($sucursalSeleccionada)
-                                    <p class="text-muted mb-4">
+                                    <p class="text-muted mb-3" style="font-size:0.85rem;">
                                         No se encontraron productos en el inventario para la sucursal seleccionada.
                                     </p>
-                                @else
-                                    <p class="text-muted mb-4">
-                                        El inventario se actualiza automáticamente con los ingresos y salidas de productos.
-                                    </p>
-                                @endif
-                                @if($sucursalSeleccionada)
-                                    <a href="{{ route('inventario.index') }}" class="btn btn-outline-secondary">
+                                    <a href="{{ route('inventario.index') }}" class="btn btn-outline-secondary btn-sm">
                                         <i class="fas fa-eye me-2"></i>Ver Todas las Sucursales
                                     </a>
+                                @else
+                                    <p class="text-muted mb-0" style="font-size:0.85rem;">
+                                        El inventario se actualiza automáticamente con los ingresos y salidas de productos.
+                                    </p>
                                 @endif
                             </div>
                         @endif
                     </div>
                 </div>
             </div>
+
+            {{-- Sin resultados de búsqueda --}}
+            <div id="noResults" class="card" style="display:none; min-height:280px;">
+                <div class="empty-state">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <h5 class="text-muted mb-2">Sin resultados</h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        No hay registros que coincidan con la búsqueda.
+                    </p>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="limpiarBusquedaBtn">
+                        <i class="fas fa-undo me-2"></i>Limpiar Búsqueda
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -179,210 +185,163 @@
 </html>
 
 <style>
-/* Usar los mismos estilos del index */
-.main-content {
-    margin-left: 60px;
-    width: calc(100vw - 60px);
-    min-height: 100vh;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
-    overflow-x: hidden;
-    box-sizing: border-box;
-}
-
 .content-wrapper {
-    padding: 20px;
-    max-width: 100%;
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-/* Estilos para la card */
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+
+/* ── Cards ── */
 .card {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: none;
+}
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
+}
+.results-count { font-weight: 400; font-size: 0.78rem; color: #94a3b8; }
+
+/* ── Toolbar (búsqueda + filtros) ── */
+.toolbar-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 0.65rem;
+    align-items: end;
+}
+.toolbar-item .form-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+}
+.search-box { position: relative; }
+.search-box .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: #94a3b8; font-size: 0.78rem; pointer-events: none;
+}
+.search-box input { padding-left: 2rem; padding-right: 1.8rem; }
+.search-clear {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    border: none; background: none; color: #94a3b8; cursor: pointer;
+    font-size: 0.75rem; padding: 4px;
+}
+.toolbar-actions > div { width: 100%; }
+
+@media (max-width: 900px) {
+    .toolbar-grid { grid-template-columns: 1fr 1fr; }
+    .toolbar-item.search-item { grid-column: 1 / -1; }
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+    .toolbar-grid { grid-template-columns: 1fr; }
 }
 
-.card:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
+/* ── Tabla ── */
 .table-card {
-    height: calc(100vh - 280px);
+    flex: 1;
     min-height: 400px;
-    max-width: 100%;
-    overflow: hidden;
-    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
 }
-
 .table-container {
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-radius: 8px;
+    flex: 1;
+    overflow: auto;
+    min-height: 300px;
 }
 
-.table {
-    table-layout: fixed;
+#inventarioTable {
     width: 100%;
-    margin-bottom: 0;
+    min-width: 860px;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
+#inventarioTable thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.6rem 0.65rem;
+    position: sticky; top: 0;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+#inventarioTable tbody td {
+    padding: 0.55rem 0.65rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #374151;
+}
+#inventarioTable tbody tr:hover { background: #f8fafc; }
+#inventarioTable tbody tr:last-child td { border-bottom: none; }
 
-.table th,
-.table td {
+.cell-text {
+    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding: 8px 12px;
-    border: none;
-    border-bottom: 1px solid #e9ecef;
 }
 
-.table th {
-    background-color: #343a40 !important;
-    color: white;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
+/* Tags */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
     border-radius: 4px;
-}
-
-.badge.text-wrap {
-    white-space: normal;
-    word-wrap: break-word;
-    max-width: 100%;
-}
-
-/* Estilos para cantidad */
-.table td .badge.fs-6 {
-    font-size: 0.9rem !important;
-    padding: 0.5rem 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
 }
+.tag-secondary { background: #f1f5f9; color: #64748b; }
+.tag-success { background: #dcfce7; color: #16a34a; }
+.tag-warning { background: #fef3c7; color: #b45309; }
 
-/* Estilos para formularios */
-.form-control, .form-select {
-    border: 2px solid #e9ecef;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    font-size: 0.95rem;
+/* Estado */
+.estado { display: inline-flex; align-items: center; gap: 0.4rem; }
+.estado-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+.estado-confirmado .estado-dot { background: #10b981; }
+.estado-anulado .estado-dot    { background: #ef4444; }
+
+/* Búsqueda highlight */
+.highlight { background: #fef08a; padding: 0 1px; }
+
+/* Empty state */
+.empty-state {
+    min-height: 320px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; color: #94a3b8; text-align: center;
 }
-
-.form-control:focus, .form-select:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    transform: translateY(-1px);
-}
-
-/* Resaltado de coincidencias */
-.highlight {
-    background-color: #ffeb3b !important;
-    color: #000 !important;
-    font-weight: bold;
-    padding: 1px 3px;
-    border-radius: 2px;
-}
-
-/* Animación para filas ocultas */
-.inventario-row {
-    transition: all 0.3s ease;
-}
-
-.inventario-row.hidden {
-    display: none;
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-    .table th,
-    .table td {
-        padding: 6px 8px;
-        font-size: 0.85rem;
-    }
-
-    .btn-sm {
-        padding: 0.2rem 0.4rem;
-        font-size: 0.75rem;
-    }
-}
+.empty-state i { color: #cbd5e1; }
 
 @media (max-width: 768px) {
-    .main-content {
-        margin-left: 50px;
-        width: calc(100vw - 50px);
-    }
-
-    .content-wrapper {
-        padding: 15px;
-    }
-
-    .table-card {
-        height: calc(100vh - 260px);
-    }
-
-    .table th,
-    .table td {
-        padding: 4px 6px;
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .main-content {
-        margin-left: 45px;
-        width: calc(100vw - 45px);
-    }
-
-    .content-wrapper {
-        padding: 10px;
-    }
-}
-
-/* Ajuste cuando el menú se expande */
-.sidebar-nav:hover ~ .main-content {
-    margin-left: 280px;
-    width: calc(100vw - 280px);
-}
-
-/* Scrollbar personalizado */
-.table-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-.table tbody tr {
-    transition: all 0.2s ease;
-}
-
-.table tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.05);
-    transform: scale(1.002);
+    .table-container { font-size: 0.875rem; }
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Filtro por sucursal
+    // Filtro por sucursal (server-side)
     const sucursalFilter = document.getElementById('sucursal_filter');
     const filtrarBtn = document.getElementById('filtrarBtn');
 
@@ -401,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Buscador de inventario
+    // Buscador de inventario (client-side)
     const searchInput = document.getElementById('searchInput');
     const clearButton = document.getElementById('clearSearch');
     const table = document.getElementById('inventarioTable');
@@ -409,102 +368,93 @@ document.addEventListener('DOMContentLoaded', function() {
     if (table) {
         const rows = table.querySelectorAll('.inventario-row');
         const noResults = document.getElementById('noResults');
+        const tableCard = document.getElementById('tableCard');
         const totalRowsSpan = document.getElementById('totalRows');
         const totalRows = rows.length;
+        const limpiarBusquedaBtn = document.getElementById('limpiarBusquedaBtn');
+
+        function escapeRegExp(text) {
+            return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
 
         function highlightText(text, search) {
             if (!search) return text;
-            const regex = new RegExp(`(${search})`, 'gi');
-            return text.replace(regex, '<span class="highlight">$1</span>');
+            return text.replace(new RegExp(`(${escapeRegExp(search)})`, 'gi'), '<span class="highlight">$1</span>');
         }
 
         function removeHighlights() {
-            const highlights = table.querySelectorAll('.highlight');
-            highlights.forEach(highlight => {
-                const parent = highlight.parentNode;
-                parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
-                parent.normalize();
+            table.querySelectorAll('.highlight').forEach(el => {
+                el.parentNode.replaceChild(document.createTextNode(el.textContent), el);
+                el.parentNode.normalize();
             });
         }
 
         function filterTable() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            let visibleCount = 0;
+            const term = searchInput.value.toLowerCase().trim();
+            let visible = 0;
 
-            // Remover resaltados anteriores
             removeHighlights();
 
             rows.forEach(row => {
-                if (!searchTerm) {
+                if (!term) {
                     row.style.display = '';
-                    visibleCount++;
+                    visible++;
                     return;
                 }
 
                 const cells = row.querySelectorAll('td');
                 let found = false;
 
-                // Buscar en todas las celdas
-                for (let i = 0; i < cells.length; i++) {
-                    const cellText = cells[i].textContent.toLowerCase();
-
-                    if (cellText.includes(searchTerm)) {
+                cells.forEach(cell => {
+                    if (cell.textContent.toLowerCase().includes(term)) {
                         found = true;
-                        // Resaltar coincidencias (solo en texto plano, no en badges)
-                        const originalText = cells[i].innerHTML;
-                        if (!originalText.includes('<span class="badge')) {
-                            const highlightedText = highlightText(cells[i].textContent, searchTerm);
-                            cells[i].innerHTML = highlightedText;
+                        if (!cell.querySelector('.tag, .estado')) {
+                            cell.innerHTML = highlightText(cell.textContent, term);
                         }
                     }
-                }
+                });
 
-                if (found) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
+                row.style.display = found ? '' : 'none';
+                if (found) visible++;
             });
 
-            // Actualizar contador
-            totalRowsSpan.textContent = visibleCount;
+            totalRowsSpan.textContent = visible;
 
-            // Mostrar/ocultar mensaje de "no resultados" - CORREGIDO
-            if (visibleCount === 0 && searchTerm && totalRows > 0) {
-                noResults.style.display = 'table-row';
+            if (visible === 0 && totalRows > 0) {
+                tableCard.style.display = 'none';
+                noResults.style.display = '';
             } else {
+                tableCard.style.display = '';
                 noResults.style.display = 'none';
             }
         }
 
-        // Event listeners para el buscador
-        if (searchInput) {
-            searchInput.addEventListener('input', filterTable);
+        searchInput.addEventListener('input', filterTable);
 
-            // Limpiar búsqueda
-            clearButton.addEventListener('click', function() {
-                searchInput.value = '';
+        clearButton.addEventListener('click', function() {
+            searchInput.value = '';
+            filterTable();
+            searchInput.focus();
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
                 filterTable();
+            }
+        });
+
+        limpiarBusquedaBtn?.addEventListener('click', function() {
+            searchInput.value = '';
+            filterTable();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey && e.key === 'f') || (e.ctrlKey && e.key === 'k')) {
+                e.preventDefault();
                 searchInput.focus();
-            });
-
-            // Enfocar el buscador al presionar Ctrl+F
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.key === 'f') {
-                    e.preventDefault();
-                    searchInput.focus();
-                }
-            });
-
-            // Limpiar con Escape
-            searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    this.value = '';
-                    filterTable();
-                }
-            });
-        }
+            }
+        });
     }
 });
 </script>

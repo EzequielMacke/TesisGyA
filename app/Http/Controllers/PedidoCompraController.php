@@ -190,14 +190,17 @@ class PedidoCompraController extends Controller
                            ->with('error', 'Solo se pueden editar pedidos en estado Pendiente.');
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'observacion' => 'nullable|string|max:500',
             'insumos' => 'required|array|min:1',
-            'insumos.*.insumo_id' => 'required|exists:insumos,id',
-            'insumos.*.cantidad' => 'required|numeric|min:0.01|max:999999.99'
+            'insumos.*.insumo_id' => 'required|exists:insumo,id',
+            'insumos.*.cantidad' => 'required|numeric|min:0.01|max:999999.99',
+            'insumos.*.observacion' => 'nullable|string|max:300'
         ], [
             'insumos.required' => 'Debe agregar al menos un insumo al pedido.',
-            'insumos.min' => 'Debe agregar al menos un insumo al pedido.'
+            'insumos.min' => 'Debe agregar al menos un insumo al pedido.',
+            'insumos.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
+            'insumos.*.observacion.max' => 'La observación no puede exceder 300 caracteres.'
         ]);
 
         try {
@@ -205,18 +208,19 @@ class PedidoCompraController extends Controller
 
             // Actualizar el pedido
             $pedido->update([
-                'observacion' => $request->observacion
+                'observacion' => $validated['observacion'] ?? null
             ]);
 
             // Eliminar detalles existentes
             $pedido->detalles()->delete();
 
             // Crear nuevos detalles
-            foreach ($request->insumos as $insumoData) {
+            foreach ($validated['insumos'] as $insumoData) {
                 PedidoCompraDetalle::create([
                     'pedido_compra_id' => $pedido->id,
                     'insumo_id' => $insumoData['insumo_id'],
                     'cantidad' => $insumoData['cantidad'],
+                    'observacion' => $insumoData['observacion'] ?? null
                 ]);
             }
 

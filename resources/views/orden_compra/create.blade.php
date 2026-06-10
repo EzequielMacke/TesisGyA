@@ -3,32 +3,29 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Nueva Orden de Compra</title>
+    <title>Nueva Orden de Compra - TesisGyA</title>
     @include('partials.head')
 </head>
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+
+            {{-- Cabecera --}}
+            <div class="page-header">
                 <div>
-                    <h2>
-                        <i class="fas fa-file-contract me-2 text-primary"></i>
-                        Nueva Orden de Compra
-                    </h2>
-                    <p class="text-muted mb-0">Crear orden de compra desde presupuesto aprobado</p>
+                    <h2><i class="fas fa-file-contract"></i> Nueva Orden de Compra</h2>
+                    <small>Crear orden de compra desde presupuesto aprobado</small>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('orden_compra.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Volver
-                    </a>
-                </div>
+                <a href="{{ route('orden_compra.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </a>
             </div>
 
+            {{-- Alerts --}}
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -37,200 +34,169 @@
             <form action="{{ route('orden_compra.store') }}" method="POST" id="ordenForm">
                 @csrf
 
-                <!-- Selector de Presupuesto -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-search me-2"></i>Seleccionar Presupuesto Aprobado
-                        </h5>
+                {{-- Selector de Presupuesto --}}
+                <div class="card">
+                    <div class="card-header-section">
+                        <span><i class="fas fa-search me-2"></i>Seleccionar Presupuesto Aprobado</span>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label for="presupuesto_select" class="form-label">Presupuesto Aprobado *</label>
-                            <select class="form-control" id="presupuesto_select" name="presupuesto_compra_aprobado_id" required>
-                                <option value="">Seleccione un presupuesto aprobado...</option>
-                                @foreach($presupuestosAprobados as $presupuesto)
-                                    <option value="{{ $presupuesto->id }}"
-                                            data-proveedor="{{ $presupuesto->proveedor->razon_social ?? 'N/A' }}"
-                                            data-ruc="{{ $presupuesto->proveedor->ruc ?? 'N/A' }}"
-                                            data-fecha="{{ $presupuesto->fecha_emision }}"
-                                            data-sucursal="{{ $presupuesto->pedidoCompra->sucursal->descripcion ?? 'N/A' }}"
-                                            data-detalles="{{ $presupuesto->detalles->count() }}">
-                                        {{ $presupuesto->nombre }} - {{ $presupuesto->proveedor->razon_social ?? 'N/A' }}
-                                        ({{ $presupuesto->detalles->count() }} items)
-                                    </option>
-                                @endforeach
-                            </select>
-                            <small class="text-muted">Solo se muestran presupuestos aprobados pendientes</small>
-                        </div>
+                        <label for="presupuesto_select" class="form-label">Presupuesto Aprobado *</label>
+                        <select class="form-select form-select-sm" id="presupuesto_select" name="presupuesto_compra_aprobado_id" required>
+                            <option value="">Seleccione un presupuesto aprobado...</option>
+                            @foreach($presupuestosAprobados as $presupuesto)
+                                <option value="{{ $presupuesto->id }}"
+                                        data-proveedor="{{ $presupuesto->proveedor->razon_social ?? 'N/A' }}"
+                                        data-ruc="{{ $presupuesto->proveedor->ruc ?? 'N/A' }}"
+                                        data-fecha="{{ $presupuesto->fecha_emision }}"
+                                        data-sucursal="{{ $presupuesto->pedidoCompra->sucursal->descripcion ?? 'N/A' }}"
+                                        data-detalles="{{ $presupuesto->detalles->count() }}">
+                                    {{ $presupuesto->nombre }} - {{ $presupuesto->proveedor->razon_social ?? 'N/A' }}
+                                    ({{ $presupuesto->detalles->count() }} items)
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">Solo se muestran presupuestos aprobados pendientes</small>
                     </div>
                 </div>
 
-                <!-- Información del Presupuesto -->
-                <div class="card mb-4" id="presupuesto_info" style="display: none;">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>Información del Presupuesto
-                        </h5>
+                {{-- Información del Presupuesto --}}
+                <div class="card" id="presupuesto_info" style="display: none;">
+                    <div class="card-header-section">
+                        <span><i class="fas fa-info-circle me-2"></i>Información del Presupuesto</span>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label text-muted">Proveedor:</label>
-                                <div class="fw-bold" id="info_proveedor">-</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label class="form-label">Proveedor</label>
+                                <div class="info-value"><i class="fas fa-building"></i><span id="info_proveedor">-</span></div>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted">RUC:</label>
-                                <div class="fw-bold" id="info_ruc">-</div>
+                            <div class="info-item">
+                                <label class="form-label">RUC</label>
+                                <div class="info-value"><i class="fas fa-id-card"></i><span id="info_ruc">-</span></div>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted">Fecha Emisión:</label>
-                                <div class="fw-bold" id="info_fecha">-</div>
+                            <div class="info-item">
+                                <label class="form-label">Fecha Emisión</label>
+                                <div class="info-value"><i class="fas fa-calendar-plus"></i><span id="info_fecha">-</span></div>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted">Sucursal:</label>
-                                <div class="fw-bold" id="info_sucursal">-</div>
+                            <div class="info-item">
+                                <label class="form-label">Sucursal</label>
+                                <div class="info-value"><i class="fas fa-building"></i><span id="info_sucursal">-</span></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Datos de la Orden -->
-                <div class="card mb-4" id="orden_datos" style="display: none;">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0">
-                            <i class="fas fa-edit me-2"></i>Datos de la Orden de Compra
-                        </h5>
+                {{-- Datos de la Orden --}}
+                <div class="card" id="orden_datos" style="display: none;">
+                    <div class="card-header-section">
+                        <span><i class="fas fa-edit me-2"></i>Datos de la Orden de Compra</span>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="fecha" class="form-label">Fecha de Orden *</label>
-                                    <input type="date" class="form-control" id="fecha" name="fecha" value="{{ date('Y-m-d') }}" required>
+                        <div class="form-grid">
+                            <div>
+                                <label for="fecha" class="form-label">Fecha de Orden *</label>
+                                <input type="date" class="form-control form-control-sm" id="fecha" name="fecha" value="{{ date('Y-m-d') }}" required>
+                            </div>
+                            <div>
+                                <label for="condicion_pago_id" class="form-label">Condición de Pago *</label>
+                                <select class="form-select form-select-sm" id="condicion_pago_id" name="condicion_pago_id" required>
+                                    <option value="">Seleccione...</option>
+                                    @foreach($condicionesPago as $condicion)
+                                        <option value="{{ $condicion->id }}">{{ $condicion->descripcion }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="metodo_pago_id" class="form-label">Método de Pago *</label>
+                                <select class="form-select form-select-sm" id="metodo_pago_id" name="metodo_pago_id" required>
+                                    <option value="">Seleccione...</option>
+                                    @foreach($metodosPago as $metodo)
+                                        <option value="{{ $metodo->id }}">{{ $metodo->descripcion }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="monto_display" class="form-label">Monto Total *</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">₲</span>
+                                    <input type="text" class="form-control readonly-field" id="monto_display" readonly>
+                                    <input type="hidden" id="monto" name="monto" required>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="condicion_pago_id" class="form-label">Condición de Pago *</label>
-                                    <select class="form-select" id="condicion_pago_id" name="condicion_pago_id" required>
-                                        <option value="">Seleccione...</option>
-                                        @foreach($condicionesPago as $condicion)
-                                            <option value="{{ $condicion->id }}">{{ $condicion->descripcion }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+
+                            <div id="cuota_field">
+                                <label for="cuota" class="form-label">Número de Cuotas</label>
+                                <input type="number" class="form-control form-control-sm" id="cuota" name="cuota" min="1" value="1">
+                                <small class="text-muted">Mínimo 1 cuota</small>
                             </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="metodo_pago_id" class="form-label">Método de Pago *</label>
-                                    <select class="form-select" id="metodo_pago_id" name="metodo_pago_id" required>
-                                        <option value="">Seleccione...</option>
-                                        @foreach($metodosPago as $metodo)
-                                            <option value="{{ $metodo->id }}">{{ $metodo->descripcion }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                            <div id="intervalo_field">
+                                <label for="intervalo" class="form-label">Intervalo (días)</label>
+                                <input type="number" class="form-control form-control-sm" id="intervalo" name="intervalo" min="1" value="30">
+                                <small class="text-muted">Días entre cuotas</small>
                             </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="monto" class="form-label">Monto Total *</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">₲</span>
-                                        <input type="text" class="form-control" id="monto_display" readonly>
-                                        <input type="hidden" id="monto" name="monto" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="cuota" class="form-label">Número de Cuotas</label>
-                                    <input type="number" class="form-control" id="cuota" name="cuota" min="1" value="1">
-                                    <small class="text-muted">Mínimo 1 cuota</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="intervalo" class="form-label">Intervalo (días)</label>
-                                    <input type="number" class="form-control" id="intervalo" name="intervalo" min="1" value="30">
-                                    <small class="text-muted">Días entre cuotas</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="observacion" class="form-label">Observación</label>
-                                    <textarea class="form-control" id="observacion" name="observacion" rows="3" maxlength="500" placeholder="Observaciones adicionales sobre la orden..."></textarea>
-                                </div>
+                            <div class="span-2">
+                                <label for="observacion" class="form-label">Observación</label>
+                                <textarea class="form-control form-control-sm" id="observacion" name="observacion" rows="2" maxlength="500" placeholder="Observaciones adicionales sobre la orden..."></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Detalle de la Orden -->
-                <div class="card mb-4" id="orden_detalle" style="display: none;">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>Detalle de la Orden
-                        </h5>
+                {{-- Detalle de la Orden --}}
+                <div class="card table-card" id="orden_detalle" style="display: none;">
+                    <div class="card-header-section">
+                        <span><i class="fas fa-list me-2"></i>Detalle de la Orden</span>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-dark">
+                    <div class="card-body p-0">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
                                     <tr>
                                         <th>Insumo</th>
-                                        <th class="text-center">Cantidad</th>
-                                        <th class="text-center">Precio Unit.</th>
-                                        <th class="text-center">Impuesto</th>
-                                        <th class="text-center">Subtotal</th>
-                                        <th class="text-center">Total Item</th>
-                                        <th>Observación</th>
+                                        <th style="width:100px;" class="text-center">Cantidad</th>
+                                        <th style="width:120px;" class="text-end">Precio Unit.</th>
+                                        <th style="width:110px;" class="text-center">Impuesto</th>
+                                        <th style="width:120px;" class="text-end">Subtotal</th>
+                                        <th style="width:130px;" class="text-end">Total Item</th>
+                                        <th style="width:200px;">Observación</th>
                                     </tr>
                                 </thead>
                                 <tbody id="detalle_tbody">
-                                    <!-- Se cargarán dinámicamente -->
                                 </tbody>
                             </table>
                         </div>
 
-                        <!-- Resumen financiero -->
-                        <div class="row mt-4">
-                            <div class="col-md-8"></div>
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span>Subtotal:</span>
-                                            <strong id="subtotal_general">₲ 0</strong>
-                                        </div>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span>Impuestos:</span>
-                                            <strong id="impuestos_general">₲ 0</strong>
-                                        </div>
-                                        <hr>
-                                        <div class="d-flex justify-content-between">
-                                            <span class="h5">TOTAL:</span>
-                                            <strong class="h5 text-success" id="total_general">₲ 0</strong>
-                                        </div>
-                                    </div>
-                                </div>
+                        {{-- Resumen financiero --}}
+                        <div class="totals-box">
+                            <div class="totals-row">
+                                <span>Subtotal</span>
+                                <strong id="subtotal_general">₲ 0</strong>
+                            </div>
+                            <div class="totals-row">
+                                <span>Impuestos</span>
+                                <strong id="impuestos_general">₲ 0</strong>
+                            </div>
+                            <div class="totals-row totals-final">
+                                <span>Total</span>
+                                <strong id="total_general">₲ 0</strong>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Botones de acción -->
-                <div class="text-center" id="botones_accion" style="display: none;">
-                    <button type="submit" class="btn btn-success btn-lg me-3">
-                        <i class="fas fa-save me-2"></i>Crear Orden de Compra
-                    </button>
-                    <a href="{{ route('orden_compra.index') }}" class="btn btn-secondary btn-lg">
-                        <i class="fas fa-times me-2"></i>Cancelar
-                    </a>
+                {{-- Acciones --}}
+                <div class="card" id="botones_accion" style="display: none;">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <a href="{{ route('orden_compra.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Crear Orden de Compra
+                        </button>
+                    </div>
                 </div>
             </form>
+
         </div>
     </div>
 
@@ -239,67 +205,181 @@
 </html>
 
 <style>
-.main-content {
-    margin-left: 60px;
-    width: calc(100vw - 60px);
-    min-height: 100vh;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
-    overflow-x: hidden;
-    box-sizing: border-box;
-}
-
 .content-wrapper {
-    padding: 20px;
-    max-width: 100%;
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+
+/* ── Form layout ── */
+#ordenForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Cards ── */
 .card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: none;
+}
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
 }
 
-.table th {
-    font-size: 0.875rem;
-    font-weight: 600;
+.select2-container--bootstrap-5 .select2-selection {
+    min-height: calc(1.5em + 0.5rem + 2px);
 }
 
-.table td {
-    vertical-align: middle;
+/* ── Información del presupuesto ── */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
 }
-
-.observacion-item {
-    background-color: #f8f9fa;
-    border-left: 4px solid #007bff;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-style: italic;
+.info-item .form-label,
+.form-grid .form-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.info-value {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
     font-size: 0.85rem;
-    margin-top: 5px;
+    color: #374151;
+}
+.info-value i { color: #94a3b8; margin-right: 0.5rem; width: 14px; text-align: center; }
+
+/* ── Datos de la orden ── */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+.form-grid .span-2 { grid-column: span 2; }
+.readonly-field {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #374151;
 }
 
-.readonly-field {
-    background-color: #f8f9fa !important;
-    border-color: #dee2e6 !important;
+@media (max-width: 900px) {
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .form-grid { grid-template-columns: repeat(2, 1fr); }
+    .form-grid .span-2 { grid-column: span 2; }
+    .page-header { flex-direction: column; align-items: flex-start; }
 }
+@media (max-width: 480px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .span-2 { grid-column: span 1; }
+}
+
+/* ── Tabla de detalle ── */
+.table-card { display: flex; flex-direction: column; }
+.table-container { overflow: auto; }
+
+.data-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+.data-table thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.6rem 0.65rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.data-table tbody td {
+    padding: 0.6rem 0.65rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #374151;
+}
+.data-table tbody tr:hover { background: #f8fafc; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.empty-cell {
+    text-align: center;
+    color: #94a3b8;
+    padding: 2.5rem 1rem;
+}
+.empty-cell i { color: #cbd5e1; }
+
+.quantity-input { width: 90px; text-align: center; }
+.observation-input { min-width: 180px; font-size: 0.82rem; }
+
+/* Tags */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+}
+.tag-secondary { background: #f1f5f9; color: #64748b; }
+.amount { font-weight: 700; color: #10b981; }
+
+/* ── Totales ── */
+.totals-box {
+    margin: 1rem;
+    margin-left: auto;
+    max-width: 320px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+.totals-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #374151; padding: 0.25rem 0; }
+.totals-row.totals-final {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+.totals-final strong { color: #10b981; }
 
 @media (max-width: 768px) {
-    .main-content {
-        margin-left: 50px;
-        width: calc(100vw - 50px);
-    }
-
-    .content-wrapper {
-        padding: 15px;
-    }
-}
-
-.sidebar-nav:hover ~ .main-content {
-    margin-left: 280px;
-    width: calc(100vw - 280px);
+    .table-container { font-size: 0.875rem; }
+    .totals-box { max-width: 100%; margin: 1rem; }
+    .quantity-input { width: 80px; }
+    .observation-input { min-width: 140px; }
 }
 </style>
 
@@ -344,6 +424,9 @@ function mostrarInformacionPresupuesto() {
 }
 
 function cargarDetallePresupuesto(presupuestoId) {
+    $('#detalle_tbody').html('<tr><td colspan="7" class="empty-cell"><i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>Cargando detalle...</td></tr>');
+    $('#orden_detalle').show();
+
     $.ajax({
         url: `/orden-compra/presupuesto-detalle/${presupuestoId}`,
         method: 'GET',
@@ -353,12 +436,12 @@ function cargarDetallePresupuesto(presupuestoId) {
                 mostrarDetalleOrden(response.detalles);
                 calcularTotales();
             } else {
-                alert('Error al cargar el detalle del presupuesto');
+                $('#detalle_tbody').html('<tr><td colspan="7" class="empty-cell">Error al cargar el detalle del presupuesto</td></tr>');
             }
         },
         error: function(xhr, status, error) {
             console.error('Error:', error);
-            alert('Error al cargar el detalle del presupuesto');
+            $('#detalle_tbody').html('<tr><td colspan="7" class="empty-cell text-danger">Error al cargar el detalle del presupuesto</td></tr>');
         }
     });
 }
@@ -384,39 +467,36 @@ function mostrarDetalleOrden(detalles) {
             <tr>
                 <td>
                     <strong>${detalle.insumo?.descripcion || 'N/A'}</strong><br>
-                    <small class="text-muted">
-                        <span class="badge bg-primary me-1">${detalle.insumo?.marca?.descripcion || 'N/A'}</span>
-                        <span class="badge bg-secondary">${detalle.insumo?.unidad_medida?.abreviatura || 'N/A'}</span>
-                    </small>
-                    ${detalle.observacion ? `<div class="observacion-item mt-2"><i class="fas fa-comment me-1"></i>${detalle.observacion}</div>` : ''}
+                    <span class="tag me-1">${detalle.insumo?.marca?.descripcion || 'N/A'}</span>
+                    <span class="tag tag-secondary">${detalle.insumo?.unidad_medida?.abreviatura || 'N/A'}</span>
+                    ${detalle.observacion ? `<div class="text-muted mt-1" style="font-size:0.78rem;"><i class="fas fa-comment me-1"></i>${detalle.observacion}</div>` : ''}
 
-                    <!-- Campos ocultos -->
                     <input type="hidden" name="detalles[${index}][insumo_id]" value="${detalle.insumo_id}">
                     <input type="hidden" name="detalles[${index}][impuesto_id]" value="${detalle.impuesto_id}">
                 </td>
                 <td class="text-center">
-                    <input type="number" class="form-control text-center readonly-field"
+                    <input type="number" class="form-control form-control-sm text-center readonly-field quantity-input"
                            name="detalles[${index}][cantidad]"
                            value="${cantidad}"
                            step="0.01" readonly>
                 </td>
-                <td class="text-center">
-                    <div class="fw-bold">₲ ${precioUnitario.toLocaleString('es-PY')}</div>
+                <td class="text-end">
+                    ₲ ${precioUnitario.toLocaleString('es-PY')}
                     <input type="hidden" name="detalles[${index}][precio_unitario]" value="${precioUnitario}">
                 </td>
                 <td class="text-center">
-                    <span class="badge bg-secondary">${detalle.impuesto?.descripcion || 'N/A'}</span>
+                    <span class="tag tag-secondary">${detalle.impuesto?.descripcion || 'N/A'}</span>
                     ${impuesto > 0 ? `<br><small class="text-muted">₲ ${impuesto.toLocaleString('es-PY')}</small>` : ''}
                 </td>
-                <td class="text-center">
+                <td class="text-end">
                     <strong>₲ ${subtotal.toLocaleString('es-PY')}</strong>
                 </td>
-                <td class="text-center">
-                    <strong class="text-success">₲ ${totalItem.toLocaleString('es-PY')}</strong>
+                <td class="text-end">
+                    <span class="amount">₲ ${totalItem.toLocaleString('es-PY')}</span>
                 </td>
                 <td>
-                    <textarea class="form-control" name="detalles[${index}][observacion]"
-                              rows="2" maxlength="300" placeholder="Observaciones adicionales...">${detalle.observacion_orden || ''}</textarea>
+                    <textarea class="form-control form-control-sm observation-input" name="detalles[${index}][observacion]"
+                              rows="1" maxlength="300" placeholder="Observaciones adicionales...">${detalle.observacion_orden || ''}</textarea>
                 </td>
             </tr>
         `;
@@ -481,7 +561,7 @@ $('#condicion_pago_id').on('change', function() {
 
         // Agregar texto informativo
         if (!$('#info_contado').length) {
-            $('#cuota').closest('.col-md-3').append('<small id="info_contado" class="text-muted">Pago al contado - No aplica cuotas</small>');
+            $('#cuota_field').append('<small id="info_contado" class="text-muted d-block">Pago al contado - No aplica cuotas</small>');
         }
     } else {
         // Habilitar campos

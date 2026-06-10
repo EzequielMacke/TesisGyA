@@ -9,7 +9,7 @@ class CargoSeeder extends Seeder
 {
     public function run(): void
     {
-        $cargos = ['Administrador', 'Usuario', 'Proveedor'];
+        $cargos = ['Administrador', 'Usuario', 'Proveedor', 'Funcionario'];
 
         foreach ($cargos as $descripcion) {
             Cargo::firstOrCreate(

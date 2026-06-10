@@ -1,9 +1,9 @@
-<!-- filepath: c:\laragon\www\TesisGyA\resources\views\pedido_compra\create.blade.php -->
+<!-- filepath: c:\laragon\www\TesisGyA\resources\views\pedido_compra\edit.blade.php -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Nuevo Pedido de Compra - TesisGyA</title>
+    <title>Editar Pedido de Compra - TesisGyA</title>
     @include('partials.head')
 </head>
 <body>
@@ -15,8 +15,8 @@
             {{-- Cabecera --}}
             <div class="page-header">
                 <div>
-                    <h2><i class="fas fa-shopping-cart"></i> Nuevo Pedido de Compra</h2>
-                    <small>Complete los datos y agregue los insumos a solicitar</small>
+                    <h2><i class="fas fa-edit"></i> Editar Pedido de Compra #{{ str_pad($pedido->id, 3, '0', STR_PAD_LEFT) }}</h2>
+                    <small>Modifique la observación general o los insumos del pedido</small>
                 </div>
                 <a href="{{ route('pedido_compra.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Volver al Listado
@@ -42,8 +42,9 @@
                 </div>
             @endif
 
-            <form action="{{ route('pedido_compra.store') }}" method="POST" id="pedidoForm">
+            <form action="{{ route('pedido_compra.update', $pedido->id) }}" method="POST" id="pedidoForm">
                 @csrf
+                @method('PUT')
 
                 {{-- Información del Pedido --}}
                 <div class="card">
@@ -54,24 +55,19 @@
                         <div class="info-grid">
                             <div class="info-item">
                                 <label class="form-label">Usuario</label>
-                                <div class="info-value"><i class="fas fa-user"></i>{{ session('user_usuario') }}</div>
-                                <input type="hidden" name="usuario_id" value="{{ session('user_id') }}">
+                                <div class="info-value"><i class="fas fa-user"></i>{{ $pedido->usuario->usuario }}</div>
                             </div>
                             <div class="info-item">
                                 <label class="form-label">Sucursal</label>
-                                <div class="info-value"><i class="fas fa-building"></i>{{ $sucursal->descripcion }}</div>
-                                <input type="hidden" name="sucursal_id" value="{{ $sucursal->id }}">
+                                <div class="info-value"><i class="fas fa-building"></i>{{ $pedido->sucursal->descripcion }}</div>
                             </div>
                             <div class="info-item">
                                 <label class="form-label">Depósito</label>
-                                <div class="info-value"><i class="fas fa-warehouse"></i>{{ $deposito->descripcion }}</div>
-                                <input type="hidden" name="deposito_id" value="{{ $deposito->id }}">
+                                <div class="info-value"><i class="fas fa-warehouse"></i>{{ $pedido->deposito->descripcion }}</div>
                             </div>
                             <div class="info-item">
                                 <label class="form-label">Fecha</label>
-                                <div class="info-value"><i class="fas fa-calendar"></i>{{ date('d/m/Y') }}</div>
-                                <input type="hidden" name="fecha" value="{{ date('Y-m-d') }}">
-                                <input type="hidden" name="estado_id" value="3">
+                                <div class="info-value"><i class="fas fa-calendar"></i>{{ $pedido->fecha->format('d/m/Y') }}</div>
                             </div>
                         </div>
                         <div class="mt-3">
@@ -80,7 +76,7 @@
                                       id="observacion"
                                       name="observacion"
                                       rows="2"
-                                      placeholder="Ingrese observaciones generales del pedido...">{{ old('observacion') }}</textarea>
+                                      placeholder="Ingrese observaciones generales del pedido...">{{ old('observacion', $pedido->observacion) }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -121,7 +117,7 @@
                 <div class="card table-card">
                     <div class="card-header-section">
                         <span><i class="fas fa-list me-2"></i>Insumos del Pedido</span>
-                        <span class="results-count" id="totalItems">0 items</span>
+                        <span class="results-count" id="totalItems">{{ $pedido->detalles->count() }} items</span>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-container">
@@ -137,7 +133,46 @@
                                     </tr>
                                 </thead>
                                 <tbody id="insumosBody">
-                                    <tr id="emptyRow">
+                                    @foreach($pedido->detalles as $index => $detalle)
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-cube text-muted me-2"></i><strong>{{ $detalle->insumo->descripcion }}</strong>
+                                                <input type="hidden" name="insumos[{{ $index }}][insumo_id]" value="{{ $detalle->insumo_id }}">
+                                            </td>
+                                            <td>
+                                                <span class="tag">{{ $detalle->insumo->marca->descripcion }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="tag tag-secondary">{{ $detalle->insumo->unidadMedida->descripcion }}</span>
+                                            </td>
+                                            <td>
+                                                <input type="number"
+                                                       class="form-control form-control-sm quantity-input"
+                                                       name="insumos[{{ $index }}][cantidad]"
+                                                       min="0.01"
+                                                       step="0.01"
+                                                       value="{{ $detalle->cantidad }}"
+                                                       required
+                                                       title="Cantidad solicitada">
+                                            </td>
+                                            <td>
+                                                <textarea class="form-control form-control-sm observation-input"
+                                                          name="insumos[{{ $index }}][observacion]"
+                                                          rows="1"
+                                                          placeholder="Observación para este insumo..."
+                                                          title="Observación específica para este insumo">{{ $detalle->observacion }}</textarea>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button"
+                                                        class="btn-icon remove-item"
+                                                        data-insumo="{{ $detalle->insumo_id }}"
+                                                        title="Eliminar insumo">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    <tr id="emptyRow" style="{{ $pedido->detalles->count() > 0 ? 'display:none;' : '' }}">
                                         <td colspan="6" class="empty-cell">
                                             <i class="fas fa-inbox fa-2x mb-2"></i><br>
                                             No hay insumos agregados al pedido
@@ -155,8 +190,8 @@
                         <a href="{{ route('pedido_compra.index') }}" class="btn btn-secondary">
                             <i class="fas fa-times me-2"></i>Cancelar
                         </a>
-                        <button type="submit" class="btn btn-success" id="guardarPedido" disabled>
-                            <i class="fas fa-save me-2"></i>Guardar Pedido
+                        <button type="submit" class="btn btn-success" id="guardarPedido" {{ $pedido->detalles->isEmpty() ? 'disabled' : '' }}>
+                            <i class="fas fa-save me-2"></i>Guardar Cambios
                         </button>
                     </div>
                 </div>
@@ -349,8 +384,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalItems = document.getElementById('totalItems');
     const guardarBtn = document.getElementById('guardarPedido');
 
-    let insumosAgregados = [];
-    let insumoCounter = 0;
+    // Insumos ya cargados en el pedido
+    let insumosAgregados = @json($pedido->detalles->pluck('insumo_id')->values());
+    let insumoCounter = {{ $pedido->detalles->count() }};
 
     // Datos de insumos
     const insumosData = @json($insumos);

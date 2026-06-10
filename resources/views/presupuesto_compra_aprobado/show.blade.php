@@ -3,183 +3,154 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Presupuesto Aprobado #{{ $presupuestoAprobado->id }}</title>
+    <title>Presupuesto Aprobado #{{ $presupuestoAprobado->id }} - TesisGyA</title>
     @include('partials.head')
 </head>
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+
+            {{-- Cabecera --}}
+            <div class="page-header">
                 <div>
-                    <h2>
-                        <i class="fas fa-file-invoice-dollar me-2 text-success"></i>
-                        Presupuesto Aprobado #{{ $presupuestoAprobado->id }}
-                    </h2>
-                    <p class="text-muted mb-0">Detalle completo del presupuesto aprobado</p>
+                    <h2><i class="fas fa-file-invoice-dollar"></i> Presupuesto Aprobado #{{ $presupuestoAprobado->id }}</h2>
+                    <small>Detalle completo del presupuesto aprobado</small>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('presupuesto_compra_aprobado.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Volver al Listado
-                    </a>
-                    <button class="btn btn-primary" onclick="window.print()">
+                <div class="header-actions">
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
                         <i class="fas fa-print me-2"></i>Imprimir
                     </button>
+                    <a href="{{ route('presupuesto_compra_aprobado.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </a>
                 </div>
             </div>
 
-            <!-- Información General -->
-            <div class="row mb-4">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Información General
-                            </h5>
+            {{-- Información General + Proveedor --}}
+            <div class="row g-3">
+                <div class="col-lg-8">
+                    <div class="card h-100">
+                        <div class="card-header-section">
+                            <span><i class="fas fa-info-circle me-2"></i>Información General</span>
+                            <span class="tag tag-success">{{ $presupuestoAprobado->estado->descripcion ?? 'N/A' }}</span>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Nombre:</label>
-                                        <div class="fw-bold">{{ $presupuestoAprobado->nombre }}</div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label class="form-label">Nombre</label>
+                                    <div class="info-value"><i class="fas fa-tag"></i>{{ $presupuestoAprobado->nombre }}</div>
+                                </div>
+                                <div class="info-item">
+                                    <label class="form-label">Fecha de Emisión</label>
+                                    <div class="info-value">
+                                        <i class="fas fa-calendar-plus"></i>
+                                        {{ $presupuestoAprobado->fecha_emision ? \Carbon\Carbon::parse($presupuestoAprobado->fecha_emision)->format('d/m/Y') : 'N/A' }}
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Estado:</label>
-                                        <div>
-                                            <span class="badge bg-success fs-6">
-                                                {{ $presupuestoAprobado->estado->descripcion ?? 'N/A' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Fecha de Emisión:</label>
-                                        <div class="fw-bold">
-                                            {{ $presupuestoAprobado->fecha_emision ? \Carbon\Carbon::parse($presupuestoAprobado->fecha_emision)->format('d/m/Y') : 'N/A' }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Fecha de Vencimiento:</label>
-                                        <div class="fw-bold">
-                                            {{ $presupuestoAprobado->fecha_vencimiento ? \Carbon\Carbon::parse($presupuestoAprobado->fecha_vencimiento)->format('d/m/Y') : 'N/A' }}
-                                        </div>
+                                <div class="info-item">
+                                    <label class="form-label">Fecha de Vencimiento</label>
+                                    <div class="info-value">
+                                        <i class="fas fa-calendar-times"></i>
+                                        {{ $presupuestoAprobado->fecha_vencimiento ? \Carbon\Carbon::parse($presupuestoAprobado->fecha_vencimiento)->format('d/m/Y') : 'N/A' }}
                                     </div>
                                 </div>
                             </div>
+
                             @if($presupuestoAprobado->descripcion)
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="mb-3">
-                                            <label class="form-label text-muted">Descripción:</label>
-                                            <div class="bg-light p-3 rounded">{{ $presupuestoAprobado->descripcion }}</div>
-                                        </div>
-                                    </div>
+                                <div class="mt-3">
+                                    <label class="form-label">Descripción</label>
+                                    <div class="info-value observation-box">{{ $presupuestoAprobado->descripcion }}</div>
                                 </div>
                             @endif
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-building me-2"></i>Proveedor
-                            </h5>
+                <div class="col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-header-section">
+                            <span><i class="fas fa-building me-2"></i>Proveedor</span>
                         </div>
                         <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Razón Social:</label>
-                                <div class="fw-bold">{{ $presupuestoAprobado->proveedor->razon_social ?? 'N/A' }}</div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted">RUC:</label>
-                                <div class="fw-bold">{{ $presupuestoAprobado->proveedor->ruc ?? 'N/A' }}</div>
-                            </div>
-                            @if($presupuestoAprobado->proveedor->telefono)
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Teléfono:</label>
-                                    <div>{{ $presupuestoAprobado->proveedor->telefono }}</div>
+                            <div class="info-grid info-grid-stack">
+                                <div class="info-item">
+                                    <label class="form-label">Razón Social</label>
+                                    <div class="info-value"><i class="fas fa-building"></i>{{ $presupuestoAprobado->proveedor->razon_social ?? 'N/A' }}</div>
                                 </div>
-                            @endif
-                            @if($presupuestoAprobado->proveedor->email)
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Email:</label>
-                                    <div>{{ $presupuestoAprobado->proveedor->email }}</div>
+                                <div class="info-item">
+                                    <label class="form-label">RUC</label>
+                                    <div class="info-value"><i class="fas fa-id-card"></i>{{ $presupuestoAprobado->proveedor->ruc ?? 'N/A' }}</div>
                                 </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Información del Pedido -->
-            <div class="card mb-4">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="fas fa-shopping-cart me-2"></i>Información del Pedido
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Pedido ID:</label>
-                                <div class="fw-bold">#{{ $presupuestoAprobado->pedido_compra_id }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Sucursal:</label>
-                                <div class="fw-bold">{{ $presupuestoAprobado->pedidoCompra->sucursal->nombre ?? 'N/A' }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Depósito:</label>
-                                <div class="fw-bold">{{ $presupuestoAprobado->pedidoCompra->deposito->nombre ?? 'N/A' }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Fecha Pedido:</label>
-                                <div class="fw-bold">
-                                    {{ $presupuestoAprobado->pedidoCompra->fecha ? \Carbon\Carbon::parse($presupuestoAprobado->pedidoCompra->fecha)->format('d/m/Y') : 'N/A' }}
-                                </div>
+                                @if($presupuestoAprobado->proveedor->telefono)
+                                    <div class="info-item">
+                                        <label class="form-label">Teléfono</label>
+                                        <div class="info-value"><i class="fas fa-phone"></i>{{ $presupuestoAprobado->proveedor->telefono }}</div>
+                                    </div>
+                                @endif
+                                @if($presupuestoAprobado->proveedor->email)
+                                    <div class="info-item">
+                                        <label class="form-label">Email</label>
+                                        <div class="info-value"><i class="fas fa-envelope"></i>{{ $presupuestoAprobado->proveedor->email }}</div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Detalles del Presupuesto -->
-            <div class="card mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>Detalles del Presupuesto
-                    </h5>
+            {{-- Información del Pedido --}}
+            <div class="card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-shopping-cart me-2"></i>Información del Pedido</span>
+                    <a href="{{ route('pedido_compra.show', $presupuestoAprobado->pedido_compra_id) }}" class="tag">
+                        #{{ $presupuestoAprobado->pedido_compra_id }}
+                    </a>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-dark">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label class="form-label">Pedido</label>
+                            <div class="info-value"><i class="fas fa-hashtag"></i>#{{ $presupuestoAprobado->pedido_compra_id }}</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Sucursal</label>
+                            <div class="info-value"><i class="fas fa-building"></i>{{ $presupuestoAprobado->pedidoCompra->sucursal->descripcion ?? 'N/A' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Depósito</label>
+                            <div class="info-value"><i class="fas fa-warehouse"></i>{{ $presupuestoAprobado->pedidoCompra->deposito->descripcion ?? 'N/A' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Fecha Pedido</label>
+                            <div class="info-value">
+                                <i class="fas fa-calendar"></i>
+                                {{ $presupuestoAprobado->pedidoCompra->fecha ? \Carbon\Carbon::parse($presupuestoAprobado->pedidoCompra->fecha)->format('d/m/Y') : 'N/A' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Detalles del Presupuesto --}}
+            <div class="card table-card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-list me-2"></i>Detalles del Presupuesto</span>
+                    <span class="results-count">{{ $presupuestoAprobado->detalles->count() }} ítem(s)</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
                                 <tr>
                                     <th>Insumo</th>
-                                    <th class="text-center">Cantidad</th>
-                                    <th class="text-center">Precio Unit.</th>
-                                    <th class="text-center">Impuesto</th>
-                                    <th class="text-center">Subtotal</th>
-                                    <th class="text-center">Total</th>
+                                    <th style="width:100px;" class="text-center">Cantidad</th>
+                                    <th style="width:130px;" class="text-end">Precio Unit.</th>
+                                    <th style="width:110px;" class="text-center">Impuesto</th>
+                                    <th style="width:130px;" class="text-end">Subtotal</th>
+                                    <th style="width:140px;" class="text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -187,7 +158,6 @@
                                     $subtotalGeneral = 0;
                                     $impuestosGeneral = 0;
                                 @endphp
-
                                 @foreach($presupuestoAprobado->detalles as $detalle)
                                     @php
                                         $subtotal = $detalle->cantidad * $detalle->precio_unitario;
@@ -204,106 +174,83 @@
                                     <tr>
                                         <td>
                                             <strong>{{ $detalle->insumo->descripcion ?? 'N/A' }}</strong><br>
-                                            <small class="text-muted">
-                                                <span class="badge bg-primary me-1">{{ $detalle->insumo->marca->descripcion ?? 'N/A' }}</span>
-                                                <span class="badge bg-secondary">{{ $detalle->insumo->unidadMedida->abreviatura ?? $detalle->insumo->unidadMedida->descripcion ?? 'N/A' }}</span>
-                                            </small>
+                                            <span class="tag me-1">{{ $detalle->insumo->marca->descripcion ?? 'N/A' }}</span>
+                                            <span class="tag tag-secondary">{{ $detalle->insumo->unidadMedida->abreviatura ?? $detalle->insumo->unidadMedida->descripcion ?? 'N/A' }}</span>
                                             @if($detalle->observacion)
-                                                <div class="observacion-detalle mt-2">
+                                                <div class="text-muted mt-1" style="font-size:0.78rem;">
                                                     <i class="fas fa-comment me-1"></i>{{ $detalle->observacion }}
                                                 </div>
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-info fs-6">{{ number_format($detalle->cantidad, 0, ',', '.') }}</span>
+                                            <span class="tag">{{ number_format($detalle->cantidad, 0, ',', '.') }}</span>
                                         </td>
+                                        <td class="text-end">₲ {{ number_format($detalle->precio_unitario, 0, ',', '.') }}</td>
                                         <td class="text-center">
-                                            <strong>₲ {{ number_format($detalle->precio_unitario, 0, ',', '.') }}</strong>
+                                            <span class="tag tag-secondary">{{ $detalle->impuesto->descripcion ?? 'N/A' }}</span>
                                         </td>
-                                        <td class="text-center">
-                                            <span class="badge bg-secondary">{{ $detalle->impuesto->descripcion ?? 'N/A' }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <strong>₲ {{ number_format($subtotal, 0, ',', '.') }}</strong>
-                                        </td>
-                                        <td class="text-center">
-                                            <strong class="text-success">₲ {{ number_format($totalItem, 0, ',', '.') }}</strong>
+                                        <td class="text-end">₲ {{ number_format($subtotal, 0, ',', '.') }}</td>
+                                        <td class="text-end">
+                                            <span class="amount">₲ {{ number_format($totalItem, 0, ',', '.') }}</span>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
 
-            <!-- Resumen Financiero -->
-            <div class="row mb-4">
-                <div class="col-md-8"></div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header bg-dark text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-calculator me-2"></i>Resumen Financiero
-                            </h5>
+                    {{-- Resumen Financiero --}}
+                    <div class="totals-box">
+                        <div class="totals-row">
+                            <span>Subtotal</span>
+                            <strong>₲ {{ number_format($subtotalGeneral, 0, ',', '.') }}</strong>
                         </div>
-                        <div class="card-body bg-light">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Subtotal:</span>
-                                <strong>₲ {{ number_format($subtotalGeneral, 0, ',', '.') }}</strong>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Impuestos:</span>
-                                <strong>₲ {{ number_format($impuestosGeneral, 0, ',', '.') }}</strong>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <span class="h5">TOTAL FINAL:</span>
-                                <strong class="h4 text-success">₲ {{ number_format($subtotalGeneral + $impuestosGeneral, 0, ',', '.') }}</strong>
-                            </div>
+                        <div class="totals-row">
+                            <span>Impuestos</span>
+                            <strong>₲ {{ number_format($impuestosGeneral, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="totals-row totals-final">
+                            <span>Total Final</span>
+                            <strong>₲ {{ number_format($subtotalGeneral + $impuestosGeneral, 0, ',', '.') }}</strong>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Información de Aprobación -->
+            {{-- Información de Aprobación --}}
             <div class="card">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-user-check me-2"></i>Información de Aprobación
-                    </h5>
+                <div class="card-header-section">
+                    <span><i class="fas fa-user-check me-2"></i>Información de Aprobación</span>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Creado por:</label>
-                                <div class="fw-bold">
-                                    {{ $presupuestoAprobado->usuario->persona->nombre ?? 'N/A' }}
-                                    {{ $presupuestoAprobado->usuario->persona->apellido ?? '' }}
-                                </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label class="form-label">Creado por</label>
+                            <div class="info-value">
+                                <i class="fas fa-user"></i>
+                                {{ $presupuestoAprobado->usuario->persona->nombre ?? 'N/A' }}
+                                {{ $presupuestoAprobado->usuario->persona->apellido ?? '' }}
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Aprobado por:</label>
-                                <div class="fw-bold">
-                                    {{ $presupuestoAprobado->aprobadoPor->persona->nombre ?? 'N/A' }}
-                                    {{ $presupuestoAprobado->aprobadoPor->persona->apellido ?? '' }}
-                                </div>
+                        <div class="info-item">
+                            <label class="form-label">Aprobado por</label>
+                            <div class="info-value">
+                                <i class="fas fa-user-check"></i>
+                                {{ $presupuestoAprobado->aprobadoPor->persona->nombre ?? 'N/A' }}
+                                {{ $presupuestoAprobado->aprobadoPor->persona->apellido ?? '' }}
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Fecha de Aprobación:</label>
-                                <div class="fw-bold">
-                                    {{ $presupuestoAprobado->fecha_aprobacion ? \Carbon\Carbon::parse($presupuestoAprobado->fecha_aprobacion)->format('d/m/Y H:i') : 'N/A' }}
-                                </div>
+                        <div class="info-item">
+                            <label class="form-label">Fecha de Aprobación</label>
+                            <div class="info-value">
+                                <i class="fas fa-calendar-check"></i>
+                                {{ $presupuestoAprobado->fecha_aprobacion ? \Carbon\Carbon::parse($presupuestoAprobado->fecha_aprobacion)->format('d/m/Y H:i') : 'N/A' }}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -312,76 +259,151 @@
 </html>
 
 <style>
-.main-content {
-    margin-left: 60px;
-    width: calc(100vw - 60px);
-    min-height: 100vh;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
-    overflow-x: hidden;
-    box-sizing: border-box;
-}
-
 .content-wrapper {
-    padding: 20px;
-    max-width: 100%;
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+.header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ── Cards ── */
 .card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: none;
 }
-
-.table th {
-    font-size: 0.875rem;
-    font-weight: 600;
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
 }
+.results-count { font-weight: 400; font-size: 0.78rem; color: #94a3b8; }
 
-.table td {
-    vertical-align: middle;
+/* ── Información (grids) ── */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
 }
-
-.observacion-detalle {
-    background-color: #f8f9fa;
-    border-left: 4px solid #007bff;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-style: italic;
+.info-grid-stack { grid-template-columns: 1fr; }
+.info-item .form-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.info-value {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
     font-size: 0.85rem;
+    color: #374151;
+}
+.info-value i { color: #94a3b8; margin-right: 0.5rem; width: 14px; text-align: center; }
+.observation-box {
+    white-space: pre-wrap;
+    line-height: 1.5;
 }
 
-@media print {
-    .btn, .sidebar-nav, .footer {
-        display: none !important;
-    }
-
-    .main-content {
-        margin-left: 0 !important;
-        width: 100% !important;
-    }
-
-    .card {
-        box-shadow: none !important;
-        border: 1px solid #dee2e6 !important;
-    }
+@media (max-width: 900px) {
+    .page-header { flex-direction: column; align-items: flex-start; }
 }
+
+/* ── Tags ── */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+    text-decoration: none;
+}
+.tag-secondary { background: #f1f5f9; color: #64748b; }
+.tag-success { background: #dcfce7; color: #16a34a; }
+.amount { font-weight: 700; color: #10b981; }
+
+/* ── Tabla de detalles ── */
+.table-card { display: flex; flex-direction: column; }
+.table-container { overflow: auto; }
+
+.data-table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+.data-table thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.6rem 0.65rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.data-table tbody td {
+    padding: 0.6rem 0.65rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #374151;
+}
+.data-table tbody tr:hover { background: #f8fafc; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* ── Totales ── */
+.totals-box {
+    margin: 1rem;
+    margin-left: auto;
+    max-width: 320px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+.totals-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #374151; padding: 0.25rem 0; }
+.totals-row.totals-final {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+.totals-final strong { color: #10b981; }
 
 @media (max-width: 768px) {
-    .main-content {
-        margin-left: 50px;
-        width: calc(100vw - 50px);
-    }
-
-    .content-wrapper {
-        padding: 15px;
-    }
+    .table-container { font-size: 0.875rem; }
+    .totals-box { max-width: 100%; margin: 1rem; }
 }
 
-.sidebar-nav:hover ~ .main-content {
-    margin-left: 280px;
-    width: calc(100vw - 280px);
+/* ── Impresión ── */
+@media print {
+    .main-content { margin-left: 0 !important; width: 100% !important; }
+    .header-actions { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
 }
 </style>
