@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             InsumoSeeder::class,
             ImpuestoSeeder::class,
             ServicioSeeder::class,
+            EnsayoSeeder::class,
             ClienteSeeder::class,
             ObraSeeder::class,
         ]);

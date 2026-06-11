@@ -5,260 +5,361 @@
     <meta charset="UTF-8">
     <title>Solicitudes de Servicio - TesisGyA</title>
     @include('partials.head')
-    <style>
-    .main-content {
-        margin-left: 60px;
-        min-height: 100vh;
-        background-color: #f8f9fa;
-        transition: margin-left 0.3s cubic-bezier(.4,2,.6,1);
-        overflow-x: hidden;
-        box-sizing: border-box;
-        width: auto;
-        max-width: 100vw;
-    }
-    @media (max-width: 768px) {
-        .main-content {
-            margin-left: 50px;
-        }
-    }
-    .sidebar-nav {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: 60px;
-        transition: width 0.3s cubic-bezier(.4,2,.6,1);
-        overflow-x: hidden;
-        z-index: 10000;
-    }
-    .sidebar-nav:hover {
-        width: 280px;
-        box-shadow: 2px 0 16px rgba(0,0,0,0.07);
-    }
-    .sidebar-nav:hover ~ .main-content {
-        margin-left: 280px;
-    }
-    @media (max-width: 768px) {
-        .sidebar-nav:hover {
-            width: 250px;
-        }
-        .sidebar-nav:hover ~ .main-content {
-            margin-left: 250px;
-        }
-    }
-</style>
 </head>
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-file-alt me-2"></i>Solicitudes de Servicio</h2>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('solicitud_servicio.create') }}" class="btn btn-success">
-                        <i class="fas fa-plus me-2"></i>Nueva Solicitud
-                    </a>
+
+            {{-- Cabecera --}}
+            <div class="page-header">
+                <div>
+                    <h2><i class="fas fa-file-alt"></i> Solicitudes de Servicio</h2>
+                    <small>Gestión de solicitudes de servicio de clientes</small>
+                </div>
+                <a href="{{ route('solicitud_servicio.create') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Nueva Solicitud
+                </a>
+            </div>
+
+            {{-- Alerts --}}
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            {{-- Filtros --}}
+            <div class="card">
+                <div class="card-body py-3 px-3">
+                    <form method="GET" action="{{ route('solicitud_servicio.index') }}">
+                        <div class="toolbar-grid">
+                            <div class="toolbar-item">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select form-select-sm" name="estado_id" onchange="this.form.submit()">
+                                    <option value="">Todos</option>
+                                    <option value="3" {{ request('estado_id') == 3 ? 'selected' : '' }}>Pendiente</option>
+                                    <option value="4" {{ request('estado_id') == 4 ? 'selected' : '' }}>Confirmado</option>
+                                    <option value="5" {{ request('estado_id') == 5 ? 'selected' : '' }}>Anulado</option>
+                                </select>
+                            </div>
+                            <div class="toolbar-item">
+                                <label class="form-label">Cliente</label>
+                                <select class="form-select form-select-sm" name="cliente_id" onchange="this.form.submit()">
+                                    <option value="">Todos</option>
+                                    @foreach($clientes as $cliente)
+                                        <option value="{{ $cliente->id }}" {{ request('cliente_id') == $cliente->id ? 'selected' : '' }}>
+                                            {{ $cliente->razon_social }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="toolbar-item">
+                                <label class="form-label">Desde</label>
+                                <input type="date" class="form-control form-control-sm" name="fecha_desde" value="{{ request('fecha_desde') }}" onchange="this.form.submit()">
+                            </div>
+                            <div class="toolbar-item">
+                                <label class="form-label">Buscar</label>
+                                <input type="text" class="form-control form-control-sm" name="search" value="{{ request('search') }}" placeholder="Cliente, obra, observación...">
+                            </div>
+                            <div class="toolbar-item toolbar-actions">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary btn-sm flex-fill">
+                                        <i class="fas fa-search me-1"></i>Buscar
+                                    </button>
+                                    <a href="{{ route('solicitud_servicio.index') }}" class="btn btn-outline-secondary btn-sm" title="Limpiar filtros">
+                                        <i class="fas fa-eraser"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            @if(session('success'))
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+            {{-- Tabla --}}
+            <div class="card table-card">
+                <div class="card-header-section">
+                    <span>Lista de Solicitudes</span>
+                    <span class="results-count">{{ $solicitudes->total() }} solicitud(es)</span>
                 </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
-                </div>
-            @endif
-
-            <!-- Filtros -->
-            <form method="GET" class="card mb-3">
-                <div class="card-body py-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-3">
-                            <label for="estado_id" class="form-label mb-2">
-                                <i class="fas fa-filter me-1"></i>Estado:
-                            </label>
-                            <select class="form-select" name="estado_id" id="estado_id" onchange="this.form.submit()">
-                                <option value="">Todos los estados</option>
-                                <option value="3" {{ request('estado_id') == 3 ? 'selected' : '' }}>Pendiente</option>
-                                <option value="4" {{ request('estado_id') == 4 ? 'selected' : '' }}>Confirmado</option>
-                                <option value="5" {{ request('estado_id') == 5 ? 'selected' : '' }}>Anulado</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="cliente_id" class="form-label mb-2">
-                                <i class="fas fa-user me-1"></i>Cliente:
-                            </label>
-                            <select class="form-select" name="cliente_id" id="cliente_id" onchange="this.form.submit()">
-                                <option value="">Todos los clientes</option>
-                                @foreach($clientes as $cliente)
-                                    <option value="{{ $cliente->id }}" {{ request('cliente_id') == $cliente->id ? 'selected' : '' }}>
-                                        {{ $cliente->razon_social }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="fecha_desde" class="form-label mb-2">
-                                <i class="fas fa-calendar me-1"></i>Fecha desde:
-                            </label>
-                            <input type="date" class="form-control" name="fecha_desde" id="fecha_desde" value="{{ request('fecha_desde') }}" onchange="this.form.submit()">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="search" class="form-label mb-2">
-                                <i class="fas fa-search me-1"></i>Buscar:
-                            </label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" name="search" id="search" value="{{ request('search') }}" placeholder="Cliente, obra, observación...">
-                                <button class="btn btn-primary" type="submit">
-                                    <i class="fas fa-filter"></i>
-                                </button>
-                                <a href="{{ route('solicitud_servicio.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
-            <!-- Tabla de Solicitudes -->
-            <div class="card table-card flex-grow-1">
-                <div class="card-body p-0 h-100">
-                    <div class="table-responsive table-container h-100">
+                <div class="card-body p-0" style="flex:1; display:flex; flex-direction:column;">
+                    <div class="table-container">
                         @if($solicitudes->count() > 0)
-                            <table class="table table-striped table-hover mb-0 h-100">
-                                <thead class="table-dark sticky-top">
+                            <table id="solicitudesTable">
+                                <thead>
                                     <tr>
-                                        <th style="width: 80px;">#</th>
+                                        <th style="width:80px;" class="text-center">N°</th>
                                         <th>Cliente</th>
                                         <th>Obra</th>
-                                        <th>Fecha</th>
-                                        <th>Estado</th>
+                                        <th style="width:100px;" class="text-center">Fecha</th>
+                                        <th style="width:110px;">Estado</th>
                                         <th>Observación</th>
                                         <th>Detalle</th>
-                                        <th>Acciones</th>
+                                        <th style="width:70px;" class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($solicitudes as $solicitud)
                                         <tr>
                                             <td class="text-center">
-                                                <span class="badge bg-dark fs-6">
-                                                    #{{ str_pad($solicitud->id, 3, '0', STR_PAD_LEFT) }}
-                                                </span>
+                                                <span class="tag">#{{ str_pad($solicitud->id, 3, '0', STR_PAD_LEFT) }}</span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-info text-wrap" title="{{ $solicitud->cliente->razon_social }}">
-                                                    {{ Str::limit($solicitud->cliente->razon_social, 20) }}
-                                                </span>
+                                                <span class="cell-text" title="{{ $solicitud->cliente->razon_social }}">{{ $solicitud->cliente->razon_social }}</span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary text-wrap" title="{{ $solicitud->obra->descripcion }}">
-                                                    {{ Str::limit($solicitud->obra->descripcion, 20) }}
-                                                </span>
+                                                <span class="cell-text" title="{{ $solicitud->obra->descripcion }}">{{ $solicitud->obra->descripcion }}</span>
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge bg-secondary">
-                                                    {{ \Carbon\Carbon::parse($solicitud->fecha)->format('d/m/Y') }}
-                                                </span>
+                                                {{ \Carbon\Carbon::parse($solicitud->fecha)->format('d/m/Y') }}
                                             </td>
-                                            <td class="text-center">
-                                                <span class="badge
-                                                    @switch($solicitud->estado_id)
-                                                        @case(3) bg-warning text-dark @break
-                                                        @case(4) bg-success @break
-                                                        @case(5) bg-danger @break
-                                                        @default bg-secondary @break
-                                                    @endswitch">
-                                                    @switch($solicitud->estado_id)
-                                                        @case(3) Pendiente @break
-                                                        @case(4) Confirmado @break
-                                                        @case(5) Anulado @break
-                                                        @default {{ $solicitud->estado->descripcion }} @break
-                                                    @endswitch
-                                                </span>
+                                            <td>
+                                                @switch($solicitud->estado_id)
+                                                    @case(3)
+                                                        <span class="estado estado-pendiente"><i class="estado-dot"></i>Pendiente</span>
+                                                        @break
+                                                    @case(4)
+                                                        <span class="estado estado-confirmado"><i class="estado-dot"></i>Confirmado</span>
+                                                        @break
+                                                    @case(5)
+                                                        <span class="estado estado-anulado"><i class="estado-dot"></i>Anulado</span>
+                                                        @break
+                                                    @default
+                                                        <span class="estado"><i class="estado-dot"></i>{{ $solicitud->estado->descripcion }}</span>
+                                                @endswitch
                                             </td>
-                                            <td title="{{ $solicitud->observacion }}">
+                                            <td>
                                                 @if($solicitud->observacion)
-                                                    <i class="fas fa-comment text-muted me-1" title="{{ $solicitud->observacion }}"></i>
-                                                    <span class="text-truncate d-inline-block" style="max-width: 120px;">
-                                                        {{ Str::limit($solicitud->observacion, 20) }}
-                                                    </span>
+                                                    <span class="cell-text" title="{{ $solicitud->observacion }}">{{ Str::limit($solicitud->observacion, 28) }}</span>
                                                 @else
-                                                    <span class="text-muted fst-italic">Sin observación</span>
+                                                    <span class="text-muted">—</span>
                                                 @endif
                                             </td>
                                             <td>
                                                 @if($solicitud->detalles && $solicitud->detalles->count())
-                                                    <ul class="mb-0 ps-3">
-                                                        @foreach($solicitud->detalles as $detalle)
-                                                            <li>
-                                                                {{ $detalle->servicio->descripcion ?? '-' }}
-                                                                @if($detalle->observacion)
-                                                                    <span class="text-muted">({{ $detalle->observacion }})</span>
-                                                                @endif
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
+                                                    <span class="tag tag-secondary" title="{{ $solicitud->detalles->pluck('servicio.descripcion')->filter()->join(', ') }}">
+                                                        {{ $solicitud->detalles->count() }} servicio(s)
+                                                    </span>
                                                 @else
-                                                    <span class="text-muted fst-italic">Sin detalle</span>
+                                                    <span class="text-muted">Sin detalle</span>
                                                 @endif
                                             </td>
                                             <td class="text-center">
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ route('solicitud_servicio.show', $solicitud->id) }}"
-                                                    class="btn btn-sm btn-outline-primary"
-                                                    title="Ver Detalle">
+                                                <div class="btn-group">
+                                                    <a href="{{ route('solicitud_servicio.show', $solicitud->id) }}" class="btn-icon" title="Ver Detalle">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    @if($solicitud->estado_id == 3)
-                                                        <a href="#"
-                                                        class="btn btn-sm btn-outline-success"
-                                                        title="Editar">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <form action="#" method="POST" style="display:inline;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Anular Solicitud" onclick="return confirm('¿Está seguro que desea anular esta solicitud?');">
-                                                                <i class="fas fa-ban"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                            <div class="mt-3">
-                                {{ $solicitudes->withQueryString()->links() }}
-                            </div>
                         @else
-                            <div class="empty-state d-flex flex-column align-items-center justify-content-center h-100">
-                                <i class="fas fa-file-alt fa-4x text-muted mb-4"></i>
-                                <h4 class="text-muted mb-3">No hay solicitudes de servicio</h4>
-                                <p class="text-muted mb-4 text-center">
-                                    Aún no se han creado solicitudes de servicio en el sistema.
+                            <div class="empty-state">
+                                <i class="fas fa-file-alt fa-3x mb-3"></i>
+                                <h5 class="text-muted mb-2">No hay solicitudes de servicio</h5>
+                                <p class="text-muted mb-3" style="font-size:0.85rem;">
+                                    No se encontraron solicitudes con los filtros aplicados.
                                 </p>
-                                <a href="{{ route('solicitud_servicio.create') }}" class="btn btn-primary">
+                                <a href="{{ route('solicitud_servicio.create') }}" class="btn btn-primary btn-sm">
                                     <i class="fas fa-plus me-2"></i>Crear Primera Solicitud
                                 </a>
                             </div>
                         @endif
                     </div>
+                    @if($solicitudes->hasPages())
+                        <div class="pagination-wrapper">
+                            {{ $solicitudes->withQueryString()->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
+
         </div>
     </div>
 
     @include('partials.footer')
-
-
 </body>
 </html>
+
+<style>
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+
+/* ── Cards ── */
+.card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: none;
+}
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
+}
+.results-count { font-weight: 400; font-size: 0.78rem; color: #94a3b8; }
+
+/* ── Toolbar (filtros) ── */
+.toolbar-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr 1.5fr 1fr;
+    gap: 0.65rem;
+    align-items: end;
+}
+.toolbar-item .form-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+}
+.toolbar-actions > div { width: 100%; }
+
+@media (max-width: 900px) {
+    .toolbar-grid { grid-template-columns: 1fr 1fr; }
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+    .toolbar-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Tabla ── */
+.table-card {
+    flex: 1;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+.table-container {
+    flex: 1;
+    overflow: auto;
+    min-height: 300px;
+}
+
+#solicitudesTable {
+    width: 100%;
+    min-width: 920px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+#solicitudesTable thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.6rem 0.65rem;
+    position: sticky; top: 0;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+#solicitudesTable tbody td {
+    padding: 0.55rem 0.65rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #374151;
+}
+#solicitudesTable tbody tr:hover { background: #f8fafc; }
+#solicitudesTable tbody tr:last-child td { border-bottom: none; }
+
+.cell-text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Tags */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+}
+.tag-secondary { background: #f1f5f9; color: #64748b; }
+
+/* Estado */
+.estado { display: inline-flex; align-items: center; gap: 0.4rem; }
+.estado-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+.estado-pendiente .estado-dot  { background: #f59e0b; }
+.estado-confirmado .estado-dot { background: #10b981; }
+.estado-anulado .estado-dot    { background: #ef4444; }
+
+/* Acciones */
+.btn-group { display: flex; gap: 4px; justify-content: center; }
+.btn-icon {
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid #e2e8f0; border-radius: 6px;
+    color: #64748b; background: #fff; font-size: 0.78rem;
+    text-decoration: none; cursor: pointer;
+}
+.btn-icon:hover { background: #f1f5f9; color: #1e293b; }
+.btn-icon.danger:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+
+/* Empty state */
+.empty-state {
+    min-height: 320px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; color: #94a3b8; text-align: center;
+}
+.empty-state i { color: #cbd5e1; }
+
+/* Paginación */
+.pagination-wrapper {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+.pagination-wrapper .pagination {
+    margin: 0;
+    justify-content: flex-end;
+}
+.pagination-wrapper .page-link {
+    font-size: 0.8rem;
+    color: #64748b;
+    border-color: #e2e8f0;
+}
+.pagination-wrapper .page-item.active .page-link {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+.pagination-wrapper .page-link:hover { background-color: #f1f5f9; color: #1e293b; }
+
+@media (max-width: 768px) {
+    .table-container { font-size: 0.875rem; }
+}
+</style>

@@ -3,258 +3,273 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detalles del Pedido #{{ $pedido->id }} - Presupuestos</title>
+    <title>Pedido #{{ str_pad($pedido->id, 3, '0', STR_PAD_LEFT) }} - Presupuestos</title>
     @include('partials.head')
 </head>
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+
+            {{-- Cabecera --}}
+            <div class="page-header">
                 <div>
-                    <h2>
-                        <i class="fas fa-shopping-cart me-2 text-primary"></i>
-                        Pedido de Compra #{{ $pedido->id }}
-                    </h2>
-                    <p class="text-muted mb-0">Detalles completos del pedido y presupuestos asociados</p>
+                    <h2><i class="fas fa-shopping-cart"></i> Pedido de Compra #{{ str_pad($pedido->id, 3, '0', STR_PAD_LEFT) }}</h2>
+                    <small>Detalle del pedido y presupuestos asociados</small>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="header-actions">
+                    <a href="{{ route('presupuesto_compra.create', $pedido->id) }}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Crear Presupuesto
+                    </a>
                     <a href="{{ route('presupuesto_compra.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Volver al Listado
                     </a>
-                    <button type="button" class="btn btn-success" onclick="crearPresupuesto()">
-                        <i class="fas fa-plus me-2"></i>Crear Presupuesto
-                    </button>
                 </div>
             </div>
 
+            {{-- Alerts --}}
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
-            <div class="row">
-                <!-- Información del Pedido -->
-                <div class="col-lg-8">
-                    <div class="card mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Información del Pedido
-                            </h5>
+            {{-- Información General --}}
+            <div class="card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-info-circle me-2"></i>Información General</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label class="form-label">Usuario Solicitante</label>
+                            <div class="info-value"><i class="fas fa-user"></i>{{ $pedido->usuario->usuario ?? 'N/A' }}</div>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="info-group mb-3">
-                                        <label class="text-muted small d-block">Usuario Solicitante:</label>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-user text-primary me-2"></i>
-                                            <strong>{{ $pedido->usuario->usuario ?? 'N/A' }}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-group mb-3">
-                                        <label class="text-muted small d-block">Fecha del Pedido:</label>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-calendar text-primary me-2"></i>
-                                            <strong>{{ $pedido->fecha->format('d/m/Y') }}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-group mb-3">
-                                        <label class="text-muted small d-block">Sucursal:</label>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-building text-success me-2"></i>
-                                            <strong>{{ $pedido->sucursal->descripcion }}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-group mb-3">
-                                        <label class="text-muted small d-block">Depósito:</label>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-warehouse text-info me-2"></i>
-                                            <strong>{{ $pedido->deposito->descripcion }}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="info-group">
-                                        <label class="text-muted small d-block">Estado:</label>
-                                        <span class="badge bg-warning text-dark fs-6">
-                                            <i class="fas fa-clock me-1"></i>{{ $pedido->estado->descripcion }}
-                                        </span>
-                                    </div>
-                                </div>
+                        <div class="info-item">
+                            <label class="form-label">Fecha del Pedido</label>
+                            <div class="info-value"><i class="fas fa-calendar"></i>{{ $pedido->fecha->format('d/m/Y') }}</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Estado</label>
+                            <div class="info-value">
+                                @switch($pedido->estado_id)
+                                    @case(3)
+                                        <span class="estado estado-pendiente"><i class="estado-dot"></i>Pendiente</span>
+                                        @break
+                                    @case(4)
+                                        <span class="estado estado-confirmado"><i class="estado-dot"></i>Confirmado</span>
+                                        @break
+                                    @case(5)
+                                        <span class="estado estado-anulado"><i class="estado-dot"></i>Anulado</span>
+                                        @break
+                                    @default
+                                        <span class="estado"><i class="estado-dot"></i>{{ $pedido->estado->descripcion }}</span>
+                                @endswitch
                             </div>
-
-                            @if($pedido->observacion)
-                                <div class="mt-4">
-                                    <label class="text-muted small d-block mb-2">Observación General:</label>
-                                    <div class="bg-light p-3 rounded border-start border-4 border-info">
-                                        <i class="fas fa-comment text-info me-2"></i>
-                                        {{ $pedido->observacion }}
-                                    </div>
-                                </div>
-                            @endif
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Sucursal</label>
+                            <div class="info-value"><i class="fas fa-building"></i>{{ $pedido->sucursal->descripcion }}</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Depósito</label>
+                            <div class="info-value"><i class="fas fa-warehouse"></i>{{ $pedido->deposito->descripcion }}</div>
                         </div>
                     </div>
 
-                    <!-- Detalles de Insumos -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-list me-2"></i>Insumos Solicitados
-                                <span class="badge bg-light text-dark ms-2">{{ $pedido->detalles->count() }} items</span>
-                            </h5>
+                    @if($pedido->observacion)
+                        <div class="mt-3">
+                            <label class="form-label">Observación General</label>
+                            <div class="info-value observation-box">{{ $pedido->observacion }}</div>
                         </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th width="5%">#</th>
-                                            <th width="35%">Insumo</th>
-                                            <th width="15%">Marca</th>
-                                            <th width="10%">Unidad</th>
-                                            <th width="10%">Cantidad</th>
-                                            <th width="25%">Observación</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($pedido->detalles as $index => $detalle)
-                                            <tr>
-                                                <td class="text-center">
-                                                    <span class="badge bg-secondary">{{ $index + 1 }}</span>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="me-2">
-                                                            <i class="fas fa-cube text-primary fa-lg"></i>
-                                                        </div>
-                                                        <div>
-                                                            <strong class="text-dark">{{ $detalle->insumo->descripcion }}</strong>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-primary">{{ $detalle->insumo->marca->descripcion }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-secondary">{{ $detalle->insumo->unidadMedida->abreviatura ?? $detalle->insumo->unidadMedida->descripcion }}</span>
-                                                </td>
-                                                <td class="text-center">
-                                                    <strong class="text-primary">{{ number_format($detalle->cantidad, 2, ',', '.') }}</strong>
-                                                </td>
-                                                <td>
-                                                    @if($detalle->observacion)
-                                                        <div class="bg-light p-2 rounded border-start border-3 border-info">
-                                                            <small class="text-muted d-block mb-1">
-                                                                <i class="fas fa-comment me-1"></i>Observación:
-                                                            </small>
-                                                            <span class="small text-dark">{{ $detalle->observacion }}</span>
-                                                        </div>
-                                                    @else
-                                                        <span class="text-muted small">
-                                                            <i class="fas fa-minus me-1"></i>Sin observación
-                                                        </span>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Estadísticas --}}
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $pedido->detalles->count() }}</div>
+                        <div class="stat-label">Insumos Solicitados</div>
                     </div>
                 </div>
-
-                <!-- Presupuestos Existentes -->
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-file-invoice-dollar me-2"></i>Presupuestos
-                                <span class="badge bg-light text-dark ms-2">{{ $pedido->presupuestos->count() }}</span>
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            @if($pedido->presupuestos->count() > 0)
-                                <div class="presupuestos-list">
-                                    @foreach($pedido->presupuestos as $presupuesto)
-                                        <div class="presupuesto-item p-3 mb-3 rounded border {{ $loop->first ? 'border-success bg-light' : 'border-secondary' }}">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h6 class="mb-0">{{ $presupuesto->nombre }}</h6>
-                                                <span class="badge {{ $presupuesto->estado_id == 3 ? 'bg-success' : 'bg-secondary' }}">
-                                                    {{ $presupuesto->estado->descripcion }}
-                                                </span>
-                                            </div>
-
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block">Proveedor:</small>
-                                                <strong class="text-primary">{{ $presupuesto->proveedor->razon_social }}</strong>
-                                            </div>
-
-                                            <div class="row mb-2">
-                                                <div class="col-6">
-                                                    <small class="text-muted d-block">Emisión:</small>
-                                                    <small class="text-dark">{{ $presupuesto->fecha_emision->format('d/m/Y') }}</small>
-                                                </div>
-                                                <div class="col-6">
-                                                    <small class="text-muted d-block">Validez:</small>
-                                                    <small class="text-dark">{{ $presupuesto->validez }} días</small>
-                                                </div>
-                                            </div>
-
-                                            @if($presupuesto->descripcion)
-                                                <div class="mb-3">
-                                                    <small class="text-muted d-block">Descripción:</small>
-                                                    <p class="small text-dark mb-0">{{ Str::limit($presupuesto->descripcion, 80) }}</p>
-                                                </div>
-                                            @endif
-
-                                            <div class="d-grid gap-1">
-                                                <a href="{{ route('presupuesto_compra.show', $presupuesto->id) }}"
-                                                class="btn btn-sm btn-outline-primary"
-                                                title="Ver Detalles">
-                                                    <i class="fas fa-eye"></i>Ver Detalles
-                                                </a>
-                                                @if($presupuesto->estado_id == 1)
-                                                    <button class="btn btn-outline-warning btn-sm" onclick="editarPresupuesto({{ $presupuesto->id }})">
-                                                        <i class="fas fa-edit me-1"></i>Editar
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="text-center py-4">
-                                    <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
-                                    <h6 class="text-muted">No hay presupuestos</h6>
-                                    <p class="text-muted small mb-3">Este pedido aún no tiene presupuestos asociados.</p>
-                                    <button class="btn btn-success btn-sm" onclick="crearPresupuesto()">
-                                        <i class="fas fa-plus me-2"></i>Crear Primer Presupuesto
-                                    </button>
-                                </div>
-                            @endif
-                        </div>
+                <div class="stat-box">
+                    <div class="stat-icon"><i class="fas fa-sort-numeric-up"></i></div>
+                    <div>
+                        <div class="stat-value">{{ number_format($pedido->detalles->sum('cantidad'), 0, ',', '.') }}</div>
+                        <div class="stat-label">Cantidad Total</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $pedido->presupuestos->count() }}</div>
+                        <div class="stat-label">Presupuestos Recibidos</div>
                     </div>
                 </div>
             </div>
+
+            {{-- Insumos Solicitados --}}
+            <div class="card table-card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-list me-2"></i>Insumos Solicitados</span>
+                    <span class="results-count">{{ $pedido->detalles->count() }} ítem(s)</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        @if($pedido->detalles->count() > 0)
+                            <table id="insumosTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:50px;" class="text-center">#</th>
+                                        <th>Insumo</th>
+                                        <th style="width:120px;" class="text-center">Cantidad</th>
+                                        <th style="width:100px;" class="text-center">Unidad</th>
+                                        <th>Observación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($pedido->detalles as $index => $detalle)
+                                        <tr>
+                                            <td class="text-center">{{ $index + 1 }}</td>
+                                            <td>
+                                                <i class="fas fa-cube text-muted me-2"></i><strong>{{ $detalle->insumo->descripcion }}</strong>
+                                                @if($detalle->insumo->marca->descripcion)
+                                                    <br><span class="tag tag-secondary mt-1">{{ $detalle->insumo->marca->descripcion }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="tag">{{ number_format($detalle->cantidad, 0, ',', '.') }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="tag tag-secondary">{{ $detalle->insumo->unidadMedida->abreviatura ?? $detalle->insumo->unidadMedida->descripcion }}</span>
+                                            </td>
+                                            <td>
+                                                @if($detalle->observacion)
+                                                    {{ $detalle->observacion }}
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="2" class="text-end">Total</th>
+                                        <th class="text-center">
+                                            <span class="tag">{{ number_format($pedido->detalles->sum('cantidad'), 0, ',', '.') }}</span>
+                                        </th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        @else
+                            <div class="empty-state">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <h5 class="text-muted mb-2">Sin insumos</h5>
+                                <p class="text-muted mb-0" style="font-size:0.85rem;">
+                                    Este pedido no tiene insumos asociados.
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Presupuestos Asociados --}}
+            <div class="card table-card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-file-invoice-dollar me-2"></i>Presupuestos Asociados</span>
+                    <span class="results-count">{{ $pedido->presupuestos->count() }} presupuesto(s)</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        @if($pedido->presupuestos->count() > 0)
+                            <table id="presupuestosTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th style="width:180px;">Proveedor</th>
+                                        <th style="width:110px;">Estado</th>
+                                        <th style="width:100px;">Emisión</th>
+                                        <th style="width:90px;" class="text-center">Validez</th>
+                                        <th>Descripción</th>
+                                        <th style="width:90px;" class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($pedido->presupuestos as $presupuesto)
+                                        <tr>
+                                            <td>
+                                                <span class="cell-text" title="{{ $presupuesto->nombre }}">{{ $presupuesto->nombre }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="cell-text" title="{{ $presupuesto->proveedor->razon_social ?? '-' }}">{{ $presupuesto->proveedor->razon_social ?? '-' }}</span>
+                                            </td>
+                                            <td>
+                                                @switch($presupuesto->estado_id)
+                                                    @case(3)
+                                                        <span class="estado estado-pendiente"><i class="estado-dot"></i>Pendiente</span>
+                                                        @break
+                                                    @case(4)
+                                                        <span class="estado estado-confirmado"><i class="estado-dot"></i>Confirmado</span>
+                                                        @break
+                                                    @case(5)
+                                                        <span class="estado estado-anulado"><i class="estado-dot"></i>Anulado</span>
+                                                        @break
+                                                    @default
+                                                        <span class="estado"><i class="estado-dot"></i>{{ $presupuesto->estado->descripcion ?? '-' }}</span>
+                                                @endswitch
+                                            </td>
+                                            <td>{{ $presupuesto->fecha_emision->format('d/m/Y') }}</td>
+                                            <td class="text-center">
+                                                <span class="tag tag-secondary">{{ $presupuesto->validez }} días</span>
+                                            </td>
+                                            <td>
+                                                @if($presupuesto->descripcion)
+                                                    <span class="cell-text" title="{{ $presupuesto->descripcion }}">{{ Str::limit($presupuesto->descripcion, 40) }}</span>
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group">
+                                                    <a href="{{ route('presupuesto_compra.show', $presupuesto->id) }}" class="btn-icon" title="Ver Detalles">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <div class="empty-state">
+                                <i class="fas fa-file-invoice fa-3x mb-3"></i>
+                                <h5 class="text-muted mb-2">Sin presupuestos</h5>
+                                <p class="text-muted mb-3" style="font-size:0.85rem;">
+                                    Este pedido aún no tiene presupuestos asociados.
+                                </p>
+                                <a href="{{ route('presupuesto_compra.create', $pedido->id) }}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-plus me-2"></i>Crear Primer Presupuesto
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -263,123 +278,195 @@
 </html>
 
 <style>
-.main-content {
-    margin-left: 60px;
-    width: calc(100vw - 60px);
-    min-height: 100vh;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
-    overflow-x: hidden;
-    box-sizing: border-box;
-}
-
 .content-wrapper {
-    padding: 20px;
-    max-width: 100%;
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+.header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ── Cards ── */
 .card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.card:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.info-group {
-    background-color: #f8f9fa;
-    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
-    border-left: 4px solid #007bff;
+    box-shadow: none;
+}
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
+}
+.results-count { font-weight: 400; font-size: 0.78rem; color: #94a3b8; }
+
+/* ── Información general ── */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+.info-item .form-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.info-value {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    color: #374151;
+}
+.info-value i { color: #94a3b8; margin-right: 0.5rem; width: 14px; text-align: center; }
+.observation-box {
+    white-space: pre-wrap;
+    line-height: 1.5;
 }
 
-.table th {
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 600;
-    font-size: 0.875rem;
+@media (max-width: 900px) {
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+    .info-grid { grid-template-columns: 1fr; }
 }
 
-.table td {
-    vertical-align: middle;
-}
+/* ── Estado ── */
+.estado { display: inline-flex; align-items: center; gap: 0.4rem; }
+.estado-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+.estado-pendiente .estado-dot  { background: #f59e0b; }
+.estado-confirmado .estado-dot { background: #10b981; }
+.estado-anulado .estado-dot    { background: #ef4444; }
 
-.presupuesto-item {
-    transition: all 0.3s ease;
+/* ── Estadísticas ── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
 }
-
-.presupuesto-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.stat-box {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
 }
-
-.badge {
-    font-size: 0.75rem;
+.stat-icon {
+    width: 42px; height: 42px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    background: #eff6ff; color: #2563eb;
+    font-size: 1.1rem; flex-shrink: 0;
 }
-
-.btn-sm {
-    font-size: 0.875rem;
-    padding: 0.25rem 0.5rem;
-}
+.stat-value { font-size: 1.3rem; font-weight: 700; color: #1e293b; line-height: 1.2; }
+.stat-label { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.4px; }
 
 @media (max-width: 768px) {
-    .main-content {
-        margin-left: 50px;
-        width: calc(100vw - 50px);
-    }
-
-    .content-wrapper {
-        padding: 15px;
-    }
-
-    .table-responsive {
-        font-size: 0.875rem;
-    }
+    .stats-grid { grid-template-columns: 1fr; }
 }
 
-.sidebar-nav:hover ~ .main-content {
-    margin-left: 280px;
-    width: calc(100vw - 280px);
+/* ── Tablas ── */
+.table-card { display: flex; flex-direction: column; }
+.table-container { overflow: auto; }
+
+#insumosTable, #presupuestosTable {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+#insumosTable thead th, #presupuestosTable thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.6rem 0.65rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+#insumosTable tbody td, #presupuestosTable tbody td {
+    padding: 0.6rem 0.65rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #374151;
+}
+#insumosTable tbody tr:hover, #presupuestosTable tbody tr:hover { background: #f8fafc; }
+#insumosTable tbody tr:last-child td, #presupuestosTable tbody tr:last-child td { border-bottom: none; }
+#insumosTable tfoot th {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 0.6rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.cell-text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Tags */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+}
+.tag-secondary { background: #f1f5f9; color: #64748b; }
+
+/* Acciones */
+.btn-group { display: flex; gap: 4px; justify-content: center; }
+.btn-icon {
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid #e2e8f0; border-radius: 6px;
+    color: #64748b; background: #fff; font-size: 0.78rem;
+    text-decoration: none; cursor: pointer;
+}
+.btn-icon:hover { background: #f1f5f9; color: #1e293b; }
+
+/* Empty state */
+.empty-state {
+    min-height: 240px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; color: #94a3b8; text-align: center;
+}
+.empty-state i { color: #cbd5e1; }
+
+@media (max-width: 768px) {
+    .table-container { font-size: 0.875rem; }
 }
 </style>
-
-<script>
-function crearPresupuesto() {
-    window.location.href = `{{ route('presupuesto_compra.create', $pedido->id) }}`;
-}
-
-function verPresupuesto(id) {
-    // Redirigir a ver detalles del presupuesto
-    window.location.href = `#`; // Aquí irá la ruta de ver presupuesto
-}
-
-function editarPresupuesto(id) {
-    // Redirigir a editar presupuesto
-    window.location.href = `#`; // Aquí irá la ruta de editar presupuesto
-}
-
-// Función para imprimir el pedido
-function imprimirPedido() {
-    window.print();
-}
-
-// Efecto de carga suave
-document.addEventListener('DOMContentLoaded', function() {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach((card, index) => {
-        setTimeout(() => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = 'all 0.5s ease';
-
-            setTimeout(() => {
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, 50);
-        }, index * 100);
-    });
-});
-</script>

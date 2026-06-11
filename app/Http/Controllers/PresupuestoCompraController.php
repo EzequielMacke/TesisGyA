@@ -6,7 +6,6 @@ use App\Models\Impuesto;
 use App\Models\PedidoCompra;
 use App\Models\PresupuestoCompra;
 use App\Models\PresupuestoCompraDetalle;
-use App\Models\PresupuestoServicio;
 use App\Models\Proveedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -180,17 +179,17 @@ class PresupuestoCompraController extends Controller
 
     public function show($id)
     {
-        $presupuesto = PresupuestoServicio::with([
-            'cliente',
-            'obra',
-            'visitaPrevia.fotos',
-            'visitaPrevia.planos',
-            'visitaPrevia.estado',
-            'detalles.ensayo.servicio',
-            'detalles.impuesto',
-            'usuario'
+        $presupuesto = PresupuestoCompra::with([
+            'proveedor',
+            'estado',
+            'usuario.persona',
+            'pedidoCompra.sucursal',
+            'pedidoCompra.deposito',
+            'detalles.insumo.marca',
+            'detalles.insumo.unidadMedida',
+            'detalles.impuesto'
         ])->findOrFail($id);
 
-        return view('presupuesto_servicio.show', compact('presupuesto'));
+        return view('presupuesto_compra.show_presupuesto', compact('presupuesto'));
     }
 }

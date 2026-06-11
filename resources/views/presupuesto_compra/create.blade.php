@@ -1,4 +1,3 @@
-<!-- filepath: c:\laragon\www\TesisGyA\resources\views\presupuesto_compra\create.blade.php -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,38 +8,36 @@
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+
+            {{-- Cabecera --}}
+            <div class="page-header">
                 <div>
-                    <h2>
-                        <i class="fas fa-file-invoice-dollar me-2 text-primary"></i>
-                        Crear Presupuesto
-                    </h2>
-                    <p class="text-muted mb-0">Para el Pedido de Compra #{{ $pedido->id }}</p>
+                    <h2><i class="fas fa-file-invoice-dollar"></i> Crear Presupuesto</h2>
+                    <small>Para el Pedido de Compra #{{ $pedido->id }}</small>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('presupuesto_compra.show_pedido', $pedido->id) }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Volver al Pedido
-                    </a>
-                </div>
+                <a href="{{ route('presupuesto_compra.show_pedido', $pedido->id) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Pedido
+                </a>
             </div>
 
+            {{-- Alerts --}}
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
             @if($errors->any())
-                <div class="alert alert-danger">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <ul class="mb-0">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
@@ -49,154 +46,123 @@
                 <input type="hidden" name="pedido_compra_id" value="{{ $pedido->id }}">
                 <input type="hidden" name="proveedor_id" value="{{ $proveedor->id }}">
 
-                <!-- Datos del Presupuesto -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>Datos del Presupuesto
-                        </h5>
+                {{-- Datos del Presupuesto --}}
+                <div class="card">
+                    <div class="card-header-section">
+                        <span><i class="fas fa-info-circle me-2"></i>Datos del Presupuesto</span>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="nombre" class="form-label">Nombre del Presupuesto</label>
-                                    <input type="text"
-                                           class="form-control bg-light"
-                                           id="nombre"
-                                           name="nombre"
-                                           value="Presupuesto Nro {{ $numeroPresupuesto }} para el Pedido {{ $pedido->id }} del Proveedor {{ $proveedor->razon_social }}"
-                                           readonly>
-                                </div>
+                        <div class="form-grid">
+                            <div class="span-2">
+                                <label for="nombre" class="form-label">Nombre del Presupuesto</label>
+                                <input type="text"
+                                       class="form-control form-control-sm readonly-field"
+                                       id="nombre"
+                                       name="nombre"
+                                       value="Presupuesto Nro {{ $numeroPresupuesto }} para el Pedido {{ $pedido->id }} del Proveedor {{ $proveedor->razon_social }}"
+                                       readonly>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="proveedor_display" class="form-label">Proveedor</label>
-                                    <input type="text"
-                                           class="form-control bg-light"
-                                           id="proveedor_display"
-                                           value="{{ $proveedor->razon_social }}"
-                                           readonly>
-                                </div>
+                            <div class="span-2">
+                                <label for="proveedor_display" class="form-label">Proveedor</label>
+                                <input type="text"
+                                       class="form-control form-control-sm readonly-field"
+                                       id="proveedor_display"
+                                       value="{{ $proveedor->razon_social }}"
+                                       readonly>
                             </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="fecha_emision" class="form-label">Fecha Emisión *</label>
-                                    <input type="date"
-                                           class="form-control"
-                                           id="fecha_emision"
-                                           name="fecha_emision"
-                                           value="{{ old('fecha_emision', date('Y-m-d')) }}"
-                                           required>
-                                </div>
+                            <div>
+                                <label for="fecha_emision" class="form-label">Fecha Emisión *</label>
+                                <input type="date"
+                                       class="form-control form-control-sm"
+                                       id="fecha_emision"
+                                       name="fecha_emision"
+                                       value="{{ old('fecha_emision', date('Y-m-d')) }}"
+                                       required>
                             </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="validez" class="form-label">Validez (días) *</label>
-                                    <input type="number"
-                                           class="form-control"
-                                           id="validez"
-                                           name="validez"
-                                           value="{{ old('validez', '30') }}"
-                                           min="1"
-                                           max="365"
-                                           required>
-                                </div>
+                            <div>
+                                <label for="validez" class="form-label">Validez (días) *</label>
+                                <input type="number"
+                                       class="form-control form-control-sm"
+                                       id="validez"
+                                       name="validez"
+                                       value="{{ old('validez', '30') }}"
+                                       min="1"
+                                       max="365"
+                                       required>
                             </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="fecha_vencimiento" class="form-label">Fecha Vencimiento *</label>
-                                    <input type="date"
-                                           class="form-control"
-                                           id="fecha_vencimiento"
-                                           name="fecha_vencimiento"
-                                           value="{{ old('fecha_vencimiento') }}"
-                                           required
-                                           readonly>
-                                </div>
+                            <div>
+                                <label for="fecha_vencimiento" class="form-label">Fecha Vencimiento *</label>
+                                <input type="date"
+                                       class="form-control form-control-sm readonly-field"
+                                       id="fecha_vencimiento"
+                                       name="fecha_vencimiento"
+                                       value="{{ old('fecha_vencimiento') }}"
+                                       required
+                                       readonly>
                             </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="impuesto_general" class="form-label">Impuesto para Todos</label>
-                                    <select class="form-select" id="impuesto_general">
-                                        <option value="">Aplicar a todos...</option>
-                                        @foreach($impuestos as $impuesto)
-                                            <option value="{{ $impuesto->id }}"
-                                                    data-calculo="{{ $impuesto->calculo }}"
-                                                    {{ $impuesto->id == 3 ? 'selected' : '' }}>
-                                                {{ $impuesto->descripcion }} ({{ $impuesto->calculo }}%)
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <small class="text-muted">Aplica el mismo impuesto a todos los items</small>
-                                </div>
+                            <div>
+                                <label for="impuesto_general" class="form-label">Impuesto para Todos</label>
+                                <select class="form-select form-select-sm" id="impuesto_general">
+                                    <option value="">Aplicar a todos...</option>
+                                    @foreach($impuestos as $impuesto)
+                                        <option value="{{ $impuesto->id }}"
+                                                data-calculo="{{ $impuesto->calculo }}"
+                                                {{ $impuesto->id == 3 ? 'selected' : '' }}>
+                                            {{ $impuesto->descripcion }} ({{ $impuesto->calculo }}%)
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    <label for="descripcion" class="form-label">Descripción (opcional)</label>
-                                    <textarea class="form-control"
-                                              id="descripcion"
-                                              name="descripcion"
-                                              rows="3"
-                                              placeholder="Descripción o comentarios del presupuesto...">{{ old('descripcion') }}</textarea>
-                                </div>
+                            <div class="span-4">
+                                <label for="descripcion" class="form-label">Descripción (opcional)</label>
+                                <textarea class="form-control form-control-sm"
+                                          id="descripcion"
+                                          name="descripcion"
+                                          rows="2"
+                                          placeholder="Descripción o comentarios del presupuesto...">{{ old('descripcion') }}</textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Cotización de Insumos -->
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>Cotizar Insumos del Pedido
-                        </h5>
+                {{-- Cotización de Insumos --}}
+                <div class="card table-card">
+                    <div class="card-header-section">
+                        <span><i class="fas fa-list me-2"></i>Cotizar Insumos del Pedido</span>
+                        <span class="results-count">{{ $pedido->detalles->count() }} ítem(s)</span>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-dark">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
                                     <tr>
-                                        <th width="20%">Insumo</th>
-                                        <th width="8%">Cantidad</th>
-                                        <th width="12%">Precio Unit.</th>
-                                        <th width="12%">Impuesto</th>
-                                        <th width="10%">Subtotal</th>
-                                        <th width="18%">Observación del Pedido</th>
-                                        <th width="20%">Observación del Presupuesto</th>
+                                        <th>Insumo</th>
+                                        <th style="width:70px;" class="text-center">Cantidad</th>
+                                        <th style="width:120px;">Precio Unit.</th>
+                                        <th style="width:150px;">Impuesto</th>
+                                        <th style="width:120px;" class="text-center">Subtotal</th>
+                                        <th style="width:200px;">Observación del Pedido</th>
+                                        <th style="width:240px;">Observación del Presupuesto</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($pedido->detalles as $index => $detalle)
                                         <tr class="insumo-row">
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-2">
-                                                        <i class="fas fa-cube text-primary"></i>
-                                                    </div>
-                                                    <div>
-                                                        <strong class="d-block">{{ $detalle->insumo->descripcion }}</strong>
-                                                        <small class="text-muted">
-                                                            <span class="badge bg-primary me-1">{{ $detalle->insumo->marca->descripcion }}</span>
-                                                            <span class="badge bg-secondary">{{ $detalle->insumo->unidadMedida->abreviatura ?? $detalle->insumo->unidadMedida->descripcion }}</span>
-                                                        </small>
-                                                    </div>
-                                                </div>
+                                                <strong class="d-block">{{ $detalle->insumo->descripcion }}</strong>
+                                                <span class="tag me-1">{{ $detalle->insumo->marca->descripcion }}</span>
+                                                <span class="tag tag-secondary">{{ $detalle->insumo->unidadMedida->abreviatura ?? $detalle->insumo->unidadMedida->descripcion }}</span>
                                                 <input type="hidden" name="detalles[{{ $index }}][insumo_id]" value="{{ $detalle->insumo_id }}">
                                                 <input type="hidden" name="detalles[{{ $index }}][cantidad]" value="{{ $detalle->cantidad }}">
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge bg-info fs-6">{{ number_format($detalle->cantidad, 0, ',', '.') }}</span>
+                                                <span class="tag">{{ number_format($detalle->cantidad, 0, ',', '.') }}</span>
                                             </td>
                                             <td>
                                                 <input type="number"
-                                                       class="form-control precio-input"
+                                                       class="form-control form-control-sm precio-input"
                                                        name="detalles[{{ $index }}][precio_unitario]"
                                                        value="{{ old('detalles.'.$index.'.precio_unitario', '0') }}"
                                                        min="0"
@@ -205,7 +171,7 @@
                                                        required>
                                             </td>
                                             <td>
-                                                <select class="form-select impuesto-select" name="detalles[{{ $index }}][impuesto_id]" required>
+                                                <select class="form-select form-select-sm impuesto-select" name="detalles[{{ $index }}][impuesto_id]" required>
                                                     <option value="">Seleccionar</option>
                                                     @foreach($impuestos as $impuesto)
                                                         <option value="{{ $impuesto->id }}"
@@ -217,27 +183,23 @@
                                                 </select>
                                             </td>
                                             <td class="text-center">
-                                                <strong class="subtotal-item text-primary">₲ 0</strong>
+                                                <span class="amount subtotal-item">₲ 0</span>
                                                 <small class="d-block text-muted impuesto-item">+ ₲ 0 imp.</small>
                                             </td>
                                             <td>
                                                 @if($detalle->observacion)
-                                                    <div class="bg-light p-2 rounded border-start border-3 border-info">
-                                                        <small class="text-dark">{{ $detalle->observacion }}</small>
-                                                    </div>
+                                                    <div class="obs-box">{{ $detalle->observacion }}</div>
                                                 @else
-                                                    <span class="text-muted small">
-                                                        <i class="fas fa-minus me-1"></i>Sin observación
-                                                    </span>
+                                                    <span class="text-muted">—</span>
                                                 @endif
                                             </td>
                                             <td>
-                                                <textarea class="form-control observacion-input"
+                                                <textarea class="form-control form-control-sm observacion-input"
                                                           name="detalles[{{ $index }}][observacion]"
                                                           rows="2"
                                                           placeholder="Observación del proveedor..."
                                                           maxlength="300">{{ old('detalles.'.$index.'.observacion') }}</textarea>
-                                                <small class="text-muted">Máximo 300 caracteres</small>
+                                                <small class="text-muted char-counter">0/300 caracteres</small>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -247,63 +209,50 @@
                     </div>
                 </div>
 
-                <!-- Resumen de Totales -->
-                <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-calculator me-2"></i>Resumen de Totales
-                        </h5>
+                {{-- Resumen de Totales --}}
+                <div class="card">
+                    <div class="card-header-section">
+                        <span><i class="fas fa-calculator me-2"></i>Resumen de Totales</span>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="bg-light p-4 rounded">
-                                    <h6 class="text-primary mb-3">
-                                        <i class="fas fa-list-ul me-2"></i>Detalles por Impuesto
-                                    </h6>
-                                    <div id="resumenImpuestos">
-                                        <p class="text-muted">Agregue precios para ver el desglose</p>
-                                    </div>
+                        <div class="totals-grid">
+                            <div class="totals-box">
+                                <div class="totals-box-title">Detalle por Impuesto</div>
+                                <div id="resumenImpuestos">
+                                    <p class="text-muted mb-0" style="font-size:0.8rem;">Agregue precios para ver el desglose</p>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <div class="bg-primary text-white p-4 rounded">
-                                    <h6 class="mb-3">
-                                        <i class="fas fa-chart-pie me-2"></i>Totales Generales
-                                    </h6>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Total sin impuestos:</span>
-                                        <strong id="subtotalGeneral">₲ 0</strong>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Total impuestos:</span>
-                                        <strong id="impuestosGeneral">₲ 0</strong>
-                                    </div>
-                                    <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
-                                    <div class="d-flex justify-content-between">
-                                        <span class="h5">TOTAL FINAL:</span>
-                                        <strong class="h4" id="totalGeneral">₲ 0</strong>
-                                    </div>
+                            <div class="totals-box">
+                                <div class="totals-row">
+                                    <span>Total sin impuestos</span>
+                                    <strong id="subtotalGeneral">₲ 0</strong>
+                                </div>
+                                <div class="totals-row">
+                                    <span>Total impuestos</span>
+                                    <strong id="impuestosGeneral">₲ 0</strong>
+                                </div>
+                                <div class="totals-row totals-final">
+                                    <span>TOTAL FINAL</span>
+                                    <strong id="totalGeneral">₲ 0</strong>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Botones de Acción -->
+                {{-- Acciones --}}
                 <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ route('presupuesto_compra.show_pedido', $pedido->id) }}" class="btn btn-secondary btn-lg">
-                                <i class="fas fa-times me-2"></i>Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-success btn-lg" id="guardarPresupuesto">
-                                <i class="fas fa-save me-2"></i>Guardar Presupuesto
-            </button>
-                        </div>
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <a href="{{ route('presupuesto_compra.show_pedido', $pedido->id) }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success" id="guardarPresupuesto">
+                            <i class="fas fa-save me-2"></i>Guardar Presupuesto
+                        </button>
                     </div>
                 </div>
             </form>
+
         </div>
     </div>
 
@@ -312,91 +261,178 @@
 </html>
 
 <style>
-.main-content {
-    margin-left: 60px;
-    width: calc(100vw - 60px);
-    min-height: 100vh;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
-    overflow-x: hidden;
-    box-sizing: border-box;
-}
-
 .content-wrapper {
-    padding: 20px;
-    max-width: 100%;
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+
+/* ── Formulario ── */
+#presupuestoForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Cards ── */
 .card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: none;
+}
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
+}
+.results-count { font-weight: 400; font-size: 0.78rem; color: #94a3b8; }
+
+/* ── Datos del presupuesto ── */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+.form-grid .form-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.form-grid .span-2 { grid-column: span 2; }
+.form-grid .span-4 { grid-column: span 4; }
+.readonly-field {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #374151;
 }
 
-.form-control, .form-select {
-    border: 2px solid #e9ecef;
-    border-radius: 6px;
-    transition: all 0.3s ease;
+@media (max-width: 900px) {
+    .form-grid { grid-template-columns: repeat(2, 1fr); }
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .span-2,
+    .form-grid .span-4 { grid-column: span 1; }
 }
 
-.form-control:focus, .form-select:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
+/* ── Tablas ── */
+.table-card { display: flex; flex-direction: column; }
+.table-container { overflow: auto; }
 
-.precio-input {
-    text-align: center;
+.data-table {
+    width: 100%;
+    min-width: 1100px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+.data-table thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
     font-weight: 600;
+    padding: 0.6rem 0.65rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
-
-.observacion-input {
-    font-size: 0.875rem;
-    resize: vertical;
-}
-
-.table th {
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.table td {
+.data-table tbody td {
+    padding: 0.6rem 0.65rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
+    color: #374151;
 }
+.data-table tbody tr:hover { background: #f8fafc; }
+.data-table tbody tr:last-child td { border-bottom: none; }
 
-.insumo-row:hover {
-    background-color: rgba(0, 123, 255, 0.05);
+/* Tags */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
 }
+.tag-secondary { background: #f1f5f9; color: #64748b; }
+.amount { font-weight: 700; color: #10b981; }
 
-.impuesto-detalle {
-    border-left: 4px solid #007bff;
-    background-color: #f8f9fa;
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
+/* Observación del pedido */
+.obs-box {
+    background: #f8fafc;
+    border-left: 3px solid #38bdf8;
     border-radius: 0 6px 6px 0;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.78rem;
+    color: #374151;
 }
+
+.precio-input { text-align: center; font-weight: 600; }
+.observacion-input { font-size: 0.8rem; resize: vertical; }
+.char-counter { font-size: 0.68rem; }
+
+/* ── Totales ── */
+.totals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+.totals-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+.totals-box-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.5rem;
+}
+.totals-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #374151; padding: 0.25rem 0; }
+.totals-row.totals-final {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+.totals-final strong { color: #10b981; }
 
 @media (max-width: 768px) {
-    .main-content {
-        margin-left: 50px;
-        width: calc(100vw - 50px);
-    }
-
-    .content-wrapper {
-        padding: 15px;
-    }
-}
-
-.sidebar-nav:hover ~ .main-content {
-    margin-left: 280px;
-    width: calc(100vw - 280px);
+    .table-container { font-size: 0.875rem; }
+    .totals-grid { grid-template-columns: 1fr; }
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Aplicar impuesto por defecto (ID 3 - 5%) a todos los items al cargar
+    // Aplicar impuesto por defecto a todos los items al cambiar el selector general
     document.getElementById('impuesto_general').addEventListener('change', function() {
         if (this.value) {
             document.querySelectorAll('.impuesto-select').forEach(select => {
@@ -426,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar cálculo de fecha
     calcularFechaVencimiento();
 
-    // Calcular totales con el nuevo sistema de impuestos
+    // Calcular totales
     function calcularTotales() {
         let subtotalGeneral = 0;
         let impuestosGeneral = 0;
@@ -434,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.querySelectorAll('.insumo-row').forEach(row => {
             const cantidad = parseFloat(row.querySelector('input[name*="[cantidad]"]').value) || 0;
-            const precio = Math.round(parseFloat(row.querySelector('.precio-input').value) || 0); // Redondear sin decimales
+            const precio = Math.round(parseFloat(row.querySelector('.precio-input').value) || 0);
             const impuestoSelect = row.querySelector('.impuesto-select');
             const impuestoId = parseInt(impuestoSelect.value);
             const impuestoCalculo = parseFloat(impuestoSelect.options[impuestoSelect.selectedIndex]?.dataset.calculo) || 0;
@@ -449,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Si el impuesto es ID 1 (Exentas), no calcular impuesto
                 if (impuestoId !== 1) {
-                    impuesto = Math.round(subtotal / impuestoCalculo); // División según tu especificación
+                    impuesto = Math.round(subtotal / impuestoCalculo);
                 }
 
                 subtotalGeneral += subtotal;
@@ -485,23 +521,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (Object.keys(impuestosDetalle).length > 0) {
             let html = '';
             Object.values(impuestosDetalle).forEach(detalle => {
-                // Solo mostrar en el resumen si tiene impuesto (no exentas)
                 if (detalle.total > 0 || detalle.calculo === 0) {
                     html += `
-                        <div class="impuesto-detalle mb-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-primary fw-bold">${detalle.nombre}</span>
-                                <strong class="text-success">
-                                    ${detalle.total > 0 ? '₲ ' + detalle.total.toLocaleString('es-PY') : 'Sin impuesto'}
-                                </strong>
-                            </div>
+                        <div class="totals-row">
+                            <span>${detalle.nombre}</span>
+                            <strong>${detalle.total > 0 ? '₲ ' + detalle.total.toLocaleString('es-PY') : 'Sin impuesto'}</strong>
                         </div>
                     `;
                 }
             });
-            resumenImpuestos.innerHTML = html || '<p class="text-muted">Todos los items son exentos</p>';
+            resumenImpuestos.innerHTML = html || '<p class="text-muted mb-0" style="font-size:0.8rem;">Todos los items son exentos</p>';
         } else {
-            resumenImpuestos.innerHTML = '<p class="text-muted">Agregue precios para ver el desglose</p>';
+            resumenImpuestos.innerHTML = '<p class="text-muted mb-0" style="font-size:0.8rem;">Agregue precios para ver el desglose</p>';
         }
 
         // Actualizar totales generales
@@ -529,16 +560,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Contador de caracteres para observaciones
     document.querySelectorAll('.observacion-input').forEach(textarea => {
+        const counter = textarea.nextElementSibling;
+        counter.textContent = `${textarea.value.length}/300 caracteres`;
         textarea.addEventListener('input', function() {
             const maxLength = 300;
-            const currentLength = this.value.length;
-            const small = this.nextElementSibling;
-
-            if (currentLength > maxLength) {
+            if (this.value.length > maxLength) {
                 this.value = this.value.substring(0, maxLength);
             }
-
-            small.textContent = `${this.value.length}/${maxLength} caracteres`;
+            counter.textContent = `${this.value.length}/${maxLength} caracteres`;
         });
     });
 

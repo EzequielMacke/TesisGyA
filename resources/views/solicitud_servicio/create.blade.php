@@ -5,148 +5,49 @@
     <meta charset="UTF-8">
     <title>Nueva Solicitud de Servicio</title>
     @include('partials.head')
-    <style>
-        html, body {
-            width: 100%;
-            min-width: 0;
-            overflow-x: hidden;
-        }
-        .main-content {
-            margin-left: 60px;
-            min-height: 100vh;
-            background-color: #f8f9fa;
-            transition: margin-left 0.3s cubic-bezier(.4,2,.6,1);
-            overflow-x: auto;
-            box-sizing: border-box;
-            width: auto;
-            max-width: 100vw;
-        }
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 50px;
-            }
-        }
-        .sidebar-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 60px;
-            transition: width 0.3s cubic-bezier(.4,2,.6,1);
-            overflow-x: hidden;
-            z-index: 10000;
-        }
-        .sidebar-nav:hover {
-            width: 280px;
-            box-shadow: 2px 0 16px rgba(0,0,0,0.07);
-        }
-        .sidebar-nav:hover ~ .main-content {
-            margin-left: 280px;
-        }
-        @media (max-width: 768px) {
-            .sidebar-nav:hover {
-                width: 250px;
-            }
-            .sidebar-nav:hover ~ .main-content {
-                margin-left: 250px;
-            }
-        }
-        .content-wrapper {
-            padding: 15px;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow-x: auto;
-        }
-        .menu-text {
-            opacity: 0;
-            transition: opacity 0.2s;
-            white-space: nowrap;
-        }
-        .sidebar-nav:hover .menu-text {
-            opacity: 1;
-            transition-delay: 0.1s;
-        }
-        .card-form {
-            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
-            border-radius: 1rem;
-        }
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #0d6efd;
-            margin-bottom: 1rem;
-            letter-spacing: 0.5px;
-        }
-        .info-card {
-            border-left: 4px solid #0d6efd;
-            background: #f8f9fa;
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
-            margin-bottom: 1rem;
-        }
-        .select2-container--default .select2-selection--single {
-            border-radius: 0.5rem;
-            height: 38px;
-            padding-top: 3px;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 32px;
-        }
-        .form-check-input:checked {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-        .servicio-check {
-            background: #f1f3f6;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            margin-bottom: 0.5rem;
-            transition: background 0.2s;
-        }
-        .servicio-check:hover {
-            background: #e2e6ea;
-        }
-        .btn-primary {
-            box-shadow: 0 2px 8px rgba(13,110,253,0.08);
-        }
-        .btn-secondary {
-            box-shadow: 0 2px 8px rgba(108,117,125,0.08);
-        }
-    </style>
 </head>
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <div class="d-flex align-items-center mb-4">
-                <h2 class="mb-0 section-title">
-                    <i class="fas fa-file-alt me-2"></i>Nueva Solicitud de Servicio
-                </h2>
+
+            {{-- Cabecera --}}
+            <div class="page-header">
+                <div>
+                    <h2><i class="fas fa-file-alt"></i> Nueva Solicitud de Servicio</h2>
+                    <small>Complete los datos para registrar una nueva solicitud</small>
+                </div>
+                <a href="{{ route('solicitud_servicio.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Listado
+                </a>
             </div>
 
-            @if ($errors->any())
-                <div class="alert alert-danger shadow-sm">
+            {{-- Alerts --}}
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li><i class="fas fa-exclamation-circle me-2"></i>{{ $error }}</li>
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
                         @endforeach
                     </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('solicitud_servicio.store') }}">
+            <form method="POST" action="{{ route('solicitud_servicio.store') }}" id="solicitudForm">
                 @csrf
 
-                <div class="card card-form mb-4">
+                {{-- Datos de la Solicitud --}}
+                <div class="card">
+                    <div class="card-header-section">
+                        <span><i class="fas fa-info-circle me-2"></i>Datos de la Solicitud</span>
+                    </div>
                     <div class="card-body">
-                        <div class="row g-4 mb-3">
-                            <!-- Cliente -->
-                            <div class="col-md-4">
-                                <label for="cliente_id" class="form-label fw-bold">
-                                    <i class="fas fa-user-tie me-1 text-primary"></i>Cliente
-                                </label>
-                                <select name="cliente_id" id="cliente_id" class="form-select select2">
+                        <div class="form-grid">
+                            <div>
+                                <label for="cliente_id" class="form-label">Cliente *</label>
+                                <select name="cliente_id" id="cliente_id" class="form-select form-select-sm select2">
                                     <option value="">Seleccione un cliente</option>
                                     @foreach($clientes as $cliente)
                                         <option value="{{ $cliente->id }}" {{ old('cliente_id') == $cliente->id ? 'selected' : '' }}>
@@ -154,153 +55,252 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <div id="info-cliente" class="mt-2"></div>
+                                <div id="info-cliente" class="detail-box mt-2" style="display:none;"></div>
                             </div>
-                            <!-- Obra -->
-                            <div class="col-md-4">
-                                <label for="obra_id" class="form-label fw-bold">
-                                    <i class="fas fa-building me-1 text-primary"></i>Obra
-                                </label>
-                                <select name="obra_id" id="obra_id" class="form-select select2" disabled>
+                            <div>
+                                <label for="obra_id" class="form-label">Obra *</label>
+                                <select name="obra_id" id="obra_id" class="form-select form-select-sm select2" disabled>
                                     <option value="">Seleccione una obra</option>
                                 </select>
-                                <div id="info-obra" class="mt-2"></div>
+                                <div id="info-obra" class="detail-box mt-2" style="display:none;"></div>
                             </div>
-                            <!-- Fecha -->
-                            <div class="col-md-4">
-                                <label for="fecha" class="form-label fw-bold">
-                                    <i class="fas fa-calendar-alt me-1 text-primary"></i>Fecha
-                                </label>
-                                <input type="date" name="fecha" id="fecha" class="form-control" value="{{ old('fecha', date('Y-m-d')) }}">
+                            <div>
+                                <label for="fecha" class="form-label">Fecha *</label>
+                                <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="{{ old('fecha', date('Y-m-d')) }}">
                             </div>
                         </div>
 
-                        <!-- Servicios -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold section-title">
-                                <i class="fas fa-tools me-2"></i>Servicios
-                            </label>
-                            <div class="row" id="servicios-list">
-                                @foreach($servicios as $servicio)
-                                    <div class="col-md-4">
-                                        <div class="form-check servicio-check">
-                                            <input class="form-check-input" type="checkbox" name="servicios[]" value="{{ $servicio->id }}"
-                                                id="servicio_{{ $servicio->id }}"
-                                                {{ (is_array(old('servicios')) && in_array($servicio->id, old('servicios'))) ? 'checked' : '' }}>
-                                            <label class="form-check-label fw-normal" for="servicio_{{ $servicio->id }}">
-                                                <i class="fas fa-cogs me-1 text-secondary"></i>{{ $servicio->descripcion }}
-                                            </label>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        <!-- Observación -->
-                        <div class="mb-4">
-                            <label for="observacion" class="form-label fw-bold">
-                                <i class="fas fa-comment-dots me-1 text-primary"></i>Observación
-                            </label>
-                            <textarea name="observacion" id="observacion" class="form-control" rows="2" placeholder="Ingrese una observación...">{{ old('observacion') }}</textarea>
-                        </div>
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{{ route('solicitud_servicio.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Guardar Solicitud
-                            </button>
+                        <div class="mt-3">
+                            <label for="observacion" class="form-label">Observación</label>
+                            <textarea name="observacion" id="observacion" class="form-control form-control-sm" rows="2" placeholder="Ingrese una observación...">{{ old('observacion') }}</textarea>
                         </div>
                     </div>
                 </div>
+
+                {{-- Servicios --}}
+                <div class="card">
+                    <div class="card-header-section">
+                        <span><i class="fas fa-tools me-2"></i>Servicios a Solicitar</span>
+                        <span class="results-count">{{ $servicios->count() }} disponible(s)</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="servicios-grid">
+                            @foreach($servicios as $servicio)
+                                <label class="servicio-check" for="servicio_{{ $servicio->id }}">
+                                    <input class="form-check-input" type="checkbox" name="servicios[]" value="{{ $servicio->id }}"
+                                        id="servicio_{{ $servicio->id }}"
+                                        {{ (is_array(old('servicios')) && in_array($servicio->id, old('servicios'))) ? 'checked' : '' }}>
+                                    <span><i class="fas fa-cogs me-1 text-muted"></i>{{ $servicio->descripcion }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Acciones --}}
+                <div class="card">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <a href="{{ route('solicitud_servicio.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar Solicitud
+                        </button>
+                    </div>
+                </div>
             </form>
+
         </div>
     </div>
 
     @include('partials.footer')
-
-    <script>
-    $(document).ready(function() {
-        $('.select2').select2({ width: '100%' });
-
-        // Al seleccionar cliente, cargar obras activas y mostrar info del cliente
-        $('#cliente_id').on('change', function() {
-            var clienteId = $(this).val();
-            $('#obra_id').prop('disabled', true).empty().append('<option value="">Seleccione una obra</option>');
-            $('#info-cliente').html('');
-            $('#info-obra').html('');
-            if (clienteId) {
-                // Cargar obras del cliente
-                $.getJSON('{{ url("api/obras") }}/' + clienteId, function(obras) {
-                    if (obras.length > 0) {
-                        $('#obra_id').append(
-                            obras.map(o => `<option value="${o.id}">${o.descripcion}</option>`)
-                        );
-                        $('#obra_id').prop('disabled', false);
-                        @if(old('obra_id'))
-                            $('#obra_id').val('{{ old('obra_id') }}').trigger('change');
-                        @endif
-                    }
-                });
-                // Mostrar info del cliente (ya que está en el select, puedes buscarlo en el array de PHP o hacer AJAX)
-                @php
-                    $clientesArr = [];
-                    foreach($clientes as $c) {
-                        $clientesArr[$c->id] = [
-                            'razon_social' => $c->razon_social,
-                            'ruc' => $c->ruc,
-                            'telefono' => $c->telefono,
-                            'email' => $c->email
-                        ];
-                    }
-                @endphp
-                var clientesData = @json($clientesArr);
-                var data = clientesData[clienteId];
-                if(data){
-                    $('#info-cliente').html(
-                        `<div class="info-card">
-                            <div class="fw-bold mb-1"><i class="fas fa-user-tie text-primary me-1"></i>${data.razon_social}</div>
-                            <div><i class="fas fa-id-card me-1 text-secondary"></i><strong>RUC:</strong> ${data.ruc}</div>
-                            <div><i class="fas fa-phone me-1 text-secondary"></i><strong>Teléfono:</strong> ${data.telefono}</div>
-                            <div><i class="fas fa-envelope me-1 text-secondary"></i><strong>Email:</strong> ${data.email}</div>
-                        </div>`
-                    );
-                }
-            }
-        });
-
-        // Al seleccionar obra, mostrar info de la obra
-        $('#obra_id').on('change', function() {
-            var obraId = $(this).val();
-            $('#info-obra').html('');
-            if (obraId) {
-                $.getJSON('{{ url("api/obra") }}/' + obraId, function(data) {
-                    $('#info-obra').html(
-                        `<div class="info-card border-primary">
-                            <div class="fw-bold mb-1"><i class="fas fa-building text-primary me-1"></i>${data.descripcion}</div>
-                            <div><i class="fas fa-map-marker-alt me-1 text-secondary"></i><strong>Ubicación:</strong> ${data.ubicacion}</div>
-                            <div>
-                                <i class="fas fa-sticky-note me-1 text-secondary"></i>
-                                <strong>Observación:</strong>
-                                ${data.observacion ? data.observacion : 'No tiene observación'}
-                            </div>
-                        </div>`
-                    );
-                });
-            }
-        });
-
-        // Si hay valores viejos, dispara los cambios
-        @if(old('cliente_id'))
-            $('#cliente_id').val('{{ old('cliente_id') }}').trigger('change');
-        @endif
-        @if(old('obra_id'))
-            setTimeout(function() {
-                $('#obra_id').val('{{ old('obra_id') }}').trigger('change');
-            }, 500);
-        @endif
-    });
-    </script>
 </body>
 </html>
+
+<style>
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+
+/* ── Formulario ── */
+#solicitudForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Cards ── */
+.card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: none;
+}
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
+}
+.results-count { font-weight: 400; font-size: 0.78rem; color: #94a3b8; }
+
+/* ── Datos de la solicitud ── */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+.form-grid .form-label,
+.card-body > .form-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.detail-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    color: #374151;
+}
+.detail-row { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.25rem; }
+.detail-row:last-child { margin-bottom: 0; }
+.detail-row i { color: #94a3b8; width: 14px; text-align: center; }
+
+.select2-container--bootstrap-5 .select2-selection {
+    min-height: calc(1.5em + 0.5rem + 2px);
+}
+
+@media (max-width: 900px) {
+    .form-grid { grid-template-columns: repeat(2, 1fr); }
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+    .form-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Servicios ── */
+.servicios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.6rem;
+}
+.servicio-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    margin-bottom: 0;
+}
+.servicio-check:hover { background: #eff6ff; border-color: #bfdbfe; }
+.servicio-check.checked { background: #eff6ff; border-color: #2563eb; color: #1e293b; }
+.servicio-check input { margin: 0; cursor: pointer; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    $('.select2').select2({ theme: 'bootstrap-5', width: '100%' });
+
+    // Resaltar tarjetas de servicio seleccionadas
+    document.querySelectorAll('.servicio-check').forEach(function (label) {
+        const checkbox = label.querySelector('input[type="checkbox"]');
+        const sync = () => label.classList.toggle('checked', checkbox.checked);
+        sync();
+        checkbox.addEventListener('change', sync);
+    });
+
+    // Al seleccionar cliente, cargar obras activas y mostrar info del cliente
+    $('#cliente_id').on('change', function() {
+        var clienteId = $(this).val();
+        $('#obra_id').prop('disabled', true).empty().append('<option value="">Seleccione una obra</option>');
+        $('#info-cliente').hide().html('');
+        $('#info-obra').hide().html('');
+        if (clienteId) {
+            $.getJSON('{{ url("api/obras") }}/' + clienteId, function(obras) {
+                if (obras.length > 0) {
+                    $('#obra_id').append(
+                        obras.map(o => `<option value="${o.id}">${o.descripcion}</option>`)
+                    );
+                    $('#obra_id').prop('disabled', false);
+                    @if(old('obra_id'))
+                        $('#obra_id').val('{{ old('obra_id') }}').trigger('change');
+                    @endif
+                }
+            });
+
+            @php
+                $clientesArr = [];
+                foreach($clientes as $c) {
+                    $clientesArr[$c->id] = [
+                        'razon_social' => $c->razon_social,
+                        'ruc' => $c->ruc,
+                        'telefono' => $c->telefono,
+                        'email' => $c->email
+                    ];
+                }
+            @endphp
+            var clientesData = @json($clientesArr);
+            var data = clientesData[clienteId];
+            if (data) {
+                $('#info-cliente').html(
+                    `<div class="detail-row"><i class="fas fa-id-card"></i><span><strong>RUC:</strong> ${data.ruc}</span></div>
+                     <div class="detail-row"><i class="fas fa-phone"></i><span><strong>Teléfono:</strong> ${data.telefono ?? '-'}</span></div>
+                     <div class="detail-row"><i class="fas fa-envelope"></i><span><strong>Email:</strong> ${data.email ?? '-'}</span></div>`
+                ).show();
+            }
+        }
+    });
+
+    // Al seleccionar obra, mostrar info de la obra
+    $('#obra_id').on('change', function() {
+        var obraId = $(this).val();
+        $('#info-obra').hide().html('');
+        if (obraId) {
+            $.getJSON('{{ url("api/obra") }}/' + obraId, function(data) {
+                $('#info-obra').html(
+                    `<div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Ubicación:</strong> ${data.ubicacion}</span></div>
+                     <div class="detail-row"><i class="fas fa-sticky-note"></i><span><strong>Observación:</strong> ${data.observacion ? data.observacion : 'No tiene observación'}</span></div>`
+                ).show();
+            });
+        }
+    });
+
+    // Si hay valores viejos, dispara los cambios
+    @if(old('cliente_id'))
+        $('#cliente_id').val('{{ old('cliente_id') }}').trigger('change');
+    @endif
+    @if(old('obra_id'))
+        setTimeout(function() {
+            $('#obra_id').val('{{ old('obra_id') }}').trigger('change');
+        }, 500);
+    @endif
+});
+</script>

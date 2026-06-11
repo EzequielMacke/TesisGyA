@@ -256,8 +256,9 @@ class CompraController extends Controller
             }
         }
 
-        $compra->update(['monto' => round($monto)]);
         $total_iva = $iva5 + $iva10;
+        $montoTotal = $monto + $total_iva;
+        $compra->update(['monto' => round($montoTotal)]);
         $condicion = strtolower($orden->condicionPago->descripcion);
         $cuotas = $orden->cuota;
         $intervalo = $orden->intervalo;
@@ -273,16 +274,16 @@ class CompraController extends Controller
                 'fecha_emision' => $request->fecha_emision,
                 'fecha_pago' => null,
                 'fecha_vencimiento' => $request->fecha_vencimiento ?? $request->fecha_emision,
-                'monto' => round($monto),
+                'monto' => round($montoTotal),
                 'monto_pagado' => 0,
-                'saldo' => round($monto),
+                'saldo' => round($montoTotal),
                 'estado_id' => 3,
             ]);
         } else {
             if (empty($cuotas) || empty($intervalo)) {
                 return back()->with('error', 'La orden de compra seleccionada no tiene configuradas las cuotas o el intervalo para crédito.');
             }
-            $montoCuota = round($monto / $cuotas);
+            $montoCuota = round($montoTotal / $cuotas);
             $fechaBase = \Carbon\Carbon::parse($request->fecha_emision);
             for ($i = 1; $i <= $cuotas; $i++) {
                 $fechaVencimiento = $fechaBase->copy()->addDays($intervalo * ($i - 1));

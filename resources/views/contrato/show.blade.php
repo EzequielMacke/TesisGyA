@@ -4,89 +4,43 @@
     <meta charset="UTF-8">
     <title>Ver Contrato</title>
     @include('partials.head')
-    <style>
-        .main-content {
-            margin-left: 60px;
-            min-height: 100vh;
-            background-color: #f8f9fa;
-            transition: margin-left 0.3s cubic-bezier(.4,2,.6,1);
-            overflow-x: hidden;
-            box-sizing: border-box;
-            width: auto;
-            max-width: 100vw;
-        }
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 50px;
-            }
-        }
-        .sidebar-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 60px;
-            transition: width 0.3s cubic-bezier(.4,2,.6,1);
-            overflow-x: hidden;
-            z-index: 10000;
-        }
-        .sidebar-nav:hover {
-            width: 280px;
-            box-shadow: 2px 0 16px rgba(0,0,0,0.07);
-        }
-        .sidebar-nav:hover ~ .main-content {
-            margin-left: 280px;
-        }
-        @media (max-width: 768px) {
-            .sidebar-nav:hover {
-                width: 250px;
-            }
-            .sidebar-nav:hover ~ .main-content {
-                margin-left: 250px;
-            }
-        }
-        .content-wrapper {
-            padding: 20px;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-        .contrato-text {
-            font-family: 'Times New Roman', serif;
-            line-height: 1.6;
-            text-align: justify;
-        }
-        .contrato-title {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .contrato-section {
-            margin-bottom: 15px;
-        }
-        .contrato-clause {
-            font-weight: bold;
-            text-decoration: underline;
-        }
-    </style>
 </head>
 <body>
     @include('partials.menu_lateral')
 
     <div class="main-content">
         <div class="content-wrapper">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-primary"><i class="fas fa-file-contract me-2"></i>Contrato #{{ $contrato->id }}</h2>
+
+            {{-- Cabecera --}}
+            <div class="page-header">
                 <div>
-                    <a href="{{ route('contrato.index') }}" class="btn btn-outline-secondary me-2">
-                        <i class="fas fa-arrow-left me-2"></i>Volver
-                    </a>
-                    <button onclick="window.print()" class="btn btn-primary">
+                    <h2><i class="fas fa-file-contract"></i> Contrato #{{ $contrato->id }}</h2>
+                    <small>{{ $contrato->cliente->razon_social ?? 'Cliente' }} — {{ $contrato->obra->descripcion ?? 'Obra' }}</small>
+                </div>
+                <div class="header-actions">
+                    @switch($contrato->estado_id)
+                        @case(3)
+                            <span class="estado estado-pendiente"><i class="estado-dot"></i>Pendiente</span>
+                            @break
+                        @case(4)
+                            <span class="estado estado-confirmado"><i class="estado-dot"></i>Confirmado</span>
+                            @break
+                        @case(5)
+                            <span class="estado estado-anulado"><i class="estado-dot"></i>Anulado</span>
+                            @break
+                        @default
+                            <span class="estado"><i class="estado-dot"></i>{{ $contrato->estado->descripcion ?? '-' }}</span>
+                    @endswitch
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
                         <i class="fas fa-print me-2"></i>Imprimir
                     </button>
+                    <a href="{{ route('contrato.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </a>
                 </div>
             </div>
 
-            <div class="card shadow-sm">
+            <div class="card">
                 <div class="card-body contrato-text">
                     <div class="contrato-title">
                         CONTRATO DE PRESTACIÓN DE SERVICIOS
@@ -133,7 +87,7 @@
 
                     <div class="contrato-section">
                         <p class="contrato-clause">CUARTA – HONORARIOS Y FORMA DE PAGO</p>
-                        <p>EL CONTRATANTE abonará a EL PRESTADOR la suma de <span id="monto-letras"></span> (Gs {{ number_format($contrato->monto, 0, ',', '.') }}), en concepto de pago total por los servicios.</p>
+                        <p>EL CONTRATANTE abonará a EL PRESTADOR la suma de <span id="monto-letras"></span> (₲ {{ number_format($contrato->monto, 0, ',', '.') }}), en concepto de pago total por los servicios.</p>
                         <p>El pago se realizará de la siguiente forma:</p>
                         <ul>
                             <li>{{ $contrato->anticipo }}% como anticipo al momento de la firma del contrato.</li>
@@ -204,6 +158,7 @@
                     @endif
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -276,3 +231,70 @@
     </script>
 </body>
 </html>
+
+<style>
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+.header-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── Cards ── */
+.card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+/* ── Estado ── */
+.estado { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #374151; }
+.estado-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+.estado-pendiente .estado-dot  { background: #f59e0b; }
+.estado-confirmado .estado-dot { background: #10b981; }
+.estado-anulado .estado-dot    { background: #ef4444; }
+
+/* ── Documento del contrato ── */
+.contrato-text {
+    font-family: 'Times New Roman', serif;
+    line-height: 1.6;
+    text-align: justify;
+}
+.contrato-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+.contrato-section {
+    margin-bottom: 15px;
+}
+.contrato-clause {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* ── Impresión ── */
+@media print {
+    .main-content { margin-left: 0 !important; width: 100% !important; }
+    .header-actions .btn { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+}
+</style>
