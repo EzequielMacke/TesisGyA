@@ -25,6 +25,9 @@ class DatabaseSeeder extends Seeder
             MarcaSeeder::class,
             InsumoSeeder::class,
             ImpuestoSeeder::class,
+            ServicioSeeder::class,
+            ClienteSeeder::class,
+            ObraSeeder::class,
         ]);
     }
 }
