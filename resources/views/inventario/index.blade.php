@@ -61,6 +61,18 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="toolbar-item">
+                            <label class="form-label">Obra</label>
+                            <select class="form-select form-select-sm" id="obra_filter">
+                                <option value="">Todas las obras</option>
+                                @foreach($obras as $obra)
+                                    <option value="{{ $obra->id }}"
+                                            {{ $obraSeleccionada == $obra->id ? 'selected' : '' }}>
+                                        {{ $obra->descripcion }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="toolbar-item toolbar-actions">
                             <label class="form-label">&nbsp;</label>
                             <div class="d-flex gap-2">
@@ -82,8 +94,10 @@
                     <span>
                         @if($sucursalSeleccionada)
                             Mostrando: {{ $sucursales->find($sucursalSeleccionada)->descripcion ?? 'Sucursal' }}
+                        @elseif($obraSeleccionada)
+                            Mostrando: Obra - {{ $obras->find($obraSeleccionada)->descripcion ?? 'Obra' }}
                         @else
-                            Mostrando: Todas las sucursales
+                            Mostrando: Todas las ubicaciones
                         @endif
                     </span>
                     <span class="results-count">
@@ -97,7 +111,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width:60px;">ID</th>
-                                        <th style="width:140px;">Depósito</th>
+                                        <th style="width:160px;">Ubicación</th>
                                         <th>Insumo</th>
                                         <th style="width:130px;">Marca</th>
                                         <th style="width:90px;">Unidad</th>
@@ -110,9 +124,15 @@
                                         <tr class="inventario-row">
                                             <td><strong>{{ $inventario->id }}</strong></td>
                                             <td>
-                                                <span class="cell-text" title="{{ $inventario->deposito->descripcion }}">
-                                                    {{ $inventario->deposito->descripcion }}
-                                                </span>
+                                                @if($inventario->deposito_id)
+                                                    <span class="cell-text" title="{{ $inventario->deposito->descripcion }}">
+                                                        {{ $inventario->deposito->descripcion }}
+                                                    </span>
+                                                @else
+                                                    <span class="cell-text" title="Obra: {{ $inventario->obra->descripcion ?? '-' }}">
+                                                        <span class="tag tag-secondary">Obra</span> {{ $inventario->obra->descripcion ?? '-' }}
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td>
                                                 <span class="cell-text" title="{{ $inventario->insumo->descripcion }}">
@@ -150,7 +170,14 @@
                                         No se encontraron productos en el inventario para la sucursal seleccionada.
                                     </p>
                                     <a href="{{ route('inventario.index') }}" class="btn btn-outline-secondary btn-sm">
-                                        <i class="fas fa-eye me-2"></i>Ver Todas las Sucursales
+                                        <i class="fas fa-eye me-2"></i>Ver Todas las Ubicaciones
+                                    </a>
+                                @elseif($obraSeleccionada)
+                                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                                        No se encontraron productos en el inventario para la obra seleccionada.
+                                    </p>
+                                    <a href="{{ route('inventario.index') }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-eye me-2"></i>Ver Todas las Ubicaciones
                                     </a>
                                 @else
                                     <p class="text-muted mb-0" style="font-size:0.85rem;">
@@ -222,7 +249,7 @@
 /* ── Toolbar (búsqueda + filtros) ── */
 .toolbar-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr auto;
+    grid-template-columns: 2fr 1fr 1fr auto;
     gap: 0.65rem;
     align-items: end;
 }
@@ -252,6 +279,7 @@
 }
 @media (max-width: 480px) {
     .toolbar-grid { grid-template-columns: 1fr; }
+    .toolbar-item.search-item { grid-column: auto; }
 }
 
 /* ── Tabla ── */
@@ -341,13 +369,15 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Filtro por sucursal (server-side)
+    // Filtro por sucursal/obra (server-side)
     const sucursalFilter = document.getElementById('sucursal_filter');
+    const obraFilter = document.getElementById('obra_filter');
     const filtrarBtn = document.getElementById('filtrarBtn');
 
-    if (filtrarBtn && sucursalFilter) {
+    if (filtrarBtn) {
         filtrarBtn.addEventListener('click', function() {
-            const sucursalId = sucursalFilter.value;
+            const sucursalId = sucursalFilter ? sucursalFilter.value : '';
+            const obraId = obraFilter ? obraFilter.value : '';
             const url = new URL(window.location.href);
 
             if (sucursalId) {
@@ -356,7 +386,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 url.searchParams.delete('sucursal');
             }
 
+            if (obraId) {
+                url.searchParams.set('obra', obraId);
+            } else {
+                url.searchParams.delete('obra');
+            }
+
             window.location.href = url.toString();
+        });
+    }
+
+    // Selección mutuamente excluyente entre sucursal y obra
+    if (sucursalFilter && obraFilter) {
+        sucursalFilter.addEventListener('change', function() {
+            if (sucursalFilter.value) {
+                obraFilter.value = '';
+            }
+        });
+
+        obraFilter.addEventListener('change', function() {
+            if (obraFilter.value) {
+                sucursalFilter.value = '';
+            }
         });
     }
 

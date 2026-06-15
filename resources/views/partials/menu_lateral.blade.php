@@ -48,11 +48,26 @@
                 <span class="sidebar-label">Dashboard</span>
             </a>
 
-            <a href="{{ route('inventario.index') }}"
-               class="sidebar-link {{ request()->routeIs('inventario.*') ? 'is-active' : '' }}">
-                <i class="fas fa-warehouse sidebar-icon"></i>
-                <span class="sidebar-label">Inventario</span>
-            </a>
+            {{-- Gestión de Insumos --}}
+            @php $insumosOpen = request()->routeIs('inventario.*', 'solicitud_materiales.*', 'movimiento_insumos.*'); @endphp
+            <div class="sidebar-group {{ $insumosOpen ? 'is-open' : '' }}">
+                <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
+                    <i class="fas fa-warehouse sidebar-icon"></i>
+                    <span class="sidebar-label">Gestión de Inventario</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-sublinks">
+                    <a href="{{ route('inventario.index') }}" class="sidebar-sublink {{ request()->routeIs('inventario.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-warehouse"></i><span>Inventario</span>
+                    </a>
+                    <a href="{{ route('solicitud_materiales.index') }}" class="sidebar-sublink {{ request()->routeIs('solicitud_materiales.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-clipboard-list"></i><span>Solicitud de Insumos</span>
+                    </a>
+                    <a href="{{ route('movimiento_insumos.index') }}" class="sidebar-sublink {{ request()->routeIs('movimiento_insumos.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-truck"></i><span>Movimiento de Insumos</span>
+                    </a>
+                </div>
+            </div>
 
             {{-- Compra --}}
             @php $compraOpen = request()->routeIs('pedido_compra.*','presupuesto_compra_aprobado.*','orden_compra.*','nota_remision_compra.*','compras.*'); @endphp

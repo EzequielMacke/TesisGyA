@@ -13,5 +13,9 @@ class SucursalSeeder extends Seeder
             ['descripcion' => 'Central'],
             ['estado_id' => 1, 'deposito_id' => 1]
         );
+        Sucursal::firstOrCreate(
+            ['descripcion' => 'Sucursal'],
+            ['estado_id' => 1, 'deposito_id' => 2]
+        );
     }
 }

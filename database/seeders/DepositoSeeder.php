@@ -11,7 +11,12 @@ class DepositoSeeder extends Seeder
     {
         Deposito::firstOrCreate(
             ['descripcion' => 'Central'],
-            ['estado_id' => 1]
+            ['estado_id' => 1, 'ubicacion' => 'Av. Mariscal López 1234, Asunción']
+        );
+
+        Deposito::firstOrCreate(
+            ['descripcion' => 'Sucursal'],
+            ['estado_id' => 1, 'ubicacion' => 'Av. San Martín 567, Asunción']
         );
     }
 }

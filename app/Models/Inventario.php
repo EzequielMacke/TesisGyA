@@ -13,6 +13,7 @@ class Inventario extends Model
 
     protected $fillable = [
         'deposito_id',
+        'obra_id',
         'insumo_id',
         'cantidad',
         'estado_id'
@@ -26,6 +27,12 @@ class Inventario extends Model
     public function deposito()
     {
         return $this->belongsTo(Deposito::class);
+    }
+
+    // Relación con Obra
+    public function obra()
+    {
+        return $this->belongsTo(Obra::class);
     }
 
     // Relación con Insumo

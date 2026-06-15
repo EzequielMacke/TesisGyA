@@ -6,12 +6,14 @@ use App\Http\Controllers\InsumoController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\MovimientoMaterialController;
 use App\Http\Controllers\NotaRemisionCompraController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\PedidoCompraController;
 use App\Http\Controllers\PresupuestoCompraAprobadoController;
 use App\Http\Controllers\PresupuestoCompraController;
 use App\Http\Controllers\PresupuestoServicioController;
+use App\Http\Controllers\SolicitudMaterialController;
 use App\Http\Controllers\SolicitudServicioController;
 use App\Http\Controllers\VisitaPreviaController;
 use Illuminate\Http\Request;
@@ -154,6 +156,26 @@ Route::post('solicitud_servicio', [SolicitudServicioController::class, 'store'])
 Route::get('solicitud_servicio/{id}', [SolicitudServicioController::class, 'show'])->name('solicitud_servicio.show');
 Route::get('api/obras/{cliente_id}', [SolicitudServicioController::class, 'apiObras']);
 Route::get('api/obra/{obra_id}', [SolicitudServicioController::class, 'apiObraInfo']);
+
+
+// Rutas para solicitud de materiales
+Route::get('solicitud_materiales', [SolicitudMaterialController::class, 'index'])->name('solicitud_materiales.index');
+Route::get('solicitud_materiales/create', [SolicitudMaterialController::class, 'create'])->name('solicitud_materiales.create');
+Route::post('solicitud_materiales', [SolicitudMaterialController::class, 'store'])->name('solicitud_materiales.store');
+Route::get('solicitud_materiales/{id}/edit', [SolicitudMaterialController::class, 'edit'])->name('solicitud_materiales.edit');
+Route::put('solicitud_materiales/{id}', [SolicitudMaterialController::class, 'update'])->name('solicitud_materiales.update');
+Route::patch('solicitud_materiales/{id}/anular', [SolicitudMaterialController::class, 'anular'])->name('solicitud_materiales.anular');
+
+
+// Rutas para movimiento de insumos
+Route::get('movimiento_insumos', [MovimientoMaterialController::class, 'index'])->name('movimiento_insumos.index');
+Route::get('movimiento_insumos/create', [MovimientoMaterialController::class, 'create'])->name('movimiento_insumos.create');
+Route::post('movimiento_insumos', [MovimientoMaterialController::class, 'store'])->name('movimiento_insumos.store');
+Route::get('movimiento_insumos/{id}/remision', [MovimientoMaterialController::class, 'remision'])->name('movimiento_insumos.remision');
+Route::patch('movimiento_insumos/{id}/confirmar', [MovimientoMaterialController::class, 'confirmar'])->name('movimiento_insumos.confirmar');
+Route::patch('movimiento_insumos/{id}/anular', [MovimientoMaterialController::class, 'anular'])->name('movimiento_insumos.anular');
+Route::get('api/movimiento-insumos/solicitud/{id}', [MovimientoMaterialController::class, 'solicitudInfo']);
+Route::get('api/movimiento-insumos/inventario/{depositoId}', [MovimientoMaterialController::class, 'inventarioDeposito']);
 
 
 // Rutas para visita previa

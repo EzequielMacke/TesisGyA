@@ -25,7 +25,7 @@ return new class extends Migration
             $table->unsignedInteger('metodo_pago_id');
             $table->foreign('metodo_pago_id')->references('id')->on('metodo_pago');
             $table->date('fecha');
-            $table->decimal('monto', 10, 2);
+            $table->decimal('monto', 15, 2);
             $table->unsignedInteger('presupuesto_compra_aprobado_id');
             $table->foreign('presupuesto_compra_aprobado_id')->references('id')->on('presupuesto_compra_aprobados');
             $table->integer('intervalo');

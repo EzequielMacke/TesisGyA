@@ -14,7 +14,8 @@ class Deposito extends Model
     protected $fillable = [
         'descripcion',
         'sucursal_id',
-        'estado_id'
+        'estado_id',
+        'ubicacion'
     ];
 
     // Relación con Sucursal
