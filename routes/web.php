@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AjusteStockController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\ContratoController;
 use App\Http\Controllers\InsumoController;
@@ -176,6 +177,19 @@ Route::patch('movimiento_insumos/{id}/confirmar', [MovimientoMaterialController:
 Route::patch('movimiento_insumos/{id}/anular', [MovimientoMaterialController::class, 'anular'])->name('movimiento_insumos.anular');
 Route::get('api/movimiento-insumos/solicitud/{id}', [MovimientoMaterialController::class, 'solicitudInfo']);
 Route::get('api/movimiento-insumos/inventario/{depositoId}', [MovimientoMaterialController::class, 'inventarioDeposito']);
+
+
+// Rutas para ajuste de stock
+Route::get('ajuste_stocks', [AjusteStockController::class, 'index'])->name('ajuste_stocks.index');
+Route::get('ajuste_stocks/create', [AjusteStockController::class, 'create'])->name('ajuste_stocks.create');
+Route::post('ajuste_stocks', [AjusteStockController::class, 'store'])->name('ajuste_stocks.store');
+Route::get('ajuste_stocks/{id}/edit', [AjusteStockController::class, 'edit'])->name('ajuste_stocks.edit');
+Route::patch('ajuste_stocks/{id}', [AjusteStockController::class, 'update'])->name('ajuste_stocks.update');
+Route::patch('ajuste_stocks/{id}/confirmar', [AjusteStockController::class, 'confirmar'])->name('ajuste_stocks.confirmar');
+Route::patch('ajuste_stocks/{id}/anular', [AjusteStockController::class, 'anular'])->name('ajuste_stocks.anular');
+Route::get('api/ajuste-stocks/obras/{clienteId}', [AjusteStockController::class, 'apiObrasPorCliente']);
+Route::get('api/ajuste-stocks/inventario-deposito/{depositoId}', [AjusteStockController::class, 'apiInventarioDeposito']);
+Route::get('api/ajuste-stocks/inventario-obra/{obraId}', [AjusteStockController::class, 'apiInventarioObra']);
 
 
 // Rutas para visita previa

@@ -49,7 +49,7 @@
             </a>
 
             {{-- Gestión de Insumos --}}
-            @php $insumosOpen = request()->routeIs('inventario.*', 'solicitud_materiales.*', 'movimiento_insumos.*'); @endphp
+            @php $insumosOpen = request()->routeIs('inventario.*', 'solicitud_materiales.*', 'movimiento_insumos.*', 'ajuste_stocks.*'); @endphp
             <div class="sidebar-group {{ $insumosOpen ? 'is-open' : '' }}">
                 <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
                     <i class="fas fa-warehouse sidebar-icon"></i>
@@ -65,6 +65,9 @@
                     </a>
                     <a href="{{ route('movimiento_insumos.index') }}" class="sidebar-sublink {{ request()->routeIs('movimiento_insumos.*') ? 'is-active' : '' }}">
                         <i class="fas fa-truck"></i><span>Movimiento de Insumos</span>
+                    </a>
+                    <a href="{{ route('ajuste_stocks.index') }}" class="sidebar-sublink {{ request()->routeIs('ajuste_stocks.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-sliders-h"></i><span>Ajuste de Inventario</span>
                     </a>
                 </div>
             </div>
