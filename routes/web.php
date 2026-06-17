@@ -8,6 +8,7 @@ use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\MovimientoMaterialController;
+use App\Http\Controllers\NotaCompraController;
 use App\Http\Controllers\NotaRemisionCompraController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\PedidoCompraController;
@@ -144,10 +145,24 @@ Route::post('nota-remision-compra', [NotaRemisionCompraController::class, 'store
 Route::get('nota-remision-compra/{id}', [NotaRemisionCompraController::class, 'show'])->name('nota_remision_compra.show');
 Route::get('api/orden-compra/{orden}/detalles-pendientes', [NotaRemisionCompraController::class, 'detallesPendientes']);
 
+// Rutas para notas de compra
+Route::get('/notas-compra', [NotaCompraController::class, 'index'])->name('notas_compra.index');
+Route::get('/notas-compra/create', [NotaCompraController::class, 'create'])->name('notas_compra.create');
+Route::post('/notas-compra', [NotaCompraController::class, 'store'])->name('notas_compra.store');
+Route::get('/notas-compra/facturas/{proveedor_id}', [NotaCompraController::class, 'facturasPorProveedor'])->name('notas_compra.facturas');
+Route::get('/notas-compra/{id}/edit', [NotaCompraController::class, 'edit'])->name('notas_compra.edit');
+Route::put('/notas-compra/{id}', [NotaCompraController::class, 'update'])->name('notas_compra.update');
+Route::post('/notas-compra/{id}/aprobar', [NotaCompraController::class, 'aprobar'])->name('notas_compra.aprobar');
+Route::post('/notas-compra/{id}/anular', [NotaCompraController::class, 'anular'])->name('notas_compra.anular');
+
 // Rutas para compras (facturas de proveedor)
 Route::get('/compras', [CompraController::class, 'index'])->name('compras.index');
 Route::get('/compras/create/{orden_id?}', [CompraController::class, 'create'])->name('compras.create');
 Route::post('/compras', [CompraController::class, 'store'])->name('compras.store');
+Route::get('/compras/{id}/edit', [CompraController::class, 'edit'])->name('compras.edit');
+Route::put('/compras/{id}', [CompraController::class, 'update'])->name('compras.update');
+Route::post('/compras/{id}/aprobar', [CompraController::class, 'aprobar'])->name('compras.aprobar');
+Route::post('/compras/{id}/anular', [CompraController::class, 'anular'])->name('compras.anular');
 
 
 // Rutas para solicitud de servicio

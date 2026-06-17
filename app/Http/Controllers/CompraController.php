@@ -11,6 +11,7 @@ use App\Models\LibroCompra;
 use App\Models\NotaRemisionCompra;
 use App\Models\OrdenCompra;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CompraController extends Controller
 {
@@ -259,75 +260,175 @@ class CompraController extends Controller
         $total_iva = $iva5 + $iva10;
         $montoTotal = $monto + $total_iva;
         $compra->update(['monto' => round($montoTotal)]);
-        $condicion = strtolower($orden->condicionPago->descripcion);
-        $cuotas = $orden->cuota;
-        $intervalo = $orden->intervalo;
 
-        // Crear cuentas a pagar
-        if ($condicion == 'contado') {
-            CuentaPagar::create([
-                'compra_id' => $compra->id,
-                'cuota' => 1,
-                'metodo_pago_id' => $orden->metodo_pago_id,
-                'condicion_pago_id' => $orden->condicion_pago_id,
-                'proveedor_id' => $orden->proveedor_id,
-                'fecha_emision' => $request->fecha_emision,
-                'fecha_pago' => null,
-                'fecha_vencimiento' => $request->fecha_vencimiento ?? $request->fecha_emision,
-                'monto' => round($montoTotal),
-                'monto_pagado' => 0,
-                'saldo' => round($montoTotal),
-                'estado_id' => 3,
-            ]);
-        } else {
-            if (empty($cuotas) || empty($intervalo)) {
-                return back()->with('error', 'La orden de compra seleccionada no tiene configuradas las cuotas o el intervalo para crédito.');
-            }
-            $montoCuota = round($montoTotal / $cuotas);
-            $fechaBase = \Carbon\Carbon::parse($request->fecha_emision);
-            for ($i = 1; $i <= $cuotas; $i++) {
-                $fechaVencimiento = $fechaBase->copy()->addDays($intervalo * ($i - 1));
-                CuentaPagar::create([
-                    'compra_id' => $compra->id,
-                    'cuota' => $i,
-                    'metodo_pago_id' => $orden->metodo_pago_id,
-                    'condicion_pago_id' => $orden->condicion_pago_id,
-                    'proveedor_id' => $orden->proveedor_id,
-                    'fecha_emision' => $request->fecha_emision,
-                    'fecha_pago' => null,
-                    'fecha_vencimiento' => $fechaVencimiento,
-                    'monto' => $montoCuota,
-                    'monto_pagado' => 0,
-                    'saldo' => $montoCuota,
-                    'estado_id' => 3,
-                ]);
-            }
+        return redirect()->route('compras.index')->with('success', 'Compra registrada. Debe ser aprobada para generar cuentas a pagar y libro de compras.');
+    }
+
+    public function aprobar($id)
+    {
+        $compra = Compra::with([
+            'condicionPago', 'metodoPago', 'ordenCompra.condicionPago',
+            'detalles'
+        ])->findOrFail($id);
+
+        if ($compra->estado_id !== 3) {
+            return redirect()->route('compras.index')
+                ->with('error', 'Solo se pueden aprobar compras en estado Pendiente.');
         }
 
-        // Crear registro en libro de compras
-        LibroCompra::create([
-            'proveedor_id' => $orden->proveedor_id,
-            'compra_id' => $compra->id,
-            'tipo_documento_id' => 1,
-            'monto' => round($monto),
-            'iva5' => round($iva5),
-            'iva10' => round($iva10),
-            'iva_exento' => round($iva_exento),
-            'total_iva' => round($total_iva),
-            'fecha_emision' => $request->fecha_emision,
-            'condicion_pago_id' => $orden->condicion_pago_id,
-            'estado_id' => $compra->estado_id,
-            'datos_empresa_id' => 1,
-            'timbrado' => $request->nro_timbrado,
-            'nro_factura' => $request->nro_factura,
+        DB::transaction(function () use ($compra) {
+            $orden     = $compra->ordenCompra;
+            $condicion = strtolower($compra->condicionPago->descripcion);
+            $cuotas    = $orden->cuota ?? 1;
+            $intervalo = $orden->intervalo ?? 30;
+
+            // Recalcular IVA desde los detalles guardados
+            $monto     = 0;
+            $iva5      = 0;
+            $iva10     = 0;
+            $ivaExento = 0;
+
+            foreach ($compra->detalles as $detalle) {
+                $subtotal = $detalle->precio_unitario * $detalle->cantidad;
+                $monto   += $subtotal;
+                if ($detalle->impuesto_id == 2) {
+                    $iva5 += $subtotal / 21;
+                } elseif ($detalle->impuesto_id == 3) {
+                    $iva10 += $subtotal / 11;
+                } else {
+                    $ivaExento += $subtotal;
+                }
+            }
+
+            $totalIva   = $iva5 + $iva10;
+            $montoTotal = $compra->monto;
+
+            // Crear cuentas a pagar
+            if ($condicion == 'contado') {
+                CuentaPagar::create([
+                    'compra_id'        => $compra->id,
+                    'cuota'            => 1,
+                    'metodo_pago_id'   => $compra->metodo_pago_id,
+                    'condicion_pago_id'=> $compra->condicion_pago_id,
+                    'proveedor_id'     => $compra->proveedor_id,
+                    'fecha_emision'    => $compra->fecha_emision,
+                    'fecha_pago'       => null,
+                    'fecha_vencimiento'=> $compra->fecha_vencimiento ?? $compra->fecha_emision,
+                    'monto'            => $montoTotal,
+                    'monto_pagado'     => 0,
+                    'saldo'            => $montoTotal,
+                    'estado_id'        => 3,
+                ]);
+            } else {
+                $montoCuota = round($montoTotal / $cuotas);
+                $fechaBase  = \Carbon\Carbon::parse($compra->fecha_emision);
+                for ($i = 1; $i <= $cuotas; $i++) {
+                    $fechaVenc = $fechaBase->copy()->addDays($intervalo * ($i - 1));
+                    CuentaPagar::create([
+                        'compra_id'        => $compra->id,
+                        'cuota'            => $i,
+                        'metodo_pago_id'   => $compra->metodo_pago_id,
+                        'condicion_pago_id'=> $compra->condicion_pago_id,
+                        'proveedor_id'     => $compra->proveedor_id,
+                        'fecha_emision'    => $compra->fecha_emision,
+                        'fecha_pago'       => null,
+                        'fecha_vencimiento'=> $fechaVenc,
+                        'monto'            => $montoCuota,
+                        'monto_pagado'     => 0,
+                        'saldo'            => $montoCuota,
+                        'estado_id'        => 3,
+                    ]);
+                }
+            }
+
+            // Crear registro en libro de compras
+            LibroCompra::create([
+                'proveedor_id'     => $compra->proveedor_id,
+                'compra_id'        => $compra->id,
+                'tipo_documento_id'=> $compra->tipo_documento_id,
+                'monto'            => round($monto),
+                'iva5'             => round($iva5),
+                'iva10'            => round($iva10),
+                'iva_exento'       => round($ivaExento),
+                'total_iva'        => round($totalIva),
+                'fecha_emision'    => $compra->fecha_emision,
+                'condicion_pago_id'=> $compra->condicion_pago_id,
+                'estado_id'        => 4,
+                'datos_empresa_id' => $compra->datos_empresa_id,
+                'timbrado'         => $compra->nro_timbrado,
+                'nro_factura'      => $compra->nro_factura,
+            ]);
+
+            // Confirmar notas de remisión pendientes de la orden
+            NotaRemisionCompra::where('orden_compra_id', $compra->orden_compra_id)
+                ->where('estado_id', 3)
+                ->update(['estado_id' => 4]);
+
+            $compra->update(['estado_id' => 4]);
+        });
+
+        return redirect()->route('compras.index')
+            ->with('success', 'Compra aprobada. Cuentas a pagar y libro de compras generados.');
+    }
+
+    public function edit($id)
+    {
+        $compra = Compra::with([
+            'proveedor', 'condicionPago', 'metodoPago', 'ordenCompra',
+            'detalles.insumo.marca', 'detalles.insumo.unidadMedida', 'detalles.impuesto'
+        ])->findOrFail($id);
+
+        if ($compra->estado_id !== 3) {
+            return redirect()->route('compras.index')
+                ->with('error', 'Solo se pueden editar compras en estado Pendiente.');
+        }
+
+        return view('compras.edit', compact('compra'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $compra = Compra::findOrFail($id);
+
+        if ($compra->estado_id !== 3) {
+            return redirect()->route('compras.index')
+                ->with('error', 'Solo se pueden editar compras en estado Pendiente.');
+        }
+
+        $request->validate([
+            'nro_factura'      => 'required|string|max:20',
+            'nro_timbrado'     => 'required|string|max:8',
+            'fecha_emision'    => 'required|date',
+            'fecha_vencimiento'=> 'nullable|date|after_or_equal:fecha_emision',
+            'observacion'      => 'nullable|string|max:300',
+        ], [
+            'fecha_vencimiento.after_or_equal' => 'La fecha de vencimiento no puede ser anterior a la de emisión.',
         ]);
 
-        // ✅ ACTUALIZAR NOTAS DE REMISIÓN A ESTADO CONFIRMADO (4)
-        NotaRemisionCompra::where('orden_compra_id', $request->orden_compra_id)
-            ->where('estado_id', 3) // Solo las pendientes
-            ->update(['estado_id' => 4]); // Cambiar a confirmado
+        $compra->update([
+            'nro_factura'      => $request->nro_factura,
+            'nro_timbrado'     => $request->nro_timbrado,
+            'fecha_emision'    => $request->fecha_emision,
+            'fecha_vencimiento'=> $request->fecha_vencimiento,
+            'observacion'      => $request->observacion,
+        ]);
 
-        return redirect()->route('compras.index')->with('success', 'Compra registrada exitosamente. Las notas de remisión han sido confirmadas.');
+        return redirect()->route('compras.index')->with('success', 'Compra actualizada correctamente.');
+    }
+
+    public function anular($id)
+    {
+        $compra = Compra::findOrFail($id);
+
+        if ($compra->estado_id === 5) {
+            return redirect()->route('compras.index')
+                ->with('error', 'La compra ya está anulada.');
+        }
+
+        $compra->update(['estado_id' => 5]);
+
+        return redirect()->route('compras.index')
+            ->with('success', 'Compra anulada correctamente.');
     }
 
     public function datosOrdenCompra($id)

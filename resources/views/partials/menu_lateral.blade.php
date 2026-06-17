@@ -96,6 +96,9 @@
                     <a href="{{ route('compras.index') }}" class="sidebar-sublink {{ request()->routeIs('compras.*') ? 'is-active' : '' }}">
                         <i class="fas fa-file-invoice-dollar"></i><span>Compras</span>
                     </a>
+                    <a href="{{ route('notas_compra.index') }}" class="sidebar-sublink {{ request()->routeIs('notas_compra.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-file-alt"></i><span>Notas de Compra</span>
+                    </a>
                 </div>
             </div>
 

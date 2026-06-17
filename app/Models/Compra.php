@@ -8,6 +8,11 @@ class Compra extends Model
 {
     protected $table = 'compras';
 
+    protected $casts = [
+        'fecha_emision'    => 'date',
+        'fecha_vencimiento'=> 'date',
+    ];
+
     protected $fillable = [
         'nro_factura',
         'nro_timbrado',
@@ -70,6 +75,11 @@ class Compra extends Model
     public function tipoDocumento()
     {
         return $this->belongsTo(TipoDocumento::class, 'tipo_documento_id');
+    }
+
+    public function detalles()
+    {
+        return $this->hasMany(CompraDetalle::class, 'compra_id');
     }
 
 

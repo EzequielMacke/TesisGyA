@@ -22,6 +22,9 @@ class CuentaPagar extends Model
         'fecha_vencimiento',
         'monto',
         'monto_pagado',
+        'descuento',
+        'aumento',
+        'saldo_neto',
         'saldo',
         'estado_id',
     ];
@@ -34,6 +37,9 @@ class CuentaPagar extends Model
         'updated_at' => 'datetime',
         'monto' => 'float',
         'monto_pagado' => 'float',
+        'descuento' => 'float',
+        'aumento' => 'float',
+        'saldo_neto' => 'float',
         'saldo' => 'float',
     ];
 
