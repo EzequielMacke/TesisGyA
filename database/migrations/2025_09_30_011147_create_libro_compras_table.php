@@ -19,11 +19,11 @@ return new class extends Migration
             $table->foreign('compra_id')->references('id')->on('compras');
             $table->unsignedInteger('tipo_documento_id');
             $table->foreign('tipo_documento_id')->references('id')->on('tipo_documento');
-            $table->decimal('monto', 10, 2);
-            $table->decimal('iva5', 10, 2);
-            $table->decimal('iva10', 10, 2);
-            $table->decimal('iva_exento', 10, 2);
-            $table->decimal('total_iva', 10, 2);
+            $table->decimal('monto', 15, 2);
+            $table->decimal('iva5', 15, 2);
+            $table->decimal('iva10', 15, 2);
+            $table->decimal('iva_exento', 15, 2);
+            $table->decimal('total_iva', 15, 2);
             $table->date('fecha_emision');
             $table->unsignedInteger('condicion_pago_id');
             $table->foreign('condicion_pago_id')->references('id')->on('condicion_pago');

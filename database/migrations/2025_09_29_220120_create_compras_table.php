@@ -30,7 +30,7 @@ return new class extends Migration
             $table->unsignedInteger('estado_id');
             $table->foreign('estado_id')->references('id')->on('estados');
             $table->string('observacion')->nullable();
-            $table->decimal('monto', 10, 2);
+            $table->decimal('monto', 15, 2);
             $table->unsignedInteger('datos_empresa_id');
             $table->foreign('datos_empresa_id')->references('id')->on('datos_empresa');
             $table->unsignedInteger('presupuesto_compra_aprobado_id');

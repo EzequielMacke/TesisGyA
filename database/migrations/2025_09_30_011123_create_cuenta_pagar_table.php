@@ -25,12 +25,12 @@ return new class extends Migration
             $table->date('fecha_emision');
             $table->date('fecha_pago')->nullable();
             $table->date('fecha_vencimiento');
-            $table->decimal('monto', 10, 2);
-            $table->decimal('monto_pagado', 10, 2)->nullable();
-            $table->decimal('descuento', 10, 2)->default(0);
-            $table->decimal('aumento', 10, 2)->default(0);
-            $table->decimal('saldo_neto', 10, 2)->nullable();
-            $table->decimal('saldo', 10, 2)->nullable();
+            $table->decimal('monto', 15, 2);
+            $table->decimal('monto_pagado', 15, 2)->nullable();
+            $table->decimal('descuento', 15, 2)->default(0);
+            $table->decimal('aumento', 15, 2)->default(0);
+            $table->decimal('saldo_neto', 15, 2)->nullable();
+            $table->decimal('saldo', 15, 2)->nullable();
             $table->unsignedInteger('estado_id');
             $table->foreign('estado_id')->references('id')->on('estados');
             $table->timestamps();
