@@ -156,9 +156,19 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="btn-group">
-                                                    <a href="{{ route('solicitud_servicio.show', $solicitud->id) }}" class="btn-icon" title="Ver Detalle">
+                                                    @if($solicitud->estado_id == 3)
+                                                        <a href="{{ route('solicitud_servicio.edit', $solicitud->id) }}" class="btn-icon" title="Editar">
+                                                            <i class="fas fa-pen"></i>
+                                                        </a>
+                                                        <button type="button" class="btn-icon danger" title="Anular"
+                                                                onclick="abrirAnular({{ $solicitud->id }}, '{{ str_pad($solicitud->id, 3, '0', STR_PAD_LEFT) }}')">
+                                                            <i class="fas fa-ban"></i>
+                                                        </button>
+                                                    @endif
+                                                    <button type="button" class="btn-icon" title="Ver Detalle"
+                                                            onclick="abrirVerDetalle({{ $solicitud->id }})">
                                                         <i class="fas fa-eye"></i>
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -186,6 +196,58 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    {{-- Modal de ver detalle --}}
+    <div class="modal fade" id="modalVerDetalle" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-file-alt text-primary me-2"></i>Detalle de Solicitud <span id="verNumero"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="detail-row"><i class="fas fa-building"></i><span><strong>Cliente:</strong> <span id="verCliente"></span></span></div>
+                    <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Obra:</strong> <span id="verObra"></span></span></div>
+                    <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha:</strong> <span id="verFecha"></span></span></div>
+                    <div class="detail-row"><i class="fas fa-flag"></i><span><strong>Estado:</strong> <span id="verEstado"></span></span></div>
+                    <div class="detail-row"><i class="fas fa-sticky-note"></i><span><strong>Observación:</strong> <span id="verObservacion"></span></span></div>
+                    <hr>
+                    <div class="mb-2"><strong><i class="fas fa-tools me-1 text-muted"></i>Servicios solicitados</strong></div>
+                    <ul id="verServicios" class="servicios-detalle-list"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal de anulación --}}
+    <div class="modal fade" id="modalAnular" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Anular Solicitud</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formAnular" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <p class="mb-2">¿Está seguro que desea anular la solicitud <strong id="anularNumero"></strong>?</p>
+                        <p class="text-muted mb-0" style="font-size:0.85rem;">
+                            Esta acción no se puede deshacer.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-ban me-2"></i>Anular Solicitud
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -362,4 +424,77 @@
 @media (max-width: 768px) {
     .table-container { font-size: 0.875rem; }
 }
+
+/* ── Modal Ver Detalle ── */
+.detail-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: #374151; }
+.detail-row:last-child { margin-bottom: 0; }
+.detail-row i { color: #94a3b8; width: 16px; text-align: center; }
+.servicios-detalle-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.servicios-detalle-list li {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.82rem;
+    color: #374151;
+}
 </style>
+
+<script>
+@php
+    $solicitudesData = $solicitudes->mapWithKeys(function ($s) {
+        return [$s->id => [
+            'numero' => str_pad($s->id, 3, '0', STR_PAD_LEFT),
+            'cliente' => $s->cliente->razon_social,
+            'obra' => $s->obra->descripcion,
+            'fecha' => \Carbon\Carbon::parse($s->fecha)->format('d/m/Y'),
+            'estado' => $s->estado->descripcion,
+            'observacion' => $s->observacion,
+            'servicios' => $s->detalles->pluck('servicio.descripcion')->filter()->values(),
+        ]];
+    });
+@endphp
+var solicitudesData = @json($solicitudesData);
+
+function abrirVerDetalle(id) {
+    var data = solicitudesData[id];
+    if (!data) return;
+
+    document.getElementById('verNumero').textContent = '#' + data.numero;
+    document.getElementById('verCliente').textContent = data.cliente;
+    document.getElementById('verObra').textContent = data.obra;
+    document.getElementById('verFecha').textContent = data.fecha;
+    document.getElementById('verEstado').textContent = data.estado;
+    document.getElementById('verObservacion').textContent = data.observacion || 'Sin observación';
+
+    var lista = document.getElementById('verServicios');
+    lista.innerHTML = '';
+    if (data.servicios.length > 0) {
+        data.servicios.forEach(function (servicio) {
+            var li = document.createElement('li');
+            li.textContent = servicio;
+            lista.appendChild(li);
+        });
+    } else {
+        var li = document.createElement('li');
+        li.textContent = 'Sin servicios';
+        li.classList.add('text-muted');
+        lista.appendChild(li);
+    }
+
+    new bootstrap.Modal(document.getElementById('modalVerDetalle')).show();
+}
+
+function abrirAnular(id, numero) {
+    document.getElementById('formAnular').action = `{{ url('solicitud_servicio') }}/${id}/anular`;
+    document.getElementById('anularNumero').textContent = '#' + numero;
+    new bootstrap.Modal(document.getElementById('modalAnular')).show();
+}
+</script>

@@ -37,4 +37,16 @@ class Obra extends Model
     {
         return $this->belongsTo(Estado::class, 'estado_id');
     }
+
+    // Relación con Solicitudes de Servicio
+    public function solicitudesServicio()
+    {
+        return $this->hasMany(SolicitudServicio::class, 'obra_id');
+    }
+
+    // Relación con Visitas Previas
+    public function visitasPrevias()
+    {
+        return $this->hasMany(VisitaPrevia::class, 'obra_id');
+    }
 }

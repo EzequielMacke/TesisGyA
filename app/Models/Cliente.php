@@ -37,4 +37,16 @@ class Cliente extends Model
     {
         return $this->belongsTo(Persona::class, 'persona_id');
     }
+
+    // Relación con Solicitudes de Servicio
+    public function solicitudesServicio()
+    {
+        return $this->hasMany(SolicitudServicio::class, 'cliente_id');
+    }
+
+    // Relación con Visitas Previas
+    public function visitasPrevias()
+    {
+        return $this->hasMany(VisitaPrevia::class, 'cliente_id');
+    }
 }

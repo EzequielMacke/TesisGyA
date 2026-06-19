@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Crear Presupuesto de Servicio</title>
+    <title>Editar Presupuesto de Servicio</title>
     @include('partials.head')
 </head>
 <body>
@@ -14,16 +14,29 @@
             {{-- Cabecera --}}
             <div class="page-header">
                 <div>
-                    <h2><i class="fas fa-file-invoice-dollar"></i> Crear Presupuesto de Servicio</h2>
-                    <small>Complete los datos para generar un nuevo presupuesto</small>
+                    <h2><i class="fas fa-file-invoice-dollar"></i> Editar Presupuesto de Servicio</h2>
+                    <small>Modifique los datos del presupuesto {{ $presupuesto->numero_presupuesto }}</small>
                 </div>
                 <a href="{{ route('presupuesto_servicio.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Volver al Listado
                 </a>
             </div>
 
-            <form action="{{ route('presupuesto_servicio.store') }}" method="POST" id="presupuestoForm">
+            {{-- Alerts --}}
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            <form action="{{ route('presupuesto_servicio.update', $presupuesto->id) }}" method="POST" id="presupuestoForm">
                 @csrf
+                @method('PUT')
 
                 {{-- Selección de Datos --}}
                 <div class="card">
@@ -37,20 +50,22 @@
                                 <select name="cliente_id" id="cliente_id" class="form-select form-select-sm select2" required>
                                     <option value="">Seleccione un cliente</option>
                                     @foreach($clientes as $cliente)
-                                        <option value="{{ $cliente->id }}">{{ $cliente->razon_social }}</option>
+                                        <option value="{{ $cliente->id }}" {{ old('cliente_id', $presupuesto->cliente_id) == $cliente->id ? 'selected' : '' }}>
+                                            {{ $cliente->razon_social }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div>
                                 <label for="obra_id" class="form-label">Obra</label>
                                 <select name="obra_id" id="obra_id" class="form-select form-select-sm select2" required disabled>
-                                    <option value="">Seleccione una obra</option>
+                                    <option value="">Cargando obras...</option>
                                 </select>
                             </div>
                             <div>
                                 <label for="visita_previa_id" class="form-label">Visita Previa</label>
                                 <select name="visita_previa_id" id="visita_previa_id" class="form-select form-select-sm select2" required disabled>
-                                    <option value="">Seleccione una visita previa</option>
+                                    <option value="">Cargando visitas...</option>
                                 </select>
                             </div>
                         </div>
@@ -123,11 +138,11 @@
                             <div class="form-grid">
                                 <div>
                                     <label for="validez" class="form-label">Validez (días)</label>
-                                    <input type="number" name="validez" id="validez" class="form-control form-control-sm" min="1" required>
+                                    <input type="number" name="validez" id="validez" class="form-control form-control-sm" min="1" value="{{ old('validez', $presupuesto->validez) }}" required>
                                 </div>
                                 <div>
                                     <label for="anticipo" class="form-label">Anticipo (%)</label>
-                                    <input type="number" name="anticipo" id="anticipo" class="form-control form-control-sm" min="0" max="100" required>
+                                    <input type="number" name="anticipo" id="anticipo" class="form-control form-control-sm" min="0" max="100" value="{{ old('anticipo', $presupuesto->anticipo) }}" required>
                                 </div>
                                 <div>
                                     <label for="monto_anticipo" class="form-label">Monto Anticipo</label>
@@ -135,19 +150,19 @@
                                 </div>
                                 <div>
                                     <label for="fecha" class="form-label">Fecha</label>
-                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm readonly-field" value="{{ date('Y-m-d') }}" readonly>
+                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm readonly-field" value="{{ old('fecha', \Carbon\Carbon::parse($presupuesto->fecha)->format('Y-m-d')) }}" readonly>
                                 </div>
                                 <div class="span-2">
                                     <label for="numero_presupuesto" class="form-label">N° Presupuesto</label>
-                                    <input type="text" name="numero_presupuesto" id="numero_presupuesto" class="form-control form-control-sm readonly-field" value="PRES-{{ date('Y') }}-{{ str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT) }}" readonly>
+                                    <input type="text" id="numero_presupuesto" class="form-control form-control-sm readonly-field" value="{{ $presupuesto->numero_presupuesto }}" readonly>
                                 </div>
                                 <div class="span-2">
                                     <label for="usuario" class="form-label">Usuario</label>
-                                    <input type="text" name="usuario" id="usuario" class="form-control form-control-sm readonly-field" value="{{ session('user_usuario') }}" readonly>
+                                    <input type="text" name="usuario" id="usuario" class="form-control form-control-sm readonly-field" value="{{ $presupuesto->usuario->usuario ?? session('user_usuario') }}" readonly>
                                 </div>
                                 <div class="span-4">
                                     <label for="observacion" class="form-label">Observación</label>
-                                    <textarea name="observacion" id="observacion" class="form-control form-control-sm" rows="2" placeholder="Ingrese una observación..."></textarea>
+                                    <textarea name="observacion" id="observacion" class="form-control form-control-sm" rows="2" placeholder="Ingrese una observación...">{{ old('observacion', $presupuesto->observacion) }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -201,7 +216,7 @@
                             </div>
                             <div class="text-center mt-3">
                                 <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-save me-2"></i>Guardar Presupuesto
+                                    <i class="fas fa-save me-2"></i>Guardar Cambios
                                 </button>
                             </div>
                         </div>
@@ -504,6 +519,19 @@
 }
 </style>
 
+@php
+    $presupuestoInit = [
+        'cliente_id' => $presupuesto->cliente_id,
+        'obra_id' => $presupuesto->obra_id,
+        'obra_descripcion' => $presupuesto->obra->descripcion ?? '',
+        'visita_previa_id' => $presupuesto->visita_previa_id,
+        'visita_fecha' => optional($presupuesto->visitaPrevia)->fecha_visita,
+        'visita_estado' => optional(optional($presupuesto->visitaPrevia)->estado)->descripcion,
+        'ensayos_seleccionados' => $ensayosSeleccionados,
+        'detalles' => $detallesPresupuesto,
+    ];
+@endphp
+
 <script>
 $(document).ready(function() {
     $('.select2').select2({
@@ -513,139 +541,191 @@ $(document).ready(function() {
         width: '100%'
     });
 
+    const presupuestoInit = @json($presupuestoInit);
+    let esVisitaOriginal = true;
+
     const impuestoOptions = `
         <option value="">Seleccione</option>
         @foreach(\App\Models\Impuesto::where('estado_id', 1)->get() as $impuesto)
-            <option value="{{ $impuesto->id }}" {{ $impuesto->id == 2 ? 'selected' : '' }}>{{ $impuesto->descripcion }}</option>
+            <option value="{{ $impuesto->id }}">{{ $impuesto->descripcion }}</option>
         @endforeach
     `;
 
-    // Cargar obras al seleccionar cliente
-    $('#cliente_id').on('change', function() {
-        var clienteId = $(this).val();
-        if (clienteId) {
-            $.get('/ajax/presupuesto/obras/' + clienteId, function(data) {
-                $('#obra_id').html('<option value="">Seleccione una obra</option>');
-                data.forEach(function(obra) {
-                    $('#obra_id').append('<option value="' + obra.id + '">' + obra.descripcion + '</option>');
-                });
-                $('#obra_id').prop('disabled', false).trigger('change.select2');
+    // Cargar obras del cliente seleccionado
+    function cargarObras(clienteId, targetObraId) {
+        $('#obra_id').html('<option value="">Cargando obras...</option>').trigger('change.select2');
+
+        $.get('/ajax/presupuesto/obras/' + clienteId, function(data) {
+            data = data || [];
+
+            if (targetObraId && !data.some(o => String(o.id) === String(targetObraId))) {
+                data.push({ id: targetObraId, descripcion: presupuestoInit.obra_descripcion });
+            }
+
+            $('#obra_id').html('<option value="">Seleccione una obra</option>');
+            data.forEach(function(obra) {
+                $('#obra_id').append('<option value="' + obra.id + '">' + obra.descripcion + '</option>');
             });
-        } else {
-            resetForm();
-        }
-    });
+            $('#obra_id').prop('disabled', false);
 
-    // Cargar visitas previas al seleccionar obra
-    $('#obra_id').on('change', function() {
-        var obraId = $(this).val();
-        if (obraId) {
-            $.get('/ajax/visitas-previas/' + obraId, function(data) {
-                $('#visita_previa_id').html('<option value="">Seleccione una visita previa</option>');
-                data.forEach(function(visita) {
-                    $('#visita_previa_id').append('<option value="' + visita.id + '">' + visita.fecha + ' - ' + visita.estado + '</option>');
-                });
-                $('#visita_previa_id').prop('disabled', false).trigger('change.select2');
+            if (targetObraId) {
+                $('#obra_id').val(targetObraId).trigger('change.select2');
+                cargarVisitas(targetObraId, presupuestoInit.visita_previa_id);
+            } else {
+                $('#obra_id').trigger('change.select2');
+            }
+        });
+    }
+
+    // Cargar visitas previas pendientes de la obra seleccionada
+    function cargarVisitas(obraId, targetVisitaId) {
+        $('#visita_previa_id').html('<option value="">Cargando visitas...</option>').trigger('change.select2');
+
+        $.get('/ajax/visitas-previas/' + obraId, function(data) {
+            data = data || [];
+
+            if (targetVisitaId && !data.some(v => String(v.id) === String(targetVisitaId))) {
+                data.push({ id: targetVisitaId, fecha: presupuestoInit.visita_fecha, estado: presupuestoInit.visita_estado });
+            }
+
+            $('#visita_previa_id').html('<option value="">Seleccione una visita previa</option>');
+            data.forEach(function(visita) {
+                $('#visita_previa_id').append('<option value="' + visita.id + '">' + visita.fecha + ' - ' + visita.estado + '</option>');
             });
-        } else {
-            resetForm();
-        }
-    });
+            $('#visita_previa_id').prop('disabled', false);
 
-    // Cargar datos y ensayos al seleccionar visita previa
-    $('#visita_previa_id').on('change', function() {
-        var visitaId = $(this).val();
-        if (visitaId) {
-            $.get('/ajax/visita-previa/' + visitaId, function(data) {
-                $('#cliente-datos').html(`
-                    <div class="detail-row"><i class="fas fa-building"></i><span><strong>Razón Social:</strong> ${data.cliente.razon_social}</span></div>
-                    <div class="detail-row"><i class="fas fa-id-card"></i><span><strong>RUC:</strong> ${data.cliente.ruc}</span></div>
-                    <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Dirección:</strong> ${data.cliente.direccion}</span></div>
-                `);
-                $('#obra-datos').html(`
-                    <div class="detail-row"><i class="fas fa-building"></i><span><strong>Descripción:</strong> ${data.obra.descripcion}</span></div>
-                    <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Ubicación:</strong> ${data.obra.ubicacion}</span></div>
-                    <div class="detail-row"><i class="fas fa-ruler-combined"></i><span><strong>Metros Cuadrados:</strong> ${data.obra.metros_cuadrados}</span></div>
-                `);
-                $('#visita-datos').html(`
-                    <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha:</strong> ${data.fecha_visita}</span></div>
-                    <div class="detail-row"><i class="fas fa-info-circle"></i><span><strong>Estado:</strong> ${data.estado.descripcion}</span></div>
-                    <div class="detail-row"><i class="fas fa-sticky-note"></i><span><strong>Observación:</strong> ${data.observacion || 'Sin observación'}</span></div>
-                `);
+            if (targetVisitaId) {
+                esVisitaOriginal = String(targetVisitaId) === String(presupuestoInit.visita_previa_id);
+                $('#visita_previa_id').val(targetVisitaId).trigger('change.select2');
+                cargarDatosVisita(targetVisitaId);
+            } else {
+                $('#visita_previa_id').trigger('change.select2');
+            }
+        });
+    }
 
-                // Fotos
-                $('#fotos-visita').html('');
-                if (data.fotos && data.fotos.length > 0) {
-                    data.fotos.forEach(function(foto) {
-                        $('#fotos-visita').append(`
-                            <div class="file-item">
-                                <img src="/storage/visitas_previas/fotos/${foto.ruta_foto}" alt="Foto">
-                                <div class="file-info">
-                                    <a href="/storage/visitas_previas/fotos/${foto.ruta_foto}" target="_blank">Ver imagen</a>
-                                    <small>${foto.fecha}</small>
-                                </div>
+    // Cargar información, fotos, planos y ensayos disponibles de la visita seleccionada
+    function cargarDatosVisita(visitaId) {
+        $.get('/ajax/visita-previa/' + visitaId, function(data) {
+            $('#cliente-datos').html(`
+                <div class="detail-row"><i class="fas fa-building"></i><span><strong>Razón Social:</strong> ${data.cliente.razon_social}</span></div>
+                <div class="detail-row"><i class="fas fa-id-card"></i><span><strong>RUC:</strong> ${data.cliente.ruc}</span></div>
+                <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Dirección:</strong> ${data.cliente.direccion}</span></div>
+            `);
+            $('#obra-datos').html(`
+                <div class="detail-row"><i class="fas fa-building"></i><span><strong>Descripción:</strong> ${data.obra.descripcion}</span></div>
+                <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Ubicación:</strong> ${data.obra.ubicacion}</span></div>
+                <div class="detail-row"><i class="fas fa-ruler-combined"></i><span><strong>Metros Cuadrados:</strong> ${data.obra.metros_cuadrados}</span></div>
+            `);
+            $('#visita-datos').html(`
+                <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha:</strong> ${data.fecha_visita}</span></div>
+                <div class="detail-row"><i class="fas fa-info-circle"></i><span><strong>Estado:</strong> ${data.estado.descripcion}</span></div>
+                <div class="detail-row"><i class="fas fa-sticky-note"></i><span><strong>Observación:</strong> ${data.observacion || 'Sin observación'}</span></div>
+            `);
+
+            // Fotos
+            $('#fotos-visita').html('');
+            if (data.fotos && data.fotos.length > 0) {
+                data.fotos.forEach(function(foto) {
+                    $('#fotos-visita').append(`
+                        <div class="file-item">
+                            <img src="/storage/visitas_previas/fotos/${foto.ruta_foto}" alt="Foto">
+                            <div class="file-info">
+                                <a href="/storage/visitas_previas/fotos/${foto.ruta_foto}" target="_blank">Ver imagen</a>
+                                <small>${foto.fecha}</small>
                             </div>
-                        `);
-                    });
-                } else {
-                    $('#fotos-visita').html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay fotos disponibles.</p>');
-                }
-
-                // Planos
-                $('#planos-visita').html('');
-                if (data.planos && data.planos.length > 0) {
-                    data.planos.forEach(function(plano) {
-                        var isPdf = plano.ruta_plano.toLowerCase().endsWith('.pdf');
-                        $('#planos-visita').append(`
-                            <div class="file-item">
-                                ${isPdf
-                                    ? `<div class="file-placeholder"><i class="fas fa-file-pdf"></i></div>`
-                                    : `<img src="/storage/visitas_previas/planos/${plano.ruta_plano}" alt="Plano">`}
-                                <div class="file-info">
-                                    <a href="/storage/visitas_previas/planos/${plano.ruta_plano}" target="_blank">Ver archivo</a>
-                                    <small>${plano.fecha}</small>
-                                </div>
-                            </div>
-                        `);
-                    });
-                } else {
-                    $('#planos-visita').html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay planos disponibles.</p>');
-                }
-
-                $('#info-section').show();
-            });
-
-            // Cargar ensayos disponibles
-            $.get('/ajax/ensayos-por-visita/' + visitaId, function(data) {
-                window.ensayosData = data;
-                $('#ensayos-disponibles').html('');
-                data.forEach(function(servicio) {
-                    if (!servicio.ensayos || servicio.ensayos.length === 0) return;
-                    const checks = servicio.ensayos.map(ensayo => `
-                        <label class="servicio-check" for="ensayo-${ensayo.id}">
-                            <input type="checkbox" class="ensayo-checkbox" value="${ensayo.id}" id="ensayo-${ensayo.id}" data-descripcion="${ensayo.descripcion}" ${ensayo.checked ? 'checked' : ''}>
-                            <span>${ensayo.descripcion}</span>
-                        </label>
-                    `).join('');
-                    $('#ensayos-disponibles').append(`
-                        <div class="servicio-group">
-                            <h6>${servicio.servicio}</h6>
-                            <div class="servicios-grid">${checks}</div>
                         </div>
                     `);
                 });
+            } else {
+                $('#fotos-visita').html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay fotos disponibles.</p>');
+            }
 
-                $('#ensayos-disponibles .servicio-check').each(function() {
-                    const $label = $(this);
-                    const $checkbox = $label.find('input[type="checkbox"]');
-                    const sync = () => $label.toggleClass('checked', $checkbox.is(':checked'));
-                    sync();
-                    $checkbox.on('change', sync);
+            // Planos
+            $('#planos-visita').html('');
+            if (data.planos && data.planos.length > 0) {
+                data.planos.forEach(function(plano) {
+                    var isPdf = plano.ruta_plano.toLowerCase().endsWith('.pdf');
+                    $('#planos-visita').append(`
+                        <div class="file-item">
+                            ${isPdf
+                                ? `<div class="file-placeholder"><i class="fas fa-file-pdf"></i></div>`
+                                : `<img src="/storage/visitas_previas/planos/${plano.ruta_plano}" alt="Plano">`}
+                            <div class="file-info">
+                                <a href="/storage/visitas_previas/planos/${plano.ruta_plano}" target="_blank">Ver archivo</a>
+                                <small>${plano.fecha}</small>
+                            </div>
+                        </div>
+                    `);
                 });
+            } else {
+                $('#planos-visita').html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay planos disponibles.</p>');
+            }
 
-                $('#presupuesto-section').show();
-                updateSelectedEnsayos();
+            $('#info-section').show();
+        });
+
+        // Cargar ensayos disponibles
+        $.get('/ajax/ensayos-por-visita/' + visitaId, function(data) {
+            window.ensayosData = data;
+            $('#ensayos-disponibles').html('');
+            data.forEach(function(servicio) {
+                if (!servicio.ensayos || servicio.ensayos.length === 0) return;
+                const checks = servicio.ensayos.map(ensayo => {
+                    const checked = esVisitaOriginal
+                        ? presupuestoInit.ensayos_seleccionados.includes(ensayo.id)
+                        : ensayo.checked;
+                    return `
+                        <label class="servicio-check" for="ensayo-${ensayo.id}">
+                            <input type="checkbox" class="ensayo-checkbox" value="${ensayo.id}" id="ensayo-${ensayo.id}" data-descripcion="${ensayo.descripcion}" ${checked ? 'checked' : ''}>
+                            <span>${ensayo.descripcion}</span>
+                        </label>
+                    `;
+                }).join('');
+                $('#ensayos-disponibles').append(`
+                    <div class="servicio-group">
+                        <h6>${servicio.servicio}</h6>
+                        <div class="servicios-grid">${checks}</div>
+                    </div>
+                `);
             });
+
+            $('#ensayos-disponibles .servicio-check').each(function() {
+                const $label = $(this);
+                const $checkbox = $label.find('input[type="checkbox"]');
+                const sync = () => $label.toggleClass('checked', $checkbox.is(':checked'));
+                sync();
+                $checkbox.on('change', sync);
+            });
+
+            $('#presupuesto-section').show();
+            updateSelectedEnsayos();
+        });
+    }
+
+    $('#cliente_id').on('change', function() {
+        var clienteId = $(this).val();
+        if (clienteId) {
+            cargarObras(clienteId);
+        } else {
+            resetForm();
+        }
+    });
+
+    $('#obra_id').on('change', function() {
+        var obraId = $(this).val();
+        if (obraId) {
+            cargarVisitas(obraId);
+        } else {
+            resetForm();
+        }
+    });
+
+    $('#visita_previa_id').on('change', function() {
+        var visitaId = $(this).val();
+        if (visitaId) {
+            esVisitaOriginal = String(visitaId) === String(presupuestoInit.visita_previa_id);
+            cargarDatosVisita(visitaId);
         } else {
             resetForm();
         }
@@ -691,16 +771,21 @@ $(document).ready(function() {
             var selectedEnsayos = servicio.ensayos.filter(ensayo => selected.includes(ensayo.id.toString()));
             if (selectedEnsayos.length === 0) return;
 
-            var rows = selectedEnsayos.map(ensayo => `
-                <tr class="ensayo-item" data-id="${ensayo.id}">
-                    <td>${ensayo.descripcion}<input type="hidden" name="ensayos[]" value="${ensayo.id}"></td>
-                    <td><input type="number" class="form-control form-control-sm precio-input" name="precios[${ensayo.id}]" step="0.01" min="0" required></td>
-                    <td><input type="number" class="form-control form-control-sm cantidad-input" name="cantidades[${ensayo.id}]" min="1" required></td>
-                    <td><select name="impuestos[${ensayo.id}]" class="form-select form-select-sm impuesto-select" required>${impuestoOptions}</select></td>
-                    <td class="text-center"><span class="iva-monto">₲ 0</span></td>
-                    <td class="text-center"><span class="amount subtotal">₲ 0</span></td>
-                </tr>
-            `).join('');
+            var rows = selectedEnsayos.map(ensayo => {
+                var detalle = esVisitaOriginal ? presupuestoInit.detalles[ensayo.id] : null;
+                var precioVal = detalle ? detalle.precio_unitario : '';
+                var cantidadVal = detalle ? detalle.cantidad : '';
+                return `
+                    <tr class="ensayo-item" data-id="${ensayo.id}" data-impuesto="${detalle ? detalle.impuesto_id : ''}">
+                        <td>${ensayo.descripcion}<input type="hidden" name="ensayos[]" value="${ensayo.id}"></td>
+                        <td><input type="number" class="form-control form-control-sm precio-input" name="precios[${ensayo.id}]" step="0.01" min="0" value="${precioVal}" required></td>
+                        <td><input type="number" class="form-control form-control-sm cantidad-input" name="cantidades[${ensayo.id}]" min="1" value="${cantidadVal}" required></td>
+                        <td><select name="impuestos[${ensayo.id}]" class="form-select form-select-sm impuesto-select" required>${impuestoOptions}</select></td>
+                        <td class="text-center"><span class="iva-monto">₲ 0</span></td>
+                        <td class="text-center"><span class="amount subtotal">₲ 0</span></td>
+                    </tr>
+                `;
+            }).join('');
 
             $('#precios-cantidades').append(`
                 <div class="precio-servicio-block">
@@ -722,6 +807,13 @@ $(document).ready(function() {
                     </div>
                 </div>
             `);
+        });
+
+        // Preseleccionar el impuesto guardado (o el 10% por defecto) en cada fila
+        $('.ensayo-item').each(function() {
+            var impuestoGuardado = $(this).data('impuesto');
+            var $select = $(this).find('.impuesto-select');
+            $select.val(impuestoGuardado ? impuestoGuardado : 2);
         });
 
         updateTotals();
@@ -805,6 +897,11 @@ $(document).ready(function() {
         $('#monto_anticipo').val('');
         $('#anticipoLabel').text('Anticipo (0%)');
         $('#totalEnsayos, #totalImpuestosGeneral, #totalGeneral, #montoAnticipoResumen').text('₲ 0');
+    }
+
+    // Carga inicial: precargar cliente, obra, visita y ensayos del presupuesto
+    if (presupuestoInit.cliente_id) {
+        cargarObras(presupuestoInit.cliente_id, presupuestoInit.obra_id);
     }
 });
 </script>

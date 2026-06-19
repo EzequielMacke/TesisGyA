@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Nueva Visita Previa</title>
+    <title>Editar Visita Previa</title>
     @include('partials.head')
 </head>
 <body>
@@ -14,8 +14,8 @@
             {{-- Cabecera --}}
             <div class="page-header">
                 <div>
-                    <h2><i class="fas fa-clipboard-list"></i> Nueva Visita Previa</h2>
-                    <small>Complete los datos para registrar una nueva visita previa</small>
+                    <h2><i class="fas fa-clipboard-list"></i> Editar Visita Previa</h2>
+                    <small>Modifique los datos de la visita previa</small>
                 </div>
                 <a href="{{ route('visita_previa.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Volver al Listado
@@ -34,8 +34,9 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('visita_previa.store') }}" enctype="multipart/form-data" id="visitaForm">
+            <form method="POST" action="{{ route('visita_previa.update', $visita->id) }}" enctype="multipart/form-data" id="visitaForm">
                 @csrf
+                @method('PUT')
 
                 {{-- Datos de la Visita --}}
                 <div class="card">
@@ -49,7 +50,7 @@
                                 <select name="cliente_id" id="cliente_id" class="form-select form-select-sm select2">
                                     <option value="">Seleccione un cliente</option>
                                     @foreach($clientes as $cliente)
-                                        <option value="{{ $cliente->id }}" {{ old('cliente_id') == $cliente->id ? 'selected' : '' }}>
+                                        <option value="{{ $cliente->id }}" {{ old('cliente_id', $visita->cliente_id) == $cliente->id ? 'selected' : '' }}>
                                             {{ $cliente->razon_social }}
                                         </option>
                                     @endforeach
@@ -58,7 +59,7 @@
                             <div>
                                 <label for="obra_id" class="form-label">Obra *</label>
                                 <select name="obra_id" id="obra_id" class="form-select form-select-sm select2" disabled>
-                                    <option value="">Primero seleccione un cliente</option>
+                                    <option value="">Cargando obras...</option>
                                 </select>
                             </div>
                             <div>
@@ -69,21 +70,21 @@
                             </div>
                             <div>
                                 <label for="fecha_visita" class="form-label">Fecha de Visita *</label>
-                                <input type="date" name="fecha_visita" id="fecha_visita" class="form-control form-control-sm" value="{{ old('fecha_visita', date('Y-m-d')) }}">
+                                <input type="date" name="fecha_visita" id="fecha_visita" class="form-control form-control-sm" value="{{ old('fecha_visita', \Carbon\Carbon::parse($visita->fecha_visita)->format('Y-m-d')) }}">
                             </div>
                             <div>
                                 <label for="metros_cuadrados" class="form-label">Metros Cuadrados *</label>
-                                <input type="number" min="0" step="0.01" name="metros_cuadrados" id="metros_cuadrados" class="form-control form-control-sm" value="{{ old('metros_cuadrados') }}">
+                                <input type="number" min="0" step="0.01" name="metros_cuadrados" id="metros_cuadrados" class="form-control form-control-sm" value="{{ old('metros_cuadrados', $visita->obra->metros_cuadrados ?? '') }}">
                             </div>
                             <div>
                                 <label for="niveles" class="form-label">Niveles de la Obra *</label>
-                                <input type="text" name="niveles" id="niveles" class="form-control form-control-sm" value="{{ old('niveles') }}" placeholder="Ej: Planta baja, 1er piso">
+                                <input type="text" name="niveles" id="niveles" class="form-control form-control-sm" value="{{ old('niveles', $visita->obra->niveles ?? '') }}" placeholder="Ej: Planta baja, 1er piso">
                             </div>
                         </div>
 
                         <div class="mt-3">
                             <label for="observacion" class="form-label">Observación</label>
-                            <textarea name="observacion" id="observacion" class="form-control form-control-sm" rows="2" placeholder="Ingrese una observación...">{{ old('observacion') }}</textarea>
+                            <textarea name="observacion" id="observacion" class="form-control form-control-sm" rows="2" placeholder="Ingrese una observación...">{{ old('observacion', $visita->observacion) }}</textarea>
                         </div>
 
                         <div id="info-solicitud" class="detail-box mt-3" style="display:none;"></div>
@@ -107,12 +108,24 @@
                         <span class="results-count" id="fotos-count">0 fotos seleccionadas</span>
                     </div>
                     <div class="card-body">
+                        @if($visita->fotos->count() > 0)
+                            <div class="mb-3">
+                                <label class="form-label">Fotos ya cargadas</label>
+                                <div class="file-preview-container existing-files">
+                                    @foreach($visita->fotos as $foto)
+                                        <a href="{{ Storage::disk('public')->url('visitas_previas/fotos/' . $foto->ruta_foto) }}" target="_blank" class="file-preview" title="Ver imagen">
+                                            <img src="{{ Storage::disk('public')->url('visitas_previas/fotos/' . $foto->ruta_foto) }}" alt="Foto">
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                         <div class="file-upload-section" id="fotos-section">
                             <input type="file" name="fotos[]" id="fotos-input" class="file-input-hidden" multiple>
                             <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
                             <p>Arrastra y suelta las fotos aquí o haz clic para seleccionar</p>
                             <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('fotos-input').click()">
-                                <i class="fas fa-upload me-2"></i>Seleccionar Fotos
+                                <i class="fas fa-upload me-2"></i>Agregar Fotos
                             </button>
                             <div class="file-preview-container" id="fotos-preview"></div>
                         </div>
@@ -126,12 +139,30 @@
                         <span class="results-count" id="planos-count">0 archivos seleccionados</span>
                     </div>
                     <div class="card-body">
+                        @if($visita->planos->count() > 0)
+                            <div class="mb-3">
+                                <label class="form-label">Planos ya cargados</label>
+                                <div class="file-preview-container existing-files">
+                                    @foreach($visita->planos as $plano)
+                                        <a href="{{ Storage::disk('public')->url('visitas_previas/planos/' . $plano->ruta_plano) }}" target="_blank" class="file-preview" title="Ver archivo">
+                                            @if(strtolower(pathinfo($plano->ruta_plano, PATHINFO_EXTENSION)) == 'pdf')
+                                                <div style="display:flex; align-items:center; justify-content:center; height:100%; background:#f8fafc;">
+                                                    <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                                </div>
+                                            @else
+                                                <img src="{{ Storage::disk('public')->url('visitas_previas/planos/' . $plano->ruta_plano) }}" alt="Plano">
+                                            @endif
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                         <div class="file-upload-section" id="planos-section">
                             <input type="file" name="planos[]" id="planos-input" class="file-input-hidden" multiple>
                             <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
                             <p>Arrastra y suelta los planos aquí o haz clic para seleccionar</p>
                             <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('planos-input').click()">
-                                <i class="fas fa-upload me-2"></i>Seleccionar Planos
+                                <i class="fas fa-upload me-2"></i>Agregar Planos
                             </button>
                             <div class="file-preview-container" id="planos-preview"></div>
                         </div>
@@ -145,7 +176,7 @@
                             <i class="fas fa-times me-2"></i>Cancelar
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Guardar Visita Previa
+                            <i class="fas fa-save me-2"></i>Guardar Cambios
                         </button>
                     </div>
                 </div>
@@ -303,6 +334,10 @@
     margin-top: 1rem;
     justify-content: center;
 }
+.file-preview-container.existing-files {
+    margin-top: 0;
+    justify-content: flex-start;
+}
 .file-preview {
     position: relative;
     width: 100px;
@@ -311,6 +346,7 @@
     overflow: hidden;
     border: 1px solid #e2e8f0;
     background: #fff;
+    display: block;
 }
 .file-preview img {
     width: 100%;
@@ -344,9 +380,21 @@
 .file-preview .remove-file:hover { background: rgba(220, 53, 69, 1); }
 </style>
 
+@php
+    $visitaInit = [
+        'obra_id' => $visita->obra_id,
+        'obra_descripcion' => $visita->obra->descripcion ?? '',
+        'solicitud_id' => $visita->solicitud_servicio_id,
+        'solicitud_fecha' => optional($visita->solicitudServicio)->fecha,
+        'ensayos_seleccionados' => $ensayosSeleccionados,
+    ];
+@endphp
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     $('.select2').select2({ theme: 'bootstrap-5', width: '100%' });
+
+    const visitaInit = @json($visitaInit);
 
     const $clienteSelect = $('#cliente_id');
     const $obraSelect = $('#obra_id');
@@ -358,18 +406,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const $ensayosList = $('#ensayos-list');
 
     // Cargar obras del cliente seleccionado
-    function cargarObras(clienteId) {
+    function cargarObras(clienteId, targetObraId, targetSolicitudId) {
         $obraSelect.empty().append('<option value="">Cargando obras...</option>').trigger('change');
-        $solicitudSelect.empty().append('<option value="">Primero seleccione una obra</option>').prop('disabled', true).trigger('change');
-        $metrosInput.val('');
-        $nivelesInput.val('');
-        $infoSolicitud.hide().html('');
-        $ensayosCard.hide();
-        $ensayosList.empty();
+        if (!targetObraId) {
+            $solicitudSelect.empty().append('<option value="">Primero seleccione una obra</option>').prop('disabled', true).trigger('change');
+            $metrosInput.val('');
+            $nivelesInput.val('');
+            $infoSolicitud.hide().html('');
+            $ensayosCard.hide();
+            $ensayosList.empty();
+        }
 
         $.getJSON(`/ajax/obras/${clienteId}`, function(obras) {
+            obras = obras || [];
+
+            if (targetObraId && !obras.some(o => String(o.id) === String(targetObraId))) {
+                obras.push({ id: targetObraId, descripcion: visitaInit.obra_descripcion });
+            }
+
             $obraSelect.empty().append('<option value="">Seleccione una obra</option>');
-            if (obras && obras.length > 0) {
+            if (obras.length > 0) {
                 $.each(obras, function(i, obra) {
                     $obraSelect.append(`<option value="${obra.id}">${obra.descripcion}</option>`);
                 });
@@ -377,24 +433,38 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 $obraSelect.append('<option value="">No hay obras disponibles</option>');
             }
-            $obraSelect.trigger('change');
+
+            if (targetObraId) {
+                $obraSelect.val(targetObraId).trigger('change.select2');
+                cargarSolicitudes(targetObraId, targetSolicitudId);
+            } else {
+                $obraSelect.trigger('change');
+            }
         }).fail(function() {
             $obraSelect.empty().append('<option value="">Error al cargar obras</option>').trigger('change');
         });
     }
 
     // Cargar solicitudes pendientes de la obra seleccionada
-    function cargarSolicitudes(obraId) {
+    function cargarSolicitudes(obraId, targetSolicitudId) {
         $solicitudSelect.empty().append('<option value="">Cargando solicitudes...</option>').trigger('change');
-        $metrosInput.val('');
-        $nivelesInput.val('');
-        $infoSolicitud.hide().html('');
-        $ensayosCard.hide();
-        $ensayosList.empty();
+        if (!targetSolicitudId) {
+            $metrosInput.val('');
+            $nivelesInput.val('');
+            $infoSolicitud.hide().html('');
+            $ensayosCard.hide();
+            $ensayosList.empty();
+        }
 
         $.getJSON(`/ajax/solicitudes/${obraId}`, function(solicitudes) {
+            solicitudes = solicitudes || [];
+
+            if (targetSolicitudId && !solicitudes.some(s => String(s.id) === String(targetSolicitudId))) {
+                solicitudes.push({ id: targetSolicitudId, fecha: visitaInit.solicitud_fecha });
+            }
+
             $solicitudSelect.empty().append('<option value="">Seleccione una solicitud</option>');
-            if (solicitudes && solicitudes.length > 0) {
+            if (solicitudes.length > 0) {
                 $.each(solicitudes, function(i, solicitud) {
                     $solicitudSelect.append(`<option value="${solicitud.id}">#${solicitud.id} - ${solicitud.fecha}</option>`);
                 });
@@ -402,7 +472,13 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 $solicitudSelect.append('<option value="">No hay solicitudes disponibles</option>');
             }
-            $solicitudSelect.trigger('change');
+
+            if (targetSolicitudId) {
+                $solicitudSelect.val(targetSolicitudId).trigger('change.select2');
+                cargarDetalleSolicitud(targetSolicitudId);
+            } else {
+                $solicitudSelect.trigger('change');
+            }
         }).fail(function() {
             $solicitudSelect.empty().append('<option value="">Error al cargar solicitudes</option>').trigger('change');
         });
@@ -448,12 +524,15 @@ document.addEventListener('DOMContentLoaded', function () {
             success: function(response) {
                 if (response && response.length > 0) {
                     $.each(response, function(i, servicioData) {
-                        const checks = servicioData.ensayos.map(ensayo => `
-                            <label class="servicio-check" for="ensayo-${ensayo.id}">
-                                <input type="checkbox" name="ensayos[]" value="${ensayo.id}" id="ensayo-${ensayo.id}">
-                                <span>${ensayo.descripcion}</span>
-                            </label>
-                        `).join('');
+                        const checks = servicioData.ensayos.map(ensayo => {
+                            const checked = visitaInit.ensayos_seleccionados.includes(ensayo.id) ? 'checked' : '';
+                            return `
+                                <label class="servicio-check" for="ensayo-${ensayo.id}">
+                                    <input type="checkbox" name="ensayos[]" value="${ensayo.id}" id="ensayo-${ensayo.id}" ${checked}>
+                                    <span>${ensayo.descripcion}</span>
+                                </label>
+                            `;
+                        }).join('');
 
                         $ensayosList.append(`
                             <div class="servicio-group">
@@ -519,6 +598,12 @@ document.addEventListener('DOMContentLoaded', function () {
             $ensayosList.empty();
         }
     });
+
+    // Carga inicial: precargar obra y solicitud actuales de la visita
+    const clienteInicial = $clienteSelect.val();
+    if (clienteInicial) {
+        cargarObras(clienteInicial, visitaInit.obra_id, visitaInit.solicitud_id);
+    }
 
     // Manejo de archivos: vista previa, contador y eliminación
     function handleFileSelect(event, type) {

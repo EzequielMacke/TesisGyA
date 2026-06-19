@@ -59,7 +59,11 @@ class VisitaPreviaController extends Controller
 
     public function create()
     {
-        $clientes = Cliente::where('estado_id', 1)->get();
+        $clientes = Cliente::where('estado_id', 1)
+            ->whereHas('solicitudesServicio', function ($query) {
+                $query->where('estado_id', 3);
+            })
+            ->get();
 
         return view('visita_previa.create', compact('clientes'));
     }
@@ -74,8 +78,8 @@ class VisitaPreviaController extends Controller
             'metros_cuadrados' => 'required|numeric|min:0',
             'niveles' => 'required|string|max:255',
             'observacion' => 'nullable|string',
-            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'planos.*' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:5120',
+            'fotos.*' => 'nullable|file',
+            'planos.*' => 'nullable|file',
             'ensayos' => 'nullable|array',
             'ensayos.*' => 'exists:ensayos,id',
         ]);
@@ -113,7 +117,7 @@ class VisitaPreviaController extends Controller
                     $path = $foto->store('visitas_previas/fotos', 'public');
                     VisitaPreviaFoto::create([
                         'visita_previa_id' => $visita->id,
-                        'ruta_foto' => $path,
+                        'ruta_foto' => basename($path),
                         'fecha' => now(),
                         'usuario_id' => session('user_id'),
                         'obra_id' => $request->obra_id,
@@ -127,7 +131,7 @@ class VisitaPreviaController extends Controller
                     $path = $plano->store('visitas_previas/planos', 'public');
                     VisitaPreviaPlano::create([
                         'visita_previa_id' => $visita->id,
-                        'ruta_plano' => $path,
+                        'ruta_plano' => basename($path),
                         'fecha' => now(),
                         'usuario_id' => session('user_id'),
                         'obra_id' => $request->obra_id,
@@ -176,14 +180,36 @@ class VisitaPreviaController extends Controller
 
     public function edit($id)
     {
-        $visita = VisitaPrevia::findOrFail($id);
-        $clientes = Cliente::where('estado_id', 1)->get();
+        $visita = VisitaPrevia::with(['cliente', 'obra', 'solicitudServicio', 'fotos', 'planos', 'ensayos'])->findOrFail($id);
 
-        return view('visita_previa.edit', compact('visita', 'clientes'));
+        if ($visita->estado_id != 3) {
+            return redirect()->route('visita_previa.index')
+                ->with('error', 'Solo se pueden editar visitas previas en estado Pendiente.');
+        }
+
+        $clientes = Cliente::where('estado_id', 1)
+            ->whereHas('solicitudesServicio', function ($query) {
+                $query->where('estado_id', 3);
+            })
+            ->orderBy('razon_social')->get();
+        if (!$clientes->contains('id', $visita->cliente_id)) {
+            $clientes->push($visita->cliente);
+        }
+
+        $ensayosSeleccionados = $visita->ensayos->pluck('ensayo_id')->toArray();
+
+        return view('visita_previa.edit', compact('visita', 'clientes', 'ensayosSeleccionados'));
     }
 
     public function update(Request $request, $id)
     {
+        $visitaActual = VisitaPrevia::findOrFail($id);
+
+        if ($visitaActual->estado_id != 3) {
+            return redirect()->route('visita_previa.index')
+                ->with('error', 'Solo se pueden editar visitas previas en estado Pendiente.');
+        }
+
         $request->validate([
             'cliente_id' => 'required|exists:clientes,id',
             'obra_id' => 'required|exists:obras,id',
@@ -192,15 +218,15 @@ class VisitaPreviaController extends Controller
             'metros_cuadrados' => 'required|numeric|min:0',
             'niveles' => 'required|string|max:255',
             'observacion' => 'nullable|string',
-            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'planos.*' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:5120',
+            'fotos.*' => 'nullable|file',
+            'planos.*' => 'nullable|file',
             'ensayos' => 'nullable|array',
             'ensayos.*' => 'exists:ensayos,id',
         ]);
 
         DB::beginTransaction();
         try {
-            $visita = VisitaPrevia::findOrFail($id);
+            $visita = $visitaActual;
             $visita->update([
                 'cliente_id' => $request->cliente_id,
                 'obra_id' => $request->obra_id,
@@ -226,7 +252,7 @@ class VisitaPreviaController extends Controller
                     $path = $foto->store('visitas_previas/fotos', 'public');
                     VisitaPreviaFoto::create([
                         'visita_previa_id' => $visita->id,
-                        'ruta_foto' => $path,
+                        'ruta_foto' => basename($path),
                         'fecha' => now(),
                         'usuario_id' => session('user_id'),
                         'obra_id' => $request->obra_id,
@@ -240,7 +266,7 @@ class VisitaPreviaController extends Controller
                     $path = $plano->store('visitas_previas/planos', 'public');
                     VisitaPreviaPlano::create([
                         'visita_previa_id' => $visita->id,
-                        'ruta_plano' => $path,
+                        'ruta_plano' => basename($path),
                         'fecha' => now(),
                         'usuario_id' => session('user_id'),
                         'obra_id' => $request->obra_id,
@@ -272,16 +298,34 @@ class VisitaPreviaController extends Controller
         }
     }
 
+    public function anular($id)
+    {
+        $visita = VisitaPrevia::findOrFail($id);
+
+        if ($visita->estado_id != 3) {
+            return redirect()->route('visita_previa.index')
+                ->with('error', 'Solo se pueden anular visitas previas en estado Pendiente.');
+        }
+
+        $visita->update(['estado_id' => 5]);
+
+        // Liberar la solicitud de servicio para que pueda usarse en otra visita
+        SolicitudServicio::where('id', $visita->solicitud_servicio_id)->update(['estado_id' => 3]);
+
+        return redirect()->route('visita_previa.index')
+            ->with('success', 'Visita previa anulada correctamente.');
+    }
+
     public function destroy($id)
     {
         $visita = VisitaPrevia::findOrFail($id);
 
         // Eliminar archivos físicos
         foreach ($visita->fotos as $foto) {
-            Storage::disk('public')->delete($foto->ruta_foto);
+            Storage::disk('public')->delete('visitas_previas/fotos/' . $foto->ruta_foto);
         }
         foreach ($visita->planos as $plano) {
-            Storage::disk('public')->delete($plano->ruta_plano);
+            Storage::disk('public')->delete('visitas_previas/planos/' . $plano->ruta_plano);
         }
 
         $visita->delete();
@@ -294,6 +338,9 @@ class VisitaPreviaController extends Controller
     {
         $obras = Obra::where('cliente_id', $clienteId)
             ->where('estado_id', 1)
+            ->whereHas('solicitudesServicio', function ($query) {
+                $query->where('estado_id', 3);
+            })
             ->get(['id', 'descripcion']);
 
         return response()->json($obras);

@@ -147,16 +147,15 @@
                                                     <a href="{{ route('presupuesto_servicio.show', $presupuesto->id) }}" class="btn-icon" title="Ver Detalles">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('presupuesto_servicio.edit', $presupuesto->id) }}" class="btn-icon" title="Editar">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <form action="{{ route('presupuesto_servicio.destroy', $presupuesto->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar este presupuesto?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn-icon danger" title="Eliminar">
-                                                            <i class="fas fa-trash"></i>
+                                                    @if($presupuesto->estado_id == 3)
+                                                        <a href="{{ route('presupuesto_servicio.edit', $presupuesto->id) }}" class="btn-icon" title="Editar">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <button type="button" class="btn-icon danger" title="Anular"
+                                                                onclick="abrirAnular({{ $presupuesto->id }}, '{{ $presupuesto->numero_presupuesto }}')">
+                                                            <i class="fas fa-ban"></i>
                                                         </button>
-                                                    </form>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -184,6 +183,33 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    {{-- Modal de anulación --}}
+    <div class="modal fade" id="modalAnular" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Anular Presupuesto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formAnular" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <p class="mb-2">¿Está seguro que desea anular el presupuesto <strong id="anularNumero"></strong>?</p>
+                        <p class="text-muted mb-0" style="font-size:0.85rem;">
+                            La visita previa asociada volverá a estado Pendiente. Esta acción no se puede deshacer.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-ban me-2"></i>Anular Presupuesto
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -359,3 +385,11 @@
     .table-container { font-size: 0.875rem; }
 }
 </style>
+
+<script>
+function abrirAnular(id, numero) {
+    document.getElementById('formAnular').action = `{{ url('presupuesto_servicio') }}/${id}/anular`;
+    document.getElementById('anularNumero').textContent = numero;
+    new bootstrap.Modal(document.getElementById('modalAnular')).show();
+}
+</script>

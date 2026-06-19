@@ -58,7 +58,13 @@ class PresupuestoServicioController extends Controller
 
     public function create()
     {
-        return view('presupuesto_servicio.create');
+        $clientes = Cliente::where('estado_id', 1)
+            ->whereHas('visitasPrevias', function ($query) {
+                $query->where('estado_id', 3);
+            })
+            ->orderBy('razon_social')->get();
+
+        return view('presupuesto_servicio.create', compact('clientes'));
     }
 
     public function store(Request $request)
@@ -149,6 +155,136 @@ class PresupuestoServicioController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $presupuesto = PresupuestoServicio::with(['cliente', 'obra', 'visitaPrevia', 'detalles'])->findOrFail($id);
+
+        if ($presupuesto->estado_id != 3) {
+            return redirect()->route('presupuesto_servicio.index')
+                ->with('error', 'Solo se pueden editar presupuestos en estado Pendiente.');
+        }
+
+        $clientes = Cliente::where('estado_id', 1)
+            ->whereHas('visitasPrevias', function ($query) {
+                $query->where('estado_id', 3);
+            })
+            ->orderBy('razon_social')->get();
+        if (!$clientes->contains('id', $presupuesto->cliente_id)) {
+            $clientes->push($presupuesto->cliente);
+        }
+
+        $ensayosSeleccionados = $presupuesto->detalles->pluck('ensayos_id')->toArray();
+        $detallesPresupuesto = $presupuesto->detalles->keyBy('ensayos_id')->map(function ($detalle) {
+            return [
+                'precio_unitario' => $detalle->precio_unitario,
+                'cantidad' => $detalle->cantidad,
+                'impuesto_id' => $detalle->impuesto_id,
+            ];
+        });
+
+        return view('presupuesto_servicio.edit', compact('presupuesto', 'clientes', 'ensayosSeleccionados', 'detallesPresupuesto'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $presupuesto = PresupuestoServicio::findOrFail($id);
+
+        if ($presupuesto->estado_id != 3) {
+            return redirect()->route('presupuesto_servicio.index')
+                ->with('error', 'Solo se pueden editar presupuestos en estado Pendiente.');
+        }
+
+        $request->validate([
+            'cliente_id' => 'required|exists:clientes,id',
+            'obra_id' => 'required|exists:obras,id',
+            'visita_previa_id' => 'required|exists:visita_previa,id',
+            'validez' => 'required|integer|min:1',
+            'anticipo' => 'required|numeric|min:0|max:100',
+            'fecha' => 'required|date',
+            'observacion' => 'nullable|string',
+            'ensayos' => 'required|array',
+            'ensayos.*' => 'exists:ensayos,id',
+            'precios' => 'required|array',
+            'cantidades' => 'required|array',
+            'impuestos' => 'required|array',
+        ]);
+
+        // Cargar ensayos para obtener servicio_id
+        $ensayos = Ensayo::whereIn('id', $request->ensayos)->get()->keyBy('id');
+
+        // Calcular totales
+        $totalEnsayos = 0;
+        $totalImpuestos = 0;
+        $detalles = [];
+        foreach ($request->ensayos as $ensayoId) {
+            $ensayo = $ensayos[$ensayoId];
+            $precio = $request->precios[$ensayoId];
+            $cantidad = $request->cantidades[$ensayoId];
+            $impuestoId = $request->impuestos[$ensayoId];
+            $subtotal = round($precio * $cantidad);
+            $ivaMonto = $this->calcularIVA($subtotal, $impuestoId);
+            $totalEnsayos += $subtotal;
+            $totalImpuestos += $ivaMonto;
+            $detalles[] = [
+                'ensayos_id' => $ensayoId,
+                'servicio_id' => $ensayo->servicio_id,
+                'precio_unitario' => $precio,
+                'cantidad' => $cantidad,
+                'impuesto_id' => $impuestoId,
+            ];
+        }
+        $totalGeneral = $totalEnsayos + $totalImpuestos;
+
+        $visitaPreviaAnterior = $presupuesto->visita_previa_id;
+
+        $presupuesto->update([
+            'cliente_id' => $request->cliente_id,
+            'obra_id' => $request->obra_id,
+            'visita_previa_id' => $request->visita_previa_id,
+            'descripcion' => "Presupuesto {$presupuesto->numero_presupuesto} para la visita {$request->visita_previa_id}",
+            'validez' => $request->validez,
+            'anticipo' => $request->anticipo,
+            'fecha' => $request->fecha,
+            'observacion' => $request->observacion,
+            'monto' => $totalGeneral,
+        ]);
+
+        // Si se cambió la visita previa, liberar la anterior y confirmar la nueva
+        if ($visitaPreviaAnterior != $request->visita_previa_id) {
+            VisitaPrevia::where('id', $visitaPreviaAnterior)->update(['estado_id' => 3]);
+            VisitaPrevia::where('id', $request->visita_previa_id)->update(['estado_id' => 4]);
+        }
+
+        // Reemplazar detalles
+        $presupuesto->detalles()->delete();
+        foreach ($detalles as $detalle) {
+            PresupuestoServicioDetalle::create([
+                'presupuesto_servicio_id' => $presupuesto->id,
+                ...$detalle,
+            ]);
+        }
+
+        return redirect()->route('presupuesto_servicio.index')->with('success', 'Presupuesto actualizado exitosamente.');
+    }
+
+    public function anular($id)
+    {
+        $presupuesto = PresupuestoServicio::findOrFail($id);
+
+        if ($presupuesto->estado_id != 3) {
+            return redirect()->route('presupuesto_servicio.index')
+                ->with('error', 'Solo se pueden anular presupuestos en estado Pendiente.');
+        }
+
+        $presupuesto->update(['estado_id' => 5]);
+
+        // Liberar la visita previa para que pueda usarse en otro presupuesto
+        VisitaPrevia::where('id', $presupuesto->visita_previa_id)->update(['estado_id' => 3]);
+
+        return redirect()->route('presupuesto_servicio.index')
+            ->with('success', 'Presupuesto anulado correctamente.');
+    }
+
     public function show($id)
     {
         $presupuesto = PresupuestoServicio::with([
@@ -170,6 +306,9 @@ class PresupuestoServicioController extends Controller
     {
         $obras = Obra::where('cliente_id', $clienteId)
             ->where('estado_id', 1)
+            ->whereHas('visitasPrevias', function ($query) {
+                $query->where('estado_id', 3);
+            })
             ->get(['id', 'descripcion']);
 
         return response()->json($obras);

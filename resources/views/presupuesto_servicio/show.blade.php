@@ -128,9 +128,9 @@
                                 @if($presupuesto->visitaPrevia->fotos && $presupuesto->visitaPrevia->fotos->count() > 0)
                                     @foreach($presupuesto->visitaPrevia->fotos as $foto)
                                         <div class="file-item">
-                                            <img src="/storage/{{ $foto->ruta_foto }}" alt="Foto">
+                                            <img src="/storage/visitas_previas/fotos/{{ $foto->ruta_foto }}" alt="Foto">
                                             <div class="file-info">
-                                                <a href="/storage/{{ $foto->ruta_foto }}" target="_blank">Ver imagen</a>
+                                                <a href="/storage/visitas_previas/fotos/{{ $foto->ruta_foto }}" target="_blank">Ver imagen</a>
                                                 <small>{{ $foto->fecha }}</small>
                                             </div>
                                         </div>
@@ -149,10 +149,10 @@
                                             @if(strtolower(pathinfo($plano->ruta_plano, PATHINFO_EXTENSION)) === 'pdf')
                                                 <div class="file-placeholder"><i class="fas fa-file-pdf"></i></div>
                                             @else
-                                                <img src="/storage/{{ $plano->ruta_plano }}" alt="Plano">
+                                                <img src="/storage/visitas_previas/planos/{{ $plano->ruta_plano }}" alt="Plano">
                                             @endif
                                             <div class="file-info">
-                                                <a href="/storage/{{ $plano->ruta_plano }}" target="_blank">Ver archivo</a>
+                                                <a href="/storage/visitas_previas/planos/{{ $plano->ruta_plano }}" target="_blank">Ver archivo</a>
                                                 <small>{{ $plano->fecha }}</small>
                                             </div>
                                         </div>

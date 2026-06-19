@@ -169,7 +169,9 @@ Route::post('/compras/{id}/anular', [CompraController::class, 'anular'])->name('
 Route::get('solicitud_servicio', [SolicitudServicioController::class, 'index'])->name('solicitud_servicio.index');
 Route::get('solicitud_servicio/create', [SolicitudServicioController::class, 'create'])->name('solicitud_servicio.create');
 Route::post('solicitud_servicio', [SolicitudServicioController::class, 'store'])->name('solicitud_servicio.store');
-Route::get('solicitud_servicio/{id}', [SolicitudServicioController::class, 'show'])->name('solicitud_servicio.show');
+Route::get('solicitud_servicio/{id}/edit', [SolicitudServicioController::class, 'edit'])->name('solicitud_servicio.edit');
+Route::put('solicitud_servicio/{id}', [SolicitudServicioController::class, 'update'])->name('solicitud_servicio.update');
+Route::post('solicitud_servicio/{id}/anular', [SolicitudServicioController::class, 'anular'])->name('solicitud_servicio.anular');
 Route::get('api/obras/{cliente_id}', [SolicitudServicioController::class, 'apiObras']);
 Route::get('api/obra/{obra_id}', [SolicitudServicioController::class, 'apiObraInfo']);
 
@@ -211,6 +213,9 @@ Route::get('api/ajuste-stocks/inventario-obra/{obraId}', [AjusteStockController:
 Route::get('visita_previa', [VisitaPreviaController::class, 'index'])->name('visita_previa.index');
 Route::get('visita_previa/create', [VisitaPreviaController::class, 'create'])->name('visita_previa.create');
 Route::post('visita_previa', [VisitaPreviaController::class, 'store'])->name('visita_previa.store');
+Route::get('visita_previa/{id}/edit', [VisitaPreviaController::class, 'edit'])->name('visita_previa.edit');
+Route::put('visita_previa/{id}', [VisitaPreviaController::class, 'update'])->name('visita_previa.update');
+Route::post('visita_previa/{id}/anular', [VisitaPreviaController::class, 'anular'])->name('visita_previa.anular');
 Route::get('visita_previa/{id}', [VisitaPreviaController::class, 'show'])->name('visita_previa.show');
 Route::get('/ajax/obras/{clienteId}', [VisitaPreviaController::class, 'ajaxObras']);
 Route::get('/ajax/solicitudes/{obraId}', [VisitaPreviaController::class, 'ajaxSolicitudes']);
@@ -225,8 +230,8 @@ Route::post('presupuesto_servicio', [PresupuestoServicioController::class, 'stor
 Route::get('presupuesto_servicio/{id}', [PresupuestoServicioController::class, 'show'])->name('presupuesto_servicio.show');
 Route::get('presupuesto_servicio/{id}/edit', [PresupuestoServicioController::class, 'edit'])->name('presupuesto_servicio.edit');
 Route::put('presupuesto_servicio/{id}', [PresupuestoServicioController::class, 'update'])->name('presupuesto_servicio.update');
-Route::delete('presupuesto_servicio/{id}', [PresupuestoServicioController::class, 'destroy'])->name('presupuesto_servicio.destroy');
-Route::get('ajax/obras/{clienteId}', [PresupuestoServicioController::class, 'ajaxObras']);
+Route::post('presupuesto_servicio/{id}/anular', [PresupuestoServicioController::class, 'anular'])->name('presupuesto_servicio.anular');
+Route::get('ajax/presupuesto/obras/{clienteId}', [PresupuestoServicioController::class, 'ajaxObras']);
 Route::get('ajax/visitas-previas/{obraId}', [PresupuestoServicioController::class, 'ajaxVisitasPrevias']);
 Route::get('ajax/visita-previa/{id}', [PresupuestoServicioController::class, 'ajaxVisitaPrevia']);
 Route::get('ajax/ensayos-por-visita/{visitaId}', [PresupuestoServicioController::class, 'ajaxEnsayosPorVisita']);

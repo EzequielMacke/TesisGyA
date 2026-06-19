@@ -2,335 +2,371 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detalles de Visita Previa #{{ $visita->id }}</title>
+    <title>Visita Previa #{{ $visita->id }}</title>
     @include('partials.head')
-    <style>
-        .main-content {
-            margin-left: 60px;
-            min-height: 100vh;
-            background-color: #f8f9fa;
-            transition: margin-left 0.3s cubic-bezier(.4,2,.6,1);
-            overflow-x: hidden;
-            box-sizing: border-box;
-            width: auto;
-            max-width: 100vw;
-        }
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 50px;
-            }
-        }
-        .sidebar-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 60px;
-            transition: width 0.3s cubic-bezier(.4,2,.6,1);
-            overflow-x: hidden;
-            z-index: 10000;
-        }
-        .sidebar-nav:hover {
-            width: 280px;
-            box-shadow: 2px 0 16px rgba(0,0,0,0.07);
-        }
-        .sidebar-nav:hover ~ .main-content {
-            margin-left: 280px;
-        }
-        @media (max-width: 768px) {
-            .sidebar-nav:hover {
-                width: 250px;
-                box-shadow: 2px 0 16px rgba(0,0,0,0.07);
-            }
-            .sidebar-nav:hover ~ .main-content {
-                margin-left: 250px;
-            }
-        }
-        .content-wrapper {
-            padding: 15px;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow-x: auto;
-        }
-        .info-card {
-            border-left: 4px solid #0d6efd;
-            background: #f8f9fa;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .info-card h5 {
-            color: #0d6efd;
-            margin-bottom: 1rem;
-        }
-        .file-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .file-item {
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            background: white;
-        }
-        .file-item img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
-        .file-item .file-info {
-            padding: 0.5rem;
-            font-size: 0.9rem;
-        }
-        .file-item .file-info a {
-            color: #0d6efd;
-            text-decoration: none;
-        }
-        .file-item .file-info a:hover {
-            text-decoration: underline;
-        }
-        .ensayos-list {
-            list-style: none;
-            padding: 0;
-        }
-        .ensayos-list li {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        .ensayos-list li:last-child {
-            border-bottom: none;
-        }
-    </style>
 </head>
 <body>
     @include('partials.menu_lateral')
 
-    <div class="main-content fade-in">
+    <div class="main-content">
         <div class="content-wrapper">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-primary"><i class="fas fa-eye me-2"></i>Detalles de Visita Previa #{{ $visita->id }}</h2>
+
+            {{-- Cabecera --}}
+            <div class="page-header">
                 <div>
-                    <a href="#" class="btn btn-warning me-2">
-                        <i class="fas fa-edit me-1"></i>Editar
-                    </a>
+                    <h2><i class="fas fa-clipboard-list"></i> Visita Previa #{{ $visita->id }}</h2>
+                    <small>Fecha de visita: {{ \Carbon\Carbon::parse($visita->fecha_visita)->format('d/m/Y') }}</small>
+                </div>
+                <div class="header-actions">
+                    @switch($visita->estado_id)
+                        @case(3)
+                            <span class="estado estado-pendiente"><i class="estado-dot"></i>Pendiente</span>
+                            @break
+                        @case(4)
+                            <span class="estado estado-confirmado"><i class="estado-dot"></i>Confirmado</span>
+                            @break
+                        @case(5)
+                            <span class="estado estado-anulado"><i class="estado-dot"></i>Anulado</span>
+                            @break
+                        @default
+                            <span class="estado"><i class="estado-dot"></i>{{ $visita->estado->descripcion ?? '-' }}</span>
+                    @endswitch
+                    @if($visita->estado_id == 3)
+                        <a href="{{ route('visita_previa.edit', $visita->id) }}" class="btn btn-warning">
+                            <i class="fas fa-pen me-2"></i>Editar
+                        </a>
+                    @endif
                     <a href="{{ route('visita_previa.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-1"></i>Volver
+                        <i class="fas fa-arrow-left me-2"></i>Volver
                     </a>
                 </div>
             </div>
 
-            <div class="row">
-                <!-- Datos de la Visita Previa -->
-                <div class="col-lg-6">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Datos de la Visita Previa</h5>
+            {{-- Cliente / Obra / Solicitud de Servicio --}}
+            <div class="row g-3">
+                <div class="col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-header-section">
+                            <span><i class="fas fa-user me-2"></i>Cliente</span>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <strong>ID:</strong> {{ $visita->id }}
+                            <div class="info-grid info-grid-stack">
+                                <div class="info-item">
+                                    <label class="form-label">Razón Social</label>
+                                    <div class="info-value"><i class="fas fa-building"></i>{{ $visita->cliente->razon_social ?? '-' }}</div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <strong>Fecha de Visita:</strong> {{ \Carbon\Carbon::parse($visita->fecha_visita)->format('d/m/Y') }}
+                                <div class="info-item">
+                                    <label class="form-label">RUC</label>
+                                    <div class="info-value"><i class="fas fa-id-card"></i>{{ $visita->cliente->ruc ?? '-' }}</div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <strong>Estado:</strong>
-                                    <span class="badge {{ $visita->estado_id == 3 ? 'bg-warning text-dark' : 'bg-success' }}">
-                                        {{ $visita->estado->descripcion ?? '-' }}
-                                    </span>
+                                <div class="info-item">
+                                    <label class="form-label">Teléfono</label>
+                                    <div class="info-value"><i class="fas fa-phone"></i>{{ $visita->cliente->telefono ?? '-' }}</div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <strong>Usuario:</strong> {{ $visita->usuario->usuario ?? '-' }}
+                                <div class="info-item">
+                                    <label class="form-label">Email</label>
+                                    <div class="info-value"><i class="fas fa-envelope"></i>{{ $visita->cliente->email ?? '-' }}</div>
                                 </div>
-                            </div>
-                            <div class="mt-3">
-                                <strong>Observación:</strong>
-                                <p class="mt-1">{{ $visita->observacion ?? 'Sin observación' }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Datos del Cliente -->
-                <div class="col-lg-6">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0"><i class="fas fa-user me-2"></i>Datos del Cliente</h5>
+                <div class="col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-header-section">
+                            <span><i class="fas fa-building me-2"></i>Obra</span>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <strong>Razón Social:</strong> {{ $visita->cliente->razon_social ?? '-' }}
+                            <div class="info-grid info-grid-stack">
+                                <div class="info-item">
+                                    <label class="form-label">Descripción</label>
+                                    <div class="info-value"><i class="fas fa-file-alt"></i>{{ $visita->obra->descripcion ?? '-' }}</div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <strong>RUC:</strong> {{ $visita->cliente->ruc ?? '-' }}
+                                <div class="info-item">
+                                    <label class="form-label">Ubicación</label>
+                                    <div class="info-value"><i class="fas fa-map-marker-alt"></i>{{ $visita->obra->ubicacion ?? '-' }}</div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <strong>Teléfono:</strong> {{ $visita->cliente->telefono ?? '-' }}
+                                <div class="info-item">
+                                    <label class="form-label">Metros Cuadrados</label>
+                                    <div class="info-value"><i class="fas fa-ruler-combined"></i>{{ $visita->obra->metros_cuadrados ?? '-' }}</div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <strong>Email:</strong> {{ $visita->cliente->email ?? '-' }}
+                                <div class="info-item">
+                                    <label class="form-label">Niveles</label>
+                                    <div class="info-value"><i class="fas fa-layer-group"></i>{{ $visita->obra->niveles ?? '-' }}</div>
                                 </div>
-                            </div>
-                            <div class="mt-3">
-                                <strong>Dirección:</strong>
-                                <p class="mt-1">{{ $visita->cliente->direccion ?? 'Sin dirección' }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
-                <!-- Datos de la Obra -->
-                <div class="col-lg-6">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0"><i class="fas fa-building me-2"></i>Datos de la Obra</h5>
+                <div class="col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-header-section">
+                            <span><i class="fas fa-file-alt me-2"></i>Solicitud de Servicio</span>
+                            @if($visita->solicitud_servicio_id)
+                                <span class="tag tag-secondary">#{{ $visita->solicitud_servicio_id }}</span>
+                            @endif
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <strong>Descripción:</strong> {{ $visita->obra->descripcion ?? '-' }}
+                            <div class="info-grid info-grid-stack">
+                                <div class="info-item">
+                                    <label class="form-label">Fecha</label>
+                                    <div class="info-value"><i class="fas fa-calendar"></i>{{ $visita->solicitudServicio->fecha ? \Carbon\Carbon::parse($visita->solicitudServicio->fecha)->format('d/m/Y') : '-' }}</div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <strong>Ubicación:</strong> {{ $visita->obra->ubicacion ?? '-' }}
+                                <div class="info-item">
+                                    <label class="form-label">Estado</label>
+                                    <div class="info-value"><i class="fas fa-info-circle"></i>{{ $visita->solicitudServicio->estado->descripcion ?? '-' }}</div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <strong>Metros Cuadrados:</strong> {{ $visita->obra->metros_cuadrados ?? '-' }}
+                                <div class="info-item">
+                                    <label class="form-label">Servicios Solicitados</label>
+                                    <ul class="servicios-detalle-list">
+                                        @forelse($visita->solicitudServicio->detalles ?? [] as $detalle)
+                                            <li>{{ $detalle->servicio->descripcion ?? '-' }}</li>
+                                        @empty
+                                            <li class="text-muted">Sin servicios</li>
+                                        @endforelse
+                                    </ul>
                                 </div>
-                                <div class="col-sm-6">
-                                    <strong>Niveles:</strong> {{ $visita->obra->niveles ?? '-' }}
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <strong>Fecha:</strong> {{ $visita->obra->fecha ? \Carbon\Carbon::parse($visita->obra->fecha)->format('d/m/Y') : '-' }}
-                            </div>
-                            <div class="mt-3">
-                                <strong>Observación:</strong>
-                                <p class="mt-1">{{ $visita->obra->observacion ?? 'Sin observación' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Datos de la Solicitud de Servicio -->
-                <div class="col-lg-6">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-warning text-dark">
-                            <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Datos de la Solicitud de Servicio</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <strong>ID:</strong> {{ $visita->solicitudServicio->id ?? '-' }}
-                                </div>
-                                <div class="col-sm-6">
-                                    <strong>Fecha:</strong> {{ $visita->solicitudServicio->fecha ? \Carbon\Carbon::parse($visita->solicitudServicio->fecha)->format('d/m/Y') : '-' }}
-                                </div>
-                                <div class="col-sm-6">
-                                    <strong>Estado:</strong>
-                                    <span class="badge bg-secondary">{{ $visita->solicitudServicio->estado->descripcion ?? '-' }}</span>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <strong>Observación:</strong>
-                                <p class="mt-1">{{ $visita->solicitudServicio->observacion ?? 'Sin observación' }}</p>
-                            </div>
-                            <div class="mt-3">
-                                <strong>Servicios Solicitados:</strong>
-                                <ul class="mt-1">
-                                    @forelse($visita->solicitudServicio->detalles ?? [] as $detalle)
-                                        <li>{{ $detalle->servicio->descripcion ?? '-' }}</li>
-                                    @empty
-                                        <li>Sin servicios</li>
-                                    @endforelse
-                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Ensayos Seleccionados -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0"><i class="fas fa-flask me-2"></i>Ensayos Seleccionados</h5>
+            {{-- Datos de la Visita --}}
+            <div class="card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-clipboard-check me-2"></i>Datos de la Visita</span>
                 </div>
                 <div class="card-body">
-                    @if($visita->ensayos->count() > 0)
-                        <ul class="ensayos-list">
-                            @foreach($visita->ensayos as $ensayo)
-                                <li>
-                                    <strong>{{ $ensayo->ensayo->descripcion ?? '-' }}</strong> - Servicio: {{ $ensayo->servicio->descripcion ?? '-' }}
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <p class="text-muted">No hay ensayos seleccionados.</p>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label class="form-label">Fecha de Visita</label>
+                            <div class="info-value"><i class="fas fa-calendar"></i>{{ \Carbon\Carbon::parse($visita->fecha_visita)->format('d/m/Y') }}</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="form-label">Usuario</label>
+                            <div class="info-value"><i class="fas fa-user"></i>{{ $visita->usuario->usuario ?? '-' }}</div>
+                        </div>
+                    </div>
+                    @if($visita->observacion)
+                        <div class="mt-3">
+                            <label class="form-label">Observación</label>
+                            <div class="info-value observation-box">{{ $visita->observacion }}</div>
+                        </div>
                     @endif
                 </div>
             </div>
 
-            <!-- Fotos -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-camera me-2"></i>Fotos de la Visita</h5>
-                </div>
-                <div class="card-body">
-                    @if($visita->fotos->count() > 0)
-                        <div class="file-gallery">
-                            @foreach($visita->fotos as $foto)
-                                <div class="file-item">
-                                    <img src="{{ asset('storage/' . $foto->ruta_foto) }}" alt="Foto">
-                                    <div class="file-info">
-                                        <a href="{{ asset('storage/' . $foto->ruta_foto) }}" target="_blank">Ver imagen</a>
-                                        <br><small>{{ $foto->fecha ? \Carbon\Carbon::parse($foto->fecha)->format('d/m/Y') : '-' }}</small>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="text-muted">No hay fotos disponibles.</p>
-                    @endif
-                </div>
-            </div>
+            
 
-            <!-- Planos -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Planos de la Obra</h5>
+            {{-- Fotos y Planos --}}
+            <div class="card">
+                <div class="card-header-section">
+                    <span><i class="fas fa-images me-2"></i>Fotos y Planos de la Visita</span>
                 </div>
                 <div class="card-body">
-                    @if($visita->planos->count() > 0)
-                        <div class="file-gallery">
-                            @foreach($visita->planos as $plano)
-                                <div class="file-item">
-                                    @if(strtolower(pathinfo($plano->ruta_plano, PATHINFO_EXTENSION)) == 'pdf')
-                                        <div style="height: 150px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
-                                            <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                    <div class="info-grid-2">
+                        <div>
+                            <h6 class="subsection-title"><i class="fas fa-camera me-2"></i>Fotos de la Visita</h6>
+                            <div class="file-gallery">
+                                @if($visita->fotos->count() > 0)
+                                    @foreach($visita->fotos as $foto)
+                                        <div class="file-item">
+                                            <img src="{{ Storage::disk('public')->url('visitas_previas/fotos/' . $foto->ruta_foto) }}" alt="Foto">
+                                            <div class="file-info">
+                                                <a href="{{ Storage::disk('public')->url('visitas_previas/fotos/' . $foto->ruta_foto) }}" target="_blank">Ver imagen</a>
+                                                <small>{{ $foto->fecha ? \Carbon\Carbon::parse($foto->fecha)->format('d/m/Y') : '-' }}</small>
+                                            </div>
                                         </div>
-                                    @else
-                                        <img src="{{ asset('storage/' . $plano->ruta_plano) }}" alt="Plano">
-                                    @endif
-                                    <div class="file-info">
-                                        <a href="{{ asset('storage/' . $plano->ruta_plano) }}" target="_blank">Ver archivo</a>
-                                        <br><small>{{ $plano->fecha ? \Carbon\Carbon::parse($plano->fecha)->format('d/m/Y') : '-' }}</small>
-                                    </div>
-                                </div>
-                            @endforeach
+                                    @endforeach
+                                @else
+                                    <p class="text-muted mb-0" style="font-size:0.8rem;">No hay fotos disponibles.</p>
+                                @endif
+                            </div>
                         </div>
-                    @else
-                        <p class="text-muted">No hay planos disponibles.</p>
-                    @endif
+                        <div>
+                            <h6 class="subsection-title"><i class="fas fa-file-alt me-2"></i>Planos de la Obra</h6>
+                            <div class="file-gallery">
+                                @if($visita->planos->count() > 0)
+                                    @foreach($visita->planos as $plano)
+                                        <div class="file-item">
+                                            @if(strtolower(pathinfo($plano->ruta_plano, PATHINFO_EXTENSION)) === 'pdf')
+                                                <div class="file-placeholder"><i class="fas fa-file-pdf"></i></div>
+                                            @else
+                                                <img src="{{ Storage::disk('public')->url('visitas_previas/planos/' . $plano->ruta_plano) }}" alt="Plano">
+                                            @endif
+                                            <div class="file-info">
+                                                <a href="{{ Storage::disk('public')->url('visitas_previas/planos/' . $plano->ruta_plano) }}" target="_blank">Ver archivo</a>
+                                                <small>{{ $plano->fecha ? \Carbon\Carbon::parse($plano->fecha)->format('d/m/Y') : '-' }}</small>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <p class="text-muted mb-0" style="font-size:0.8rem;">No hay planos disponibles.</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 
     @include('partials.footer')
 </body>
 </html>
+
+<style>
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Cabecera ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.page-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+.page-header h2 i { color: #94a3b8; margin-right: 0.4rem; }
+.page-header small { color: #94a3b8; font-size: 0.8rem; }
+.header-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ── Cards ── */
+.card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: none;
+}
+.card-header-section {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    font-weight: 600; font-size: 0.85rem; color: #1e293b;
+}
+
+/* ── Información (grids) ── */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+.info-grid-stack { grid-template-columns: 1fr; }
+.info-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+.info-item .form-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.info-value {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    color: #374151;
+}
+.info-value i { color: #94a3b8; margin-right: 0.5rem; width: 14px; text-align: center; }
+.observation-box { white-space: pre-wrap; line-height: 1.5; }
+
+.subsection-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 900px) {
+    .page-header { flex-direction: column; align-items: flex-start; }
+    .info-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ── Galería de archivos ── */
+.file-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.6rem;
+}
+.file-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+.file-item img,
+.file-item .file-placeholder {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+}
+.file-item .file-placeholder {
+    display: flex; align-items: center; justify-content: center;
+    background: #f8fafc; color: #cbd5e1; font-size: 1.6rem;
+}
+.file-item .file-info { padding: 0.4rem 0.5rem; font-size: 0.72rem; color: #64748b; }
+.file-item .file-info a { color: #2563eb; text-decoration: none; font-weight: 600; }
+.file-item .file-info a:hover { text-decoration: underline; }
+.file-item .file-info small { display: block; color: #94a3b8; margin-top: 2px; }
+
+/* ── Tags ── */
+.tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+}
+.tag-secondary { background: #f1f5f9; color: #64748b; }
+
+/* ── Estado ── */
+.estado { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #374151; }
+.estado-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+.estado-pendiente .estado-dot  { background: #f59e0b; }
+.estado-confirmado .estado-dot { background: #10b981; }
+.estado-anulado .estado-dot    { background: #ef4444; }
+
+/* ── Listas de detalle ── */
+.servicios-detalle-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.servicios-detalle-list li {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.82rem;
+    color: #374151;
+}
+
+/* ── Impresión ── */
+@media print {
+    .main-content { margin-left: 0 !important; width: 100% !important; }
+    .header-actions .btn { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+}
+</style>
