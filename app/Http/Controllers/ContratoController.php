@@ -44,8 +44,14 @@ class ContratoController extends Controller
 
     public function create()
     {
-        // Obtener clientes activos
-        $clientes = Cliente::where('estado_id', 1)->orderBy('razon_social')->get();
+        // Obtener clientes activos que tengan al menos un presupuesto pendiente (estado_id 3)
+        $clientes = Cliente::where('estado_id', 1)
+            ->whereIn('id', function ($query) {
+                $query->select('cliente_id')
+                    ->from('presupuesto_servicio')
+                    ->where('estado_id', 3);
+            })
+            ->orderBy('razon_social')->get();
 
         // Obtener obras activas
         $obras = Obra::where('estado_id', 1)->orderBy('descripcion')->get();
@@ -131,7 +137,15 @@ class ContratoController extends Controller
 
     public function obrasPorCliente($cliente_id)
     {
-        $obras = Obra::where('cliente_id', $cliente_id)->where('estado_id', 1)->orderBy('descripcion')->get();
+        // Solo obras con al menos un presupuesto pendiente (estado_id 3)
+        $obras = Obra::where('cliente_id', $cliente_id)
+            ->where('estado_id', 1)
+            ->whereIn('id', function ($query) {
+                $query->select('obra_id')
+                    ->from('presupuesto_servicio')
+                    ->where('estado_id', 3);
+            })
+            ->orderBy('descripcion')->get();
         return response()->json($obras);
     }
 

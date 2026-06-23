@@ -11,6 +11,7 @@ use App\Http\Controllers\MovimientoMaterialController;
 use App\Http\Controllers\NotaCompraController;
 use App\Http\Controllers\NotaRemisionCompraController;
 use App\Http\Controllers\OrdenCompraController;
+use App\Http\Controllers\OrdenServicioController;
 use App\Http\Controllers\PedidoCompraController;
 use App\Http\Controllers\PresupuestoCompraAprobadoController;
 use App\Http\Controllers\PresupuestoCompraController;
@@ -244,3 +245,11 @@ Route::get('/contrato/{id}', [ContratoController::class, 'show'])->name('contrat
 Route::post('/contrato', [ContratoController::class, 'store'])->name('contrato.store');
 Route::get('/obras-por-cliente/{cliente_id}', [ContratoController::class, 'obrasPorCliente'])->name('obras.por.cliente');
 Route::get('/presupuestos-por-obra/{obra_id}', [ContratoController::class, 'presupuestosPorObra'])->name('presupuestos.por.obra');
+
+// Rutas para orden de servicio
+Route::get('/orden_servicio', [OrdenServicioController::class, 'index'])->name('orden_servicio.index');
+Route::get('/orden_servicio/create', [OrdenServicioController::class, 'create'])->name('orden_servicio.create');
+Route::post('/orden_servicio', [OrdenServicioController::class, 'store'])->name('orden_servicio.store');
+Route::get('/obras-con-contrato/{cliente_id}', [OrdenServicioController::class, 'obrasPorCliente'])->name('obras.con.contrato');
+Route::get('/contratos-por-obra/{obra_id}', [OrdenServicioController::class, 'contratosPorObra'])->name('contratos.por.obra');
+Route::get('/ensayos-por-presupuesto/{presupuesto_servicio_id}', [OrdenServicioController::class, 'ensayosPorPresupuesto'])->name('ensayos.por.presupuesto');

@@ -103,7 +103,7 @@
             </div>
 
             {{-- Servicio --}}
-            @php $servicioOpen = request()->routeIs('solicitud_servicio.*','visita_previa.*','presupuesto_servicio.*','contrato.*'); @endphp
+            @php $servicioOpen = request()->routeIs('solicitud_servicio.*','visita_previa.*','presupuesto_servicio.*','contrato.*','orden_servicio.*'); @endphp
             <div class="sidebar-group {{ $servicioOpen ? 'is-open' : '' }}">
                 <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
                     <i class="fas fa-tools sidebar-icon"></i>
@@ -122,6 +122,9 @@
                     </a>
                     <a href="{{ route('contrato.index') }}" class="sidebar-sublink {{ request()->routeIs('contrato.*') ? 'is-active' : '' }}">
                         <i class="fas fa-file-contract"></i><span>Contratos</span>
+                    </a>
+                    <a href="{{ route('orden_servicio.index') }}" class="sidebar-sublink {{ request()->routeIs('orden_servicio.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-tasks"></i><span>Orden de Servicio</span>
                     </a>
                 </div>
             </div>
