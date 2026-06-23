@@ -622,7 +622,7 @@ $(document).ready(function() {
                 data.forEach(function(servicio) {
                     if (!servicio.ensayos || servicio.ensayos.length === 0) return;
                     const checks = servicio.ensayos.map(ensayo => `
-                        <label class="servicio-check" for="ensayo-${ensayo.id}">
+                        <label class="servicio-check">
                             <input type="checkbox" class="ensayo-checkbox" value="${ensayo.id}" id="ensayo-${ensayo.id}" data-descripcion="${ensayo.descripcion}" ${ensayo.checked ? 'checked' : ''}>
                             <span>${ensayo.descripcion}</span>
                         </label>

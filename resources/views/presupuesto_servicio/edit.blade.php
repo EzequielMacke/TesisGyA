@@ -676,7 +676,7 @@ $(document).ready(function() {
                         ? presupuestoInit.ensayos_seleccionados.includes(ensayo.id)
                         : ensayo.checked;
                     return `
-                        <label class="servicio-check" for="ensayo-${ensayo.id}">
+                        <label class="servicio-check">
                             <input type="checkbox" class="ensayo-checkbox" value="${ensayo.id}" id="ensayo-${ensayo.id}" data-descripcion="${ensayo.descripcion}" ${checked ? 'checked' : ''}>
                             <span>${ensayo.descripcion}</span>
                         </label>

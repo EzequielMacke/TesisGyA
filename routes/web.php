@@ -4,6 +4,7 @@ use App\Http\Controllers\AjusteStockController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\ContratoController;
 use App\Http\Controllers\InsumoController;
+use App\Http\Controllers\InsumoUtilizadoController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MarcaController;
@@ -250,6 +251,19 @@ Route::get('/presupuestos-por-obra/{obra_id}', [ContratoController::class, 'pres
 Route::get('/orden_servicio', [OrdenServicioController::class, 'index'])->name('orden_servicio.index');
 Route::get('/orden_servicio/create', [OrdenServicioController::class, 'create'])->name('orden_servicio.create');
 Route::post('/orden_servicio', [OrdenServicioController::class, 'store'])->name('orden_servicio.store');
+Route::get('/orden_servicio/{id}/edit', [OrdenServicioController::class, 'edit'])->name('orden_servicio.edit');
+Route::put('/orden_servicio/{id}', [OrdenServicioController::class, 'update'])->name('orden_servicio.update');
+Route::put('/orden_servicio/{id}/anular', [OrdenServicioController::class, 'anular'])->name('orden_servicio.anular');
 Route::get('/obras-con-contrato/{cliente_id}', [OrdenServicioController::class, 'obrasPorCliente'])->name('obras.con.contrato');
 Route::get('/contratos-por-obra/{obra_id}', [OrdenServicioController::class, 'contratosPorObra'])->name('contratos.por.obra');
 Route::get('/ensayos-por-presupuesto/{presupuesto_servicio_id}', [OrdenServicioController::class, 'ensayosPorPresupuesto'])->name('ensayos.por.presupuesto');
+
+// Rutas para insumos utilizados
+Route::get('/insumos_utilizados', [InsumoUtilizadoController::class, 'index'])->name('insumos_utilizados.index');
+Route::get('/insumos_utilizados/create', [InsumoUtilizadoController::class, 'create'])->name('insumos_utilizados.create');
+Route::post('/insumos_utilizados', [InsumoUtilizadoController::class, 'store'])->name('insumos_utilizados.store');
+Route::get('/insumos_utilizados/{id}/edit', [InsumoUtilizadoController::class, 'edit'])->name('insumos_utilizados.edit');
+Route::put('/insumos_utilizados/{id}', [InsumoUtilizadoController::class, 'update'])->name('insumos_utilizados.update');
+Route::patch('/insumos_utilizados/{id}/confirmar', [InsumoUtilizadoController::class, 'confirmar'])->name('insumos_utilizados.confirmar');
+Route::patch('/insumos_utilizados/{id}/anular', [InsumoUtilizadoController::class, 'anular'])->name('insumos_utilizados.anular');
+Route::get('/insumos-por-obra/{obra_id}', [InsumoUtilizadoController::class, 'insumosPorObra'])->name('insumos.por.obra');

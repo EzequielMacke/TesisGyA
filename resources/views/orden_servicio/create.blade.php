@@ -83,7 +83,7 @@
                         <span><i class="fas fa-flask me-2"></i>Ensayos del Presupuesto</span>
                     </div>
                     <div class="card-body">
-                        <p class="text-muted mb-3" style="font-size:0.8rem;">Seleccione los ensayos a incluir en esta orden de servicio.</p>
+                        <p class="text-muted mb-3" style="font-size:0.8rem;">Estos son los ensayos incluidos en el presupuesto y se agregarán a la orden de servicio.</p>
                         <div id="ensayos-por-servicio"></div>
                     </div>
                 </div>
@@ -269,6 +269,9 @@
 }
 .servicio-check:hover { background: #eff6ff; border-color: #bfdbfe; }
 .servicio-check input { margin: 0; cursor: pointer; }
+.servicio-check-readonly { cursor: default; }
+.servicio-check-readonly:hover { background: none; border-color: #e2e8f0; }
+.servicio-check-readonly i { color: #22c55e; }
 
 .select2-container--bootstrap-5 .select2-selection {
     min-height: calc(1.5em + 0.5rem + 2px);
@@ -360,10 +363,11 @@ $(document).ready(function() {
                     data.forEach(function(servicio) {
                         if (!servicio.ensayos || servicio.ensayos.length === 0) return;
                         const checks = servicio.ensayos.map(ensayo => `
-                            <label class="servicio-check" for="ensayo-${ensayo.id}">
-                                <input type="checkbox" name="ensayos[]" class="ensayo-checkbox" value="${ensayo.id}" id="ensayo-${ensayo.id}" checked>
+                            <div class="servicio-check servicio-check-readonly">
+                                <i class="fas fa-check-circle text-success"></i>
                                 <span>${ensayo.descripcion}</span>
-                            </label>
+                                <input type="hidden" name="ensayos[]" value="${ensayo.id}">
+                            </div>
                         `).join('');
                         $('#ensayos-por-servicio').append(`
                             <div class="servicio-group">
@@ -398,8 +402,8 @@ $(document).ready(function() {
     }
 
     $('#ordenServicioForm').on('submit', function(e) {
-        if ($('.ensayo-checkbox:checked').length === 0) {
-            alert('Debe seleccionar al menos un ensayo.');
+        if ($('#ensayos-por-servicio input[name="ensayos[]"]').length === 0) {
+            alert('El presupuesto seleccionado no tiene ensayos.');
             e.preventDefault();
         }
     });

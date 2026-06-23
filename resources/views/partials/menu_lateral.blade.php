@@ -103,7 +103,7 @@
             </div>
 
             {{-- Servicio --}}
-            @php $servicioOpen = request()->routeIs('solicitud_servicio.*','visita_previa.*','presupuesto_servicio.*','contrato.*','orden_servicio.*'); @endphp
+            @php $servicioOpen = request()->routeIs('solicitud_servicio.*','visita_previa.*','presupuesto_servicio.*','contrato.*','orden_servicio.*','insumos_utilizados.*'); @endphp
             <div class="sidebar-group {{ $servicioOpen ? 'is-open' : '' }}">
                 <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
                     <i class="fas fa-tools sidebar-icon"></i>
@@ -125,6 +125,9 @@
                     </a>
                     <a href="{{ route('orden_servicio.index') }}" class="sidebar-sublink {{ request()->routeIs('orden_servicio.*') ? 'is-active' : '' }}">
                         <i class="fas fa-tasks"></i><span>Orden de Servicio</span>
+                    </a>
+                    <a href="{{ route('insumos_utilizados.index') }}" class="sidebar-sublink {{ request()->routeIs('insumos_utilizados.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-boxes"></i><span>Insumos Utilizados</span>
                     </a>
                 </div>
             </div>

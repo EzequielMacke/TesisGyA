@@ -18,7 +18,7 @@ class OrdenServicioController extends Controller
 {
     public function index(Request $request)
     {
-        $query = OrdenServicio::with(['cliente', 'obra', 'contrato', 'estado', 'usuario']);
+        $query = OrdenServicio::with(['cliente', 'obra', 'contrato', 'estado', 'usuario', 'detalles.ensayo', 'funcionarios.funcionario.persona']);
 
         // Filtros
         if ($request->filled('cliente_id')) {
@@ -49,15 +49,12 @@ class OrdenServicioController extends Controller
 
     public function create()
     {
-        // Clientes con al menos un contrato activo sin orden de servicio generada
+        // Clientes con al menos un contrato pendiente (sin orden de servicio activa)
         $clientes = Cliente::where('estado_id', 1)
             ->whereIn('id', function ($query) {
                 $query->select('cliente_id')
                     ->from('contratos')
-                    ->where('estado_id', 3)
-                    ->whereNotIn('id', function ($sub) {
-                        $sub->select('contrato_id')->from('orden_servicio');
-                    });
+                    ->where('estado_id', 3);
             })
             ->orderBy('razon_social')->get();
 
@@ -134,18 +131,113 @@ class OrdenServicioController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $ordenServicio = OrdenServicio::with(['cliente', 'obra', 'contrato.presupuestoServicio', 'usuario'])
+            ->findOrFail($id);
+
+        if ($ordenServicio->estado_id != 3) {
+            return redirect()->route('orden_servicio.index')
+                            ->with('error', 'Solo se pueden editar órdenes de servicio en estado Pendiente.');
+        }
+
+        $funcionarios = Funcionario::where('estado_id', 1)->with('persona')->get();
+
+        $funcionariosSeleccionados = OrdenServicioFuncionario::where('orden_servicio_id', $ordenServicio->id)
+            ->pluck('funcionario_id')->toArray();
+
+        $ensayosPorServicio = PresupuestoServicioDetalle::with(['ensayo', 'servicio'])
+            ->where('presupuesto_servicio_id', $ordenServicio->presupuesto_servicio_id)
+            ->get()
+            ->groupBy(function ($detalle) {
+                return $detalle->servicio->descripcion ?? 'Sin Servicio';
+            })
+            ->map(function ($detalles, $servicio) {
+                return [
+                    'servicio' => $servicio,
+                    'ensayos' => $detalles->map(function ($detalle) {
+                        return [
+                            'id' => $detalle->ensayo->id ?? $detalle->ensayos_id,
+                            'descripcion' => $detalle->ensayo->descripcion ?? '-',
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values();
+
+        return view('orden_servicio.edit', compact('ordenServicio', 'funcionarios', 'funcionariosSeleccionados', 'ensayosPorServicio'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $ordenServicio = OrdenServicio::findOrFail($id);
+
+        if ($ordenServicio->estado_id != 3) {
+            return redirect()->route('orden_servicio.index')
+                            ->with('error', 'Solo se pueden editar órdenes de servicio en estado Pendiente.');
+        }
+
+        $request->validate([
+            'observacion' => 'nullable|string',
+            'funcionarios' => 'required|array|min:1',
+            'funcionarios.*' => 'exists:funcionarios,id',
+        ], [
+            'funcionarios.required' => 'Debe seleccionar al menos un funcionario.',
+        ]);
+
+        try {
+            $ordenServicio->update([
+                'observacion' => $request->observacion,
+            ]);
+
+            OrdenServicioFuncionario::where('orden_servicio_id', $ordenServicio->id)->delete();
+            foreach ($request->funcionarios as $funcionarioId) {
+                OrdenServicioFuncionario::create([
+                    'orden_servicio_id' => $ordenServicio->id,
+                    'funcionario_id' => $funcionarioId,
+                ]);
+            }
+
+            return redirect()->route('orden_servicio.index')
+                            ->with('success', 'Orden de servicio actualizada exitosamente.');
+
+        } catch (\Exception $e) {
+            return back()->withInput()
+                        ->with('error', 'Error al actualizar la orden de servicio: ' . $e->getMessage());
+        }
+    }
+
+    public function anular($id)
+    {
+        $ordenServicio = OrdenServicio::findOrFail($id);
+
+        if ($ordenServicio->estado_id != 3) {
+            return redirect()->route('orden_servicio.index')
+                            ->with('error', 'Solo se pueden anular órdenes de servicio en estado Pendiente.');
+        }
+
+        try {
+            $ordenServicio->update(['estado_id' => 5]);
+
+            Contrato::where('id', $ordenServicio->contrato_id)->update(['estado_id' => 3]);
+
+            return redirect()->route('orden_servicio.index')
+                            ->with('success', 'Orden de servicio anulada exitosamente.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al anular la orden de servicio: ' . $e->getMessage());
+        }
+    }
+
     public function obrasPorCliente($cliente_id)
     {
-        // Solo obras con al menos un contrato activo sin orden de servicio generada
+        // Solo obras con al menos un contrato pendiente (sin orden de servicio activa)
         $obras = Obra::where('cliente_id', $cliente_id)
             ->where('estado_id', 1)
             ->whereIn('id', function ($query) {
                 $query->select('obra_id')
                     ->from('contratos')
-                    ->where('estado_id', 3)
-                    ->whereNotIn('id', function ($sub) {
-                        $sub->select('contrato_id')->from('orden_servicio');
-                    });
+                    ->where('estado_id', 3);
             })
             ->orderBy('descripcion')->get();
 
@@ -157,9 +249,6 @@ class OrdenServicioController extends Controller
         $contratos = Contrato::with('presupuestoServicio')
             ->where('obra_id', $obra_id)
             ->where('estado_id', 3)
-            ->whereNotIn('id', function ($query) {
-                $query->select('contrato_id')->from('orden_servicio');
-            })
             ->orderBy('id')
             ->get()
             ->map(function ($contrato) {
