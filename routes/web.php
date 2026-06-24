@@ -17,6 +17,7 @@ use App\Http\Controllers\PedidoCompraController;
 use App\Http\Controllers\PresupuestoCompraAprobadoController;
 use App\Http\Controllers\PresupuestoCompraController;
 use App\Http\Controllers\PresupuestoServicioController;
+use App\Http\Controllers\ServicioRealizadoController;
 use App\Http\Controllers\SolicitudMaterialController;
 use App\Http\Controllers\SolicitudServicioController;
 use App\Http\Controllers\VisitaPreviaController;
@@ -267,3 +268,11 @@ Route::put('/insumos_utilizados/{id}', [InsumoUtilizadoController::class, 'updat
 Route::patch('/insumos_utilizados/{id}/confirmar', [InsumoUtilizadoController::class, 'confirmar'])->name('insumos_utilizados.confirmar');
 Route::patch('/insumos_utilizados/{id}/anular', [InsumoUtilizadoController::class, 'anular'])->name('insumos_utilizados.anular');
 Route::get('/insumos-por-obra/{obra_id}', [InsumoUtilizadoController::class, 'insumosPorObra'])->name('insumos.por.obra');
+
+// Rutas para servicios realizados
+Route::get('/servicio_realizado', [ServicioRealizadoController::class, 'index'])->name('servicio_realizado.index');
+Route::get('/servicio_realizado/create', [ServicioRealizadoController::class, 'create'])->name('servicio_realizado.create');
+Route::post('/servicio_realizado', [ServicioRealizadoController::class, 'store'])->name('servicio_realizado.store');
+Route::get('/servicio_realizado/obras-por-cliente/{cliente_id}', [ServicioRealizadoController::class, 'obrasPorCliente'])->name('servicio_realizado.obras.por.cliente');
+Route::get('/servicio_realizado/ordenes-por-obra/{obra_id}', [ServicioRealizadoController::class, 'ordenesPorObra'])->name('servicio_realizado.ordenes.por.obra');
+Route::get('/servicio_realizado/datos-por-orden/{orden_servicio_id}', [ServicioRealizadoController::class, 'datosPorOrden'])->name('servicio_realizado.datos.por.orden');
