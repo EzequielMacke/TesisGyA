@@ -17,6 +17,7 @@ use App\Http\Controllers\PedidoCompraController;
 use App\Http\Controllers\PresupuestoCompraAprobadoController;
 use App\Http\Controllers\PresupuestoCompraController;
 use App\Http\Controllers\PresupuestoServicioController;
+use App\Http\Controllers\ReclamoController;
 use App\Http\Controllers\ServicioRealizadoController;
 use App\Http\Controllers\SolicitudMaterialController;
 use App\Http\Controllers\SolicitudServicioController;
@@ -277,8 +278,18 @@ Route::get('/servicio_realizado/{id}/edit', [ServicioRealizadoController::class,
 Route::put('/servicio_realizado/{id}', [ServicioRealizadoController::class, 'update'])->name('servicio_realizado.update');
 Route::post('/servicio_realizado/{id}/anular', [ServicioRealizadoController::class, 'anular'])->name('servicio_realizado.anular');
 Route::patch('/servicio_realizado/{id}/confirmar', [ServicioRealizadoController::class, 'confirmar'])->name('servicio_realizado.confirmar');
+Route::get('/servicio_realizado/{id}/pdf', [ServicioRealizadoController::class, 'pdf'])->name('servicio_realizado.pdf');
 Route::get('/servicio_realizado/cliente-info/{cliente_id}', [ServicioRealizadoController::class, 'clienteInfo'])->name('servicio_realizado.cliente.info');
 Route::get('/servicio_realizado/obra-info/{obra_id}', [ServicioRealizadoController::class, 'obraInfo'])->name('servicio_realizado.obra.info');
 Route::get('/servicio_realizado/obras-por-cliente/{cliente_id}', [ServicioRealizadoController::class, 'obrasPorCliente'])->name('servicio_realizado.obras.por.cliente');
 Route::get('/servicio_realizado/ordenes-por-obra/{obra_id}', [ServicioRealizadoController::class, 'ordenesPorObra'])->name('servicio_realizado.ordenes.por.obra');
 Route::get('/servicio_realizado/datos-por-orden/{orden_servicio_id}', [ServicioRealizadoController::class, 'datosPorOrden'])->name('servicio_realizado.datos.por.orden');
+
+// Rutas para reclamos
+Route::get('/reclamos', [ReclamoController::class, 'index'])->name('reclamos.index');
+Route::get('/reclamos/create', [ReclamoController::class, 'create'])->name('reclamos.create');
+Route::post('/reclamos', [ReclamoController::class, 'store'])->name('reclamos.store');
+Route::get('/reclamos/{id}/edit', [ReclamoController::class, 'edit'])->name('reclamos.edit');
+Route::put('/reclamos/{id}', [ReclamoController::class, 'update'])->name('reclamos.update');
+Route::get('/reclamos/obras-por-cliente/{cliente_id}', [ReclamoController::class, 'obrasPorCliente'])->name('reclamos.obras.por.cliente');
+Route::get('/reclamos/servicios-realizados-por-obra/{obra_id}', [ReclamoController::class, 'serviciosRealizadosPorObra'])->name('reclamos.servicios.por.obra');

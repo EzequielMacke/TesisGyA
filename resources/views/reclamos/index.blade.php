@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Servicios Realizados</title>
+    <title>Reclamos del Cliente</title>
     @include('partials.head')
 </head>
 <body>
@@ -14,11 +14,11 @@
             {{-- Cabecera --}}
             <div class="page-header">
                 <div>
-                    <h2><i class="fas fa-clipboard-check"></i> Servicios Realizados</h2>
-                    <small>Gestión de los servicios realizados por obra</small>
+                    <h2><i class="fas fa-exclamation-circle"></i> Reclamos del Cliente</h2>
+                    <small>Gestión de los reclamos registrados por obra</small>
                 </div>
-                <a href="{{ route('servicio_realizado.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>Registrar Servicio Realizado
+                <a href="{{ route('reclamos.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Registrar Reclamo
                 </a>
             </div>
 
@@ -39,7 +39,7 @@
             {{-- Filtros --}}
             <div class="card">
                 <div class="card-body py-3 px-3">
-                    <form method="GET" action="{{ route('servicio_realizado.index') }}">
+                    <form method="GET" action="{{ route('reclamos.index') }}">
                         <div class="toolbar-grid">
                             <div class="toolbar-item">
                                 <label class="form-label">Obra</label>
@@ -73,7 +73,7 @@
                                     <button type="submit" class="btn btn-primary btn-sm flex-fill">
                                         <i class="fas fa-search me-1"></i>Buscar
                                     </button>
-                                    <a href="{{ route('servicio_realizado.index') }}" class="btn btn-outline-secondary btn-sm" title="Limpiar filtros">
+                                    <a href="{{ route('reclamos.index') }}" class="btn btn-outline-secondary btn-sm" title="Limpiar filtros">
                                         <i class="fas fa-eraser"></i>
                                     </a>
                                 </div>
@@ -86,38 +86,38 @@
             {{-- Tabla --}}
             <div class="card table-card">
                 <div class="card-header-section">
-                    <span>Lista de Servicios Realizados</span>
-                    <span class="results-count">{{ $serviciosRealizados->count() }} registro(s)</span>
+                    <span>Lista de Reclamos</span>
+                    <span class="results-count">{{ $reclamos->count() }} registro(s)</span>
                 </div>
                 <div class="card-body p-0" style="flex:1; display:flex; flex-direction:column;">
                     <div class="table-container">
-                        @if($serviciosRealizados->count() > 0)
-                            <table id="serviciosRealizadosTable">
+                        @if($reclamos->count() > 0)
+                            <table id="reclamosTable">
                                 <thead>
                                     <tr>
                                         <th style="width:50px;" class="text-center">ID</th>
-                                        <th style="width:170px;">Cliente</th>
-                                        <th style="width:170px;">Obra</th>
-                                        <th style="width:90px;" class="text-center">Orden Servicio</th>
+                                        <th style="width:180px;">Cliente</th>
+                                        <th style="width:180px;">Obra</th>
+                                        <th style="width:110px;" class="text-center">Servicio Realizado</th>
                                         <th style="width:100px;">Estado</th>
                                         <th style="width:90px;" class="text-center">Fecha Registro</th>
                                         <th style="width:90px;">Usuario</th>
-                                        <th style="width:115px;" class="text-center">Acciones</th>
+                                        <th style="width:90px;" class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($serviciosRealizados as $servicioRealizado)
+                                    @foreach($reclamos as $reclamo)
                                         <tr>
-                                            <td class="text-center"><strong>{{ $servicioRealizado->id }}</strong></td>
+                                            <td class="text-center"><strong>{{ $reclamo->id }}</strong></td>
                                             <td>
-                                                <span class="cell-text" title="{{ $servicioRealizado->cliente->razon_social ?? '-' }}">{{ $servicioRealizado->cliente->razon_social ?? '-' }}</span>
+                                                <span class="cell-text" title="{{ $reclamo->cliente->razon_social ?? '-' }}">{{ $reclamo->cliente->razon_social ?? '-' }}</span>
                                             </td>
                                             <td>
-                                                <span class="cell-text" title="{{ $servicioRealizado->obra->descripcion ?? '-' }}">{{ $servicioRealizado->obra->descripcion ?? '-' }}</span>
+                                                <span class="cell-text" title="{{ $reclamo->obra->descripcion ?? '-' }}">{{ $reclamo->obra->descripcion ?? '-' }}</span>
                                             </td>
-                                            <td class="text-center">{{ $servicioRealizado->ordenServicio->nro ?? '-' }}</td>
+                                            <td class="text-center">{{ $reclamo->servicio_realizado_id ? '#' . $reclamo->servicio_realizado_id : '-' }}</td>
                                             <td>
-                                                @switch($servicioRealizado->estado->descripcion ?? '')
+                                                @switch($reclamo->estado->descripcion ?? '')
                                                     @case('Pendiente')
                                                         <span class="estado estado-pendiente"><i class="estado-dot"></i>Pendiente</span>
                                                         @break
@@ -134,37 +134,24 @@
                                                         <span class="estado estado-anulado"><i class="estado-dot"></i>Inactivo</span>
                                                         @break
                                                     @default
-                                                        <span class="estado"><i class="estado-dot"></i>{{ $servicioRealizado->estado->descripcion ?? '-' }}</span>
+                                                        <span class="estado"><i class="estado-dot"></i>{{ $reclamo->estado->descripcion ?? '-' }}</span>
                                                 @endswitch
                                             </td>
                                             <td class="text-center">
-                                                {{ $servicioRealizado->fecha_registro ? $servicioRealizado->fecha_registro->format('d/m/Y') : '-' }}
+                                                {{ $reclamo->fecha_registro ? $reclamo->fecha_registro->format('d/m/Y') : '-' }}
                                             </td>
                                             <td>
-                                                <span class="cell-text" title="{{ $servicioRealizado->usuario->usuario ?? '-' }}">{{ $servicioRealizado->usuario->usuario ?? '-' }}</span>
+                                                <span class="cell-text" title="{{ $reclamo->usuario->usuario ?? '-' }}">{{ $reclamo->usuario->usuario ?? '-' }}</span>
                                             </td>
                                             <td class="text-center">
                                                 <div class="action-buttons">
-                                                    <button type="button" class="btn-icon btn-icon-secondary" title="Ver" data-bs-toggle="modal" data-bs-target="#verModal{{ $servicioRealizado->id }}">
+                                                    <button type="button" class="btn-icon btn-icon-secondary" title="Ver" data-bs-toggle="modal" data-bs-target="#verModal{{ $reclamo->id }}">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
-                                                    @if($servicioRealizado->estado_id == 4)
-                                                        <a href="{{ route('servicio_realizado.pdf', $servicioRealizado->id) }}" class="btn-icon btn-icon-secondary" title="Descargar PDF">
-                                                            <i class="fas fa-file-pdf"></i>
-                                                        </a>
-                                                    @endif
-                                                    @if($servicioRealizado->estado_id == 3)
-                                                        <a href="{{ route('servicio_realizado.edit', $servicioRealizado->id) }}" class="btn-icon btn-icon-secondary" title="Editar">
+                                                    @if($reclamo->estado_id == 3)
+                                                        <a href="{{ route('reclamos.edit', $reclamo->id) }}" class="btn-icon btn-icon-secondary" title="Editar">
                                                             <i class="fas fa-pen"></i>
                                                         </a>
-                                                        <button type="button" class="btn-icon btn-icon-success" title="Confirmar"
-                                                                onclick="abrirConfirmar({{ $servicioRealizado->id }})">
-                                                            <i class="fas fa-check"></i>
-                                                        </button>
-                                                        <button type="button" class="btn-icon btn-icon-danger" title="Anular"
-                                                                onclick="abrirAnular({{ $servicioRealizado->id }})">
-                                                            <i class="fas fa-ban"></i>
-                                                        </button>
                                                     @endif
                                                 </div>
                                             </td>
@@ -175,12 +162,12 @@
                         @else
                             <div class="empty-state">
                                 <i class="fas fa-inbox fa-3x mb-3"></i>
-                                <h5 class="text-muted mb-2">No hay servicios realizados registrados</h5>
+                                <h5 class="text-muted mb-2">No hay reclamos registrados</h5>
                                 <p class="text-muted mb-3" style="font-size:0.85rem;">
                                     No se encontraron registros con los filtros aplicados.
                                 </p>
-                                <a href="{{ route('servicio_realizado.create') }}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-plus me-2"></i>Registrar el Primer Servicio Realizado
+                                <a href="{{ route('reclamos.create') }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-2"></i>Registrar el Primer Reclamo
                                 </a>
                             </div>
                         @endif
@@ -191,43 +178,30 @@
         </div>
     </div>
 
-    {{-- Modales de Ver Servicio Realizado --}}
-    @foreach($serviciosRealizados as $servicioRealizado)
-        <div class="modal fade" id="verModal{{ $servicioRealizado->id }}" tabindex="-1" aria-hidden="true">
+    {{-- Modales de Ver Reclamo --}}
+    @foreach($reclamos as $reclamo)
+        <div class="modal fade" id="verModal{{ $reclamo->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title"><i class="fas fa-clipboard-check me-2"></i>Servicio Realizado Nro {{ $servicioRealizado->id }}</h5>
+                        <h5 class="modal-title"><i class="fas fa-exclamation-circle me-2"></i>Reclamo Nro {{ $reclamo->id }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="detail-box mb-3">
                             <div class="detail-box-title">Datos Generales</div>
-                            <div class="detail-row"><i class="fas fa-user-tie"></i><span><strong>Cliente:</strong> {{ $servicioRealizado->cliente->razon_social ?? '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Obra:</strong> {{ $servicioRealizado->obra->descripcion ?? '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-file-alt"></i><span><strong>Solicitud de Servicio:</strong> {{ $servicioRealizado->solicitudServicio->id ?? '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-clipboard-list"></i><span><strong>Visita Previa:</strong> {{ $servicioRealizado->visitaPrevia->id ?? '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-file-invoice-dollar"></i><span><strong>Presupuesto de Servicio:</strong> {{ $servicioRealizado->presupuestoServicio->numero_presupuesto ?? '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-file-contract"></i><span><strong>Contrato:</strong> {{ $servicioRealizado->contrato->id ?? '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-tasks"></i><span><strong>Orden de Servicio:</strong> {{ $servicioRealizado->ordenServicio->nro ?? '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-info-circle"></i><span><strong>Estado:</strong> {{ $servicioRealizado->estado->descripcion ?? '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha de Registro:</strong> {{ $servicioRealizado->fecha_registro ? $servicioRealizado->fecha_registro->format('d/m/Y') : '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-user"></i><span><strong>Usuario:</strong> {{ $servicioRealizado->usuario->usuario ?? '-' }}</span></div>
-                            <div class="detail-row"><i class="fas fa-comment"></i><span><strong>Observación:</strong> {{ $servicioRealizado->observacion ?? '-' }}</span></div>
-                        </div>
-
-                        <div class="detail-box mb-3">
-                            <div class="detail-box-title">Insumos Utilizados</div>
-                            @forelse($servicioRealizado->insumos as $insumo)
-                                <div class="detail-row"><i class="fas fa-box"></i><span>Insumos Utilizados Nro {{ $insumo->insumoUtilizado->nro ?? '-' }}</span></div>
-                            @empty
-                                <div class="detail-row"><span class="text-muted">Sin insumos registrados.</span></div>
-                            @endforelse
+                            <div class="detail-row"><i class="fas fa-user-tie"></i><span><strong>Cliente:</strong> {{ $reclamo->cliente->razon_social ?? '-' }}</span></div>
+                            <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Obra:</strong> {{ $reclamo->obra->descripcion ?? '-' }}</span></div>
+                            <div class="detail-row"><i class="fas fa-clipboard-check"></i><span><strong>Servicio Realizado:</strong> {{ $reclamo->servicio_realizado_id ? '#' . $reclamo->servicio_realizado_id : '-' }}</span></div>
+                            <div class="detail-row"><i class="fas fa-info-circle"></i><span><strong>Estado:</strong> {{ $reclamo->estado->descripcion ?? '-' }}</span></div>
+                            <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha de Registro:</strong> {{ $reclamo->fecha_registro ? $reclamo->fecha_registro->format('d/m/Y') : '-' }}</span></div>
+                            <div class="detail-row"><i class="fas fa-user"></i><span><strong>Usuario:</strong> {{ $reclamo->usuario->usuario ?? '-' }}</span></div>
+                            <div class="detail-row"><i class="fas fa-comment"></i><span><strong>Observación:</strong> {{ $reclamo->observacion ?? '-' }}</span></div>
                         </div>
 
                         <div class="detail-box mb-3">
                             <div class="detail-box-title">Fotografías</div>
-                            @forelse($servicioRealizado->fotos as $foto)
+                            @forelse($reclamo->fotos as $foto)
                                 <div class="detail-row"><i class="fas fa-image"></i><span>{{ $foto->nombre_foto }}</span></div>
                             @empty
                                 <div class="detail-row"><span class="text-muted">Sin fotografías registradas.</span></div>
@@ -236,7 +210,7 @@
 
                         <div class="detail-box">
                             <div class="detail-box-title">Planos</div>
-                            @forelse($servicioRealizado->planos as $plano)
+                            @forelse($reclamo->planos as $plano)
                                 <div class="detail-row"><i class="fas fa-drafting-compass"></i><span>{{ $plano->nombre_plano }}</span></div>
                             @empty
                                 <div class="detail-row"><span class="text-muted">Sin planos registrados.</span></div>
@@ -250,58 +224,6 @@
             </div>
         </div>
     @endforeach
-
-    {{-- Modal de confirmación --}}
-    <div class="modal fade" id="modalConfirmar" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-check-circle text-success me-2"></i>Confirmar Servicio Realizado</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="formConfirmar" method="POST">
-                    @csrf
-                    @method('PATCH')
-                    <div class="modal-body">
-                        <p class="mb-0">¿Está seguro que desea confirmar el servicio realizado <strong id="confirmarNumero"></strong>?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-check me-2"></i>Confirmar Servicio
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modal de anulación --}}
-    <div class="modal fade" id="modalAnular" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Anular Servicio Realizado</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="formAnular" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <p class="mb-2">¿Está seguro que desea anular el servicio realizado <strong id="anularNumero"></strong>?</p>
-                        <p class="text-muted mb-0" style="font-size:0.85rem;">
-                            Esta acción no se puede deshacer.
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-ban me-2"></i>Anular Servicio
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     @include('partials.footer')
 </body>
@@ -374,13 +296,13 @@
     min-height: 300px;
 }
 
-#serviciosRealizadosTable {
+#reclamosTable {
     width: 100%;
-    min-width: 880px;
+    min-width: 890px;
     border-collapse: collapse;
     table-layout: fixed;
 }
-#serviciosRealizadosTable thead th {
+#reclamosTable thead th {
     background: #f8fafc;
     color: #64748b;
     font-size: 0.72rem;
@@ -392,15 +314,15 @@
     text-transform: uppercase;
     letter-spacing: 0.4px;
 }
-#serviciosRealizadosTable tbody td {
+#reclamosTable tbody td {
     padding: 0.55rem 0.65rem;
     font-size: 0.82rem;
     border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
     color: #374151;
 }
-#serviciosRealizadosTable tbody tr:hover { background: #f8fafc; }
-#serviciosRealizadosTable tbody tr:last-child td { border-bottom: none; }
+#reclamosTable tbody tr:hover { background: #f8fafc; }
+#reclamosTable tbody tr:last-child td { border-bottom: none; }
 
 .cell-text {
     display: block;
@@ -439,10 +361,6 @@
 }
 .btn-icon-secondary { color: #64748b; }
 .btn-icon-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
-.btn-icon-success { color: #64748b; }
-.btn-icon-success:hover { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
-.btn-icon-danger { color: #64748b; }
-.btn-icon-danger:hover { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
 
 /* Empty state */
 .empty-state {
@@ -478,17 +396,3 @@
     .table-container { font-size: 0.875rem; }
 }
 </style>
-
-<script>
-function abrirConfirmar(id) {
-    document.getElementById('formConfirmar').action = `{{ url('servicio_realizado') }}/${id}/confirmar`;
-    document.getElementById('confirmarNumero').textContent = '#' + id;
-    new bootstrap.Modal(document.getElementById('modalConfirmar')).show();
-}
-
-function abrirAnular(id) {
-    document.getElementById('formAnular').action = `{{ url('servicio_realizado') }}/${id}/anular`;
-    document.getElementById('anularNumero').textContent = '#' + id;
-    new bootstrap.Modal(document.getElementById('modalAnular')).show();
-}
-</script>

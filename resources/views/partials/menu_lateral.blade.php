@@ -132,6 +132,9 @@
                     <a href="{{ route('servicio_realizado.index') }}" class="sidebar-sublink {{ request()->routeIs('servicio_realizado.*') ? 'is-active' : '' }}">
                         <i class="fas fa-clipboard-check"></i><span>Servicios Realizados</span>
                     </a>
+                    <a href="{{ route('reclamos.index') }}" class="sidebar-sublink {{ request()->routeIs('reclamos.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-exclamation-circle"></i><span>Reclamos del Cliente</span>
+                    </a>
                 </div>
             </div>
 

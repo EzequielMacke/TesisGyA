@@ -12,6 +12,7 @@ use App\Models\ServicioRealizado;
 use App\Models\ServicioRealizadoFoto;
 use App\Models\ServicioRealizadoInsumo;
 use App\Models\ServicioRealizadoPlano;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -206,6 +207,7 @@ class ServicioRealizadoController extends Controller
             ? $visitaPrevia->fotos->map(function ($foto) {
                 return [
                     'url' => Storage::disk('public')->url('visitas_previas/fotos/' . $foto->ruta_foto),
+                    'path' => Storage::disk('public')->path('visitas_previas/fotos/' . $foto->ruta_foto),
                     'fecha' => $foto->fecha ? Carbon::parse($foto->fecha)->format('d/m/Y') : '-',
                 ];
             })->values()
@@ -215,6 +217,7 @@ class ServicioRealizadoController extends Controller
             ? $visitaPrevia->planos->map(function ($plano) {
                 return [
                     'url' => Storage::disk('public')->url('visitas_previas/planos/' . $plano->ruta_plano),
+                    'path' => Storage::disk('public')->path('visitas_previas/planos/' . $plano->ruta_plano),
                     'fecha' => $plano->fecha ? Carbon::parse($plano->fecha)->format('d/m/Y') : '-',
                     'es_pdf' => strtolower(pathinfo($plano->ruta_plano, PATHINFO_EXTENSION)) === 'pdf',
                 ];
@@ -458,6 +461,105 @@ class ServicioRealizadoController extends Controller
 
         return redirect()->route('servicio_realizado.index')
             ->with('success', 'Servicio realizado anulado correctamente.');
+    }
+
+    public function pdf($id)
+    {
+        $servicioRealizado = ServicioRealizado::with([
+            'cliente',
+            'obra',
+            'ordenServicio',
+            'usuario',
+            'estado',
+            'fotos',
+            'planos',
+        ])->findOrFail($id);
+
+        if ($servicioRealizado->estado_id != 4) {
+            return back()->with('error', 'Solo se puede generar el PDF de servicios realizados en estado Confirmado.');
+        }
+
+        $datosOrden = $this->datosOrdenArray($servicioRealizado->orden_servicio_id);
+
+        $datosOrden['visita_previa']['fotos'] = $datosOrden['visita_previa']['fotos']->map(function ($foto) {
+            $foto['src'] = $this->imageDataUri($foto['path']);
+
+            return $foto;
+        })->values();
+
+        $datosOrden['visita_previa']['planos'] = $datosOrden['visita_previa']['planos']->map(function ($plano) {
+            $plano['src'] = $plano['es_pdf'] ? null : $this->imageDataUri($plano['path']);
+
+            return $plano;
+        })->values();
+
+        $fotosServicio = $servicioRealizado->fotos->map(function ($foto) {
+            return [
+                'src' => $this->imageDataUri(Storage::disk('public')->path('servicios_realizados/fotos/' . $foto->nombre_foto)),
+            ];
+        })->values();
+
+        $planosServicio = $servicioRealizado->planos->map(function ($plano) {
+            $esPdf = strtolower(pathinfo($plano->nombre_plano, PATHINFO_EXTENSION)) === 'pdf';
+
+            return [
+                'src' => $esPdf ? null : $this->imageDataUri(Storage::disk('public')->path('servicios_realizados/planos/' . $plano->nombre_plano)),
+                'nombre' => $plano->nombre_plano,
+                'es_pdf' => $esPdf,
+            ];
+        })->values();
+
+        $pdf = Pdf::loadView('servicio_realizado.pdf', [
+            'servicioRealizado' => $servicioRealizado,
+            'datosOrden' => $datosOrden,
+            'fotosServicio' => $fotosServicio,
+            'planosServicio' => $planosServicio,
+            'generadoEn' => Carbon::now()->format('d/m/Y H:i'),
+        ])->setPaper('a4');
+
+        return $pdf->download('servicio_realizado_' . $servicioRealizado->id . '.pdf');
+    }
+
+    private function imageDataUri(string $path, int $maxDimension = 900, int $quality = 70): ?string
+    {
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        $info = @getimagesize($path);
+        if (!$info) {
+            return null;
+        }
+
+        [$width, $height, $type] = $info;
+
+        $source = match ($type) {
+            IMAGETYPE_JPEG => @imagecreatefromjpeg($path),
+            IMAGETYPE_PNG => @imagecreatefrompng($path),
+            IMAGETYPE_GIF => @imagecreatefromgif($path),
+            IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($path) : false,
+            default => false,
+        };
+
+        if (!$source) {
+            return null;
+        }
+
+        $scale = min(1, $maxDimension / max($width, $height));
+        $newWidth = max(1, (int) round($width * $scale));
+        $newHeight = max(1, (int) round($height * $scale));
+
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        imagefill($resized, 0, 0, imagecolorallocate($resized, 255, 255, 255));
+        imagecopyresampled($resized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        imagedestroy($source);
+
+        ob_start();
+        imagejpeg($resized, null, $quality);
+        $data = ob_get_clean();
+        imagedestroy($resized);
+
+        return 'data:image/jpeg;base64,' . base64_encode($data);
     }
 
     public function edit($id)
