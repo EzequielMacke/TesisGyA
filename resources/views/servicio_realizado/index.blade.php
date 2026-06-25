@@ -95,14 +95,14 @@
                             <table id="serviciosRealizadosTable">
                                 <thead>
                                     <tr>
-                                        <th style="width:70px;" class="text-center">ID</th>
-                                        <th>Cliente</th>
-                                        <th>Obra</th>
-                                        <th style="width:110px;" class="text-center">Orden Servicio</th>
-                                        <th style="width:110px;">Estado</th>
-                                        <th style="width:100px;" class="text-center">Fecha Registro</th>
-                                        <th style="width:100px;">Usuario</th>
-                                        <th style="width:90px;" class="text-center">Acciones</th>
+                                        <th style="width:50px;" class="text-center">ID</th>
+                                        <th style="width:170px;">Cliente</th>
+                                        <th style="width:170px;">Obra</th>
+                                        <th style="width:90px;" class="text-center">Orden Servicio</th>
+                                        <th style="width:100px;">Estado</th>
+                                        <th style="width:90px;" class="text-center">Fecha Registro</th>
+                                        <th style="width:90px;">Usuario</th>
+                                        <th style="width:115px;" class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -148,6 +148,19 @@
                                                     <button type="button" class="btn-icon btn-icon-secondary" title="Ver" data-bs-toggle="modal" data-bs-target="#verModal{{ $servicioRealizado->id }}">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
+                                                    @if($servicioRealizado->estado_id == 3)
+                                                        <a href="{{ route('servicio_realizado.edit', $servicioRealizado->id) }}" class="btn-icon btn-icon-secondary" title="Editar">
+                                                            <i class="fas fa-pen"></i>
+                                                        </a>
+                                                        <button type="button" class="btn-icon btn-icon-success" title="Confirmar"
+                                                                onclick="abrirConfirmar({{ $servicioRealizado->id }})">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                        <button type="button" class="btn-icon btn-icon-danger" title="Anular"
+                                                                onclick="abrirAnular({{ $servicioRealizado->id }})">
+                                                            <i class="fas fa-ban"></i>
+                                                        </button>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -233,6 +246,58 @@
         </div>
     @endforeach
 
+    {{-- Modal de confirmación --}}
+    <div class="modal fade" id="modalConfirmar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-check-circle text-success me-2"></i>Confirmar Servicio Realizado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formConfirmar" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-body">
+                        <p class="mb-0">¿Está seguro que desea confirmar el servicio realizado <strong id="confirmarNumero"></strong>?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-2"></i>Confirmar Servicio
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal de anulación --}}
+    <div class="modal fade" id="modalAnular" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Anular Servicio Realizado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formAnular" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <p class="mb-2">¿Está seguro que desea anular el servicio realizado <strong id="anularNumero"></strong>?</p>
+                        <p class="text-muted mb-0" style="font-size:0.85rem;">
+                            Esta acción no se puede deshacer.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-ban me-2"></i>Anular Servicio
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @include('partials.footer')
 </body>
 </html>
@@ -306,7 +371,7 @@
 
 #serviciosRealizadosTable {
     width: 100%;
-    min-width: 1080px;
+    min-width: 880px;
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -368,6 +433,10 @@
 }
 .btn-icon-secondary { color: #64748b; }
 .btn-icon-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
+.btn-icon-success { color: #64748b; }
+.btn-icon-success:hover { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+.btn-icon-danger { color: #64748b; }
+.btn-icon-danger:hover { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
 
 /* Empty state */
 .empty-state {
@@ -403,3 +472,17 @@
     .table-container { font-size: 0.875rem; }
 }
 </style>
+
+<script>
+function abrirConfirmar(id) {
+    document.getElementById('formConfirmar').action = `{{ url('servicio_realizado') }}/${id}/confirmar`;
+    document.getElementById('confirmarNumero').textContent = '#' + id;
+    new bootstrap.Modal(document.getElementById('modalConfirmar')).show();
+}
+
+function abrirAnular(id) {
+    document.getElementById('formAnular').action = `{{ url('servicio_realizado') }}/${id}/anular`;
+    document.getElementById('anularNumero').textContent = '#' + id;
+    new bootstrap.Modal(document.getElementById('modalAnular')).show();
+}
+</script>

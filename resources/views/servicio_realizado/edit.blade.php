@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registrar Servicio Realizado</title>
+    <title>Editar Servicio Realizado</title>
     @include('partials.head')
 </head>
 <body>
@@ -14,8 +14,8 @@
             {{-- Cabecera --}}
             <div class="page-header">
                 <div>
-                    <h2><i class="fas fa-clipboard-check"></i> Registrar Servicio Realizado</h2>
-                    <small>Complete los datos para registrar un nuevo servicio realizado</small>
+                    <h2><i class="fas fa-clipboard-check"></i> Editar Servicio Realizado</h2>
+                    <small>Modifique la observación y gestione las fotografías y planos del servicio realizado</small>
                 </div>
                 <a href="{{ route('servicio_realizado.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Volver al Listado
@@ -40,54 +40,46 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('servicio_realizado.store') }}" enctype="multipart/form-data" id="servicioForm">
+            <form method="POST" action="{{ route('servicio_realizado.update', $servicioRealizado->id) }}" enctype="multipart/form-data" id="servicioForm">
                 @csrf
+                @method('PUT')
 
-                {{-- Selección de Datos --}}
+                {{-- Datos Generales --}}
                 <div class="card">
                     <div class="card-header-section">
-                        <span><i class="fas fa-search me-2"></i>Selección de Datos</span>
+                        <span><i class="fas fa-info-circle me-2"></i>Datos Generales</span>
                     </div>
                     <div class="card-body">
-                        <div class="form-grid form-grid-3">
-                            <div>
-                                <label for="cliente_id" class="form-label">Cliente</label>
-                                <select id="cliente_id" class="form-select form-select-sm select2">
-                                    <option value="">Seleccionar Cliente</option>
-                                    @foreach($clientes as $cliente)
-                                        <option value="{{ $cliente->id }}">{{ $cliente->razon_social }}</option>
-                                    @endforeach
-                                </select>
+                        <div class="info-grid">
+                            <div class="detail-box detail-box-wide">
+                                <div class="detail-box-title">Identificación</div>
+                                <div class="detail-row"><i class="fas fa-hashtag"></i><span><strong>Nro Servicio Realizado:</strong> {{ $servicioRealizado->id }}</span></div>
+                                <div class="detail-row"><i class="fas fa-building"></i><span><strong>Cliente:</strong> {{ $servicioRealizado->cliente->razon_social ?? '-' }}</span></div>
+                                <div class="detail-row"><i class="fas fa-hard-hat"></i><span><strong>Obra:</strong> {{ $servicioRealizado->obra->descripcion ?? '-' }}</span></div>
+                                <div class="detail-row"><i class="fas fa-tasks"></i><span><strong>Orden de Servicio:</strong> Nro {{ $servicioRealizado->ordenServicio->nro ?? '-' }}</span></div>
                             </div>
-                            <div>
-                                <label for="obra_id" class="form-label">Obra</label>
-                                <select id="obra_id" class="form-select form-select-sm select2" disabled>
-                                    <option value="">Primero seleccione un cliente</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="orden_servicio_id" class="form-label">Orden de Servicio</label>
-                                <select name="orden_servicio_id" id="orden_servicio_id" class="form-select form-select-sm select2" disabled>
-                                    <option value="">Primero seleccione una obra</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="info-grid mt-3">
-                            <div class="detail-box" id="info-cliente-completo" style="display:none;">
+                            <div class="detail-box" id="info-cliente-completo">
                                 <div class="detail-box-title">Datos del Cliente</div>
-                                <div id="info-cliente-completo-body"></div>
+                                <div class="detail-row"><i class="fas fa-id-card"></i><span><strong>RUC:</strong> {{ $servicioRealizado->cliente->ruc ?? '-' }}</span></div>
+                                @if($servicioRealizado->cliente && $servicioRealizado->cliente->persona)
+                                    <div class="detail-row"><i class="fas fa-user"></i><span><strong>Persona de Contacto:</strong> {{ trim($servicioRealizado->cliente->persona->nombre . ' ' . $servicioRealizado->cliente->persona->apellido) }}</span></div>
+                                @endif
+                                <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Dirección:</strong> {{ $servicioRealizado->cliente->direccion ?? '-' }}</span></div>
+                                <div class="detail-row"><i class="fas fa-phone"></i><span><strong>Teléfono:</strong> {{ $servicioRealizado->cliente->telefono ?? '-' }}</span></div>
+                                <div class="detail-row"><i class="fas fa-envelope"></i><span><strong>Email:</strong> {{ $servicioRealizado->cliente->email ?? '-' }}</span></div>
                             </div>
-                            <div class="detail-box" id="info-obra-completo" style="display:none;">
+                            <div class="detail-box" id="info-obra-completo">
                                 <div class="detail-box-title">Datos de la Obra</div>
-                                <div id="info-obra-completo-body"></div>
+                                <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Ubicación:</strong> {{ $servicioRealizado->obra->ubicacion ?? '-' }}</span></div>
+                                <div class="detail-row"><i class="fas fa-ruler-combined"></i><span><strong>Metros Cuadrados:</strong> {{ $servicioRealizado->obra->metros_cuadrados ?? '-' }}</span></div>
+                                <div class="detail-row"><i class="fas fa-layer-group"></i><span><strong>Niveles:</strong> {{ $servicioRealizado->obra->niveles ?? '-' }}</span></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {{-- Información Relacionada --}}
-                <div class="card" id="info-section" style="display:none;">
+                <div class="card" id="info-section">
                     <div class="card-header-section">
                         <span><i class="fas fa-info-circle me-2"></i>Información Relacionada</span>
                     </div>
@@ -119,7 +111,7 @@
                 </div>
 
                 {{-- Insumos Utilizados --}}
-                <div class="card" id="insumos-section" style="display:none;">
+                <div class="card" id="insumos-section">
                     <div class="card-header-section">
                         <span><i class="fas fa-boxes me-2"></i>Insumos Utilizados</span>
                     </div>
@@ -130,7 +122,7 @@
                 </div>
 
                 {{-- Servicios Realizados --}}
-                <div class="card" id="servicios-section" style="display:none;">
+                <div class="card" id="servicios-section">
                     <div class="card-header-section">
                         <span><i class="fas fa-flask me-2"></i>Servicios Realizados</span>
                     </div>
@@ -140,7 +132,7 @@
                 </div>
 
                 {{-- Funcionarios --}}
-                <div class="card" id="funcionarios-section" style="display:none;">
+                <div class="card" id="funcionarios-section">
                     <div class="card-header-section">
                         <span><i class="fas fa-users me-2"></i>Funcionarios Asignados</span>
                     </div>
@@ -150,18 +142,34 @@
                 </div>
 
                 {{-- Fotos --}}
-                <div class="card" id="fotos-card" style="display:none;">
+                <div class="card">
                     <div class="card-header-section">
-                        <span><i class="fas fa-camera me-2"></i>Fotografías</span>
-                        <span class="results-count" id="fotos-count">0 fotos seleccionadas</span>
+                        <span><i class="fas fa-camera me-2"></i>Fotografías del Servicio Realizado</span>
+                        <span class="results-count" id="fotos-count">0 fotos nuevas seleccionadas</span>
                     </div>
                     <div class="card-body">
+                        @if($servicioRealizado->fotos->count() > 0)
+                            <div class="mb-3">
+                                <label class="form-label">Fotos ya cargadas</label>
+                                <div class="file-preview-container existing-files" id="fotos-existentes">
+                                    @foreach($servicioRealizado->fotos as $foto)
+                                        <div class="file-preview" data-existing-id="{{ $foto->id }}">
+                                            <a href="{{ Storage::disk('public')->url('servicios_realizados/fotos/' . $foto->nombre_foto) }}" target="_blank" title="Ver imagen">
+                                                <img src="{{ Storage::disk('public')->url('servicios_realizados/fotos/' . $foto->nombre_foto) }}" alt="Foto">
+                                            </a>
+                                            <button type="button" class="remove-file remove-existing" data-type="fotos" data-id="{{ $foto->id }}" title="Quitar foto">&times;</button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                        <div id="fotos-eliminar-inputs"></div>
                         <div class="file-upload-section" id="fotos-section">
                             <input type="file" name="fotos[]" id="fotos-input" class="file-input-hidden" multiple accept="image/*">
                             <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
                             <p>Arrastra y suelta las fotos aquí o haz clic para seleccionar</p>
                             <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('fotos-input').click()">
-                                <i class="fas fa-upload me-2"></i>Seleccionar Fotos
+                                <i class="fas fa-upload me-2"></i>Agregar Fotos
                             </button>
                             <div class="file-preview-container" id="fotos-preview"></div>
                         </div>
@@ -169,18 +177,40 @@
                 </div>
 
                 {{-- Planos --}}
-                <div class="card" id="planos-card" style="display:none;">
+                <div class="card">
                     <div class="card-header-section">
-                        <span><i class="fas fa-file-alt me-2"></i>Planos</span>
-                        <span class="results-count" id="planos-count">0 archivos seleccionados</span>
+                        <span><i class="fas fa-file-alt me-2"></i>Planos del Servicio Realizado</span>
+                        <span class="results-count" id="planos-count">0 archivos nuevos seleccionados</span>
                     </div>
                     <div class="card-body">
+                        @if($servicioRealizado->planos->count() > 0)
+                            <div class="mb-3">
+                                <label class="form-label">Planos ya cargados</label>
+                                <div class="file-preview-container existing-files" id="planos-existentes">
+                                    @foreach($servicioRealizado->planos as $plano)
+                                        <div class="file-preview" data-existing-id="{{ $plano->id }}">
+                                            <a href="{{ Storage::disk('public')->url('servicios_realizados/planos/' . $plano->nombre_plano) }}" target="_blank" title="Ver archivo">
+                                                @if(strtolower(pathinfo($plano->nombre_plano, PATHINFO_EXTENSION)) == 'pdf')
+                                                    <div style="display:flex; align-items:center; justify-content:center; height:100%; background:#f8fafc;">
+                                                        <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                                    </div>
+                                                @else
+                                                    <img src="{{ Storage::disk('public')->url('servicios_realizados/planos/' . $plano->nombre_plano) }}" alt="Plano">
+                                                @endif
+                                            </a>
+                                            <button type="button" class="remove-file remove-existing" data-type="planos" data-id="{{ $plano->id }}" title="Quitar plano">&times;</button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                        <div id="planos-eliminar-inputs"></div>
                         <div class="file-upload-section" id="planos-section">
                             <input type="file" name="planos[]" id="planos-input" class="file-input-hidden" multiple>
                             <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
                             <p>Arrastra y suelta los planos aquí o haz clic para seleccionar</p>
                             <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('planos-input').click()">
-                                <i class="fas fa-upload me-2"></i>Seleccionar Planos
+                                <i class="fas fa-upload me-2"></i>Agregar Planos
                             </button>
                             <div class="file-preview-container" id="planos-preview"></div>
                         </div>
@@ -188,18 +218,18 @@
                 </div>
 
                 {{-- Observación y Acciones --}}
-                <div class="card" id="final-card" style="display:none;">
+                <div class="card">
                     <div class="card-body">
                         <div class="mb-3">
                             <label for="observacion" class="form-label">Observación</label>
-                            <textarea name="observacion" id="observacion" class="form-control form-control-sm" rows="2" placeholder="Ingrese una observación...">{{ old('observacion') }}</textarea>
+                            <textarea name="observacion" id="observacion" class="form-control form-control-sm" rows="2" placeholder="Ingrese una observación...">{{ old('observacion', $servicioRealizado->observacion) }}</textarea>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <a href="{{ route('servicio_realizado.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times me-2"></i>Cancelar
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Guardar Servicio Realizado
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
                             </button>
                         </div>
                     </div>
@@ -276,14 +306,7 @@
 }
 .results-count { font-weight: 400; font-size: 0.78rem; color: #94a3b8; }
 
-/* ── Grillas de formulario ── */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-}
-.form-grid.form-grid-3 { grid-template-columns: repeat(3, 1fr); }
-.form-grid .form-label {
+.form-label {
     display: block;
     font-size: 0.7rem;
     font-weight: 500;
@@ -291,10 +314,6 @@
     margin-bottom: 0.25rem;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-}
-
-.select2-container--bootstrap-5 .select2-selection {
-    min-height: calc(1.5em + 0.5rem + 2px);
 }
 
 /* ── Información relacionada ── */
@@ -623,6 +642,10 @@
     margin-top: 1rem;
     justify-content: center;
 }
+.file-preview-container.existing-files {
+    margin-top: 0;
+    justify-content: flex-start;
+}
 .file-preview {
     position: relative;
     width: 100px;
@@ -631,6 +654,7 @@
     overflow: hidden;
     border: 1px solid #e2e8f0;
     background: #fff;
+    display: block;
 }
 .file-preview img {
     width: 100%;
@@ -660,50 +684,18 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 11px;
     cursor: pointer;
+    z-index: 2;
 }
 .file-preview .remove-file:hover { background: rgba(220, 53, 69, 1); }
 
-@media (max-width: 900px) {
-    .form-grid, .form-grid.form-grid-3 { grid-template-columns: repeat(2, 1fr); }
-    .page-header { flex-direction: column; align-items: flex-start; }
-}
 @media (max-width: 480px) {
-    .form-grid, .form-grid.form-grid-3 { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    $('.select2').select2({ theme: 'bootstrap-5', width: '100%' });
-
-    const $clienteSelect = $('#cliente_id');
-    const $obraSelect = $('#obra_id');
-    const $ordenSelect = $('#orden_servicio_id');
-
-    const $infoClienteCompleto = $('#info-cliente-completo');
-    const $infoObraCompleto = $('#info-obra-completo');
-    const $infoSection = $('#info-section');
-    const $insumosSection = $('#insumos-section');
-    const $serviciosSection = $('#servicios-section');
-    const $funcionariosSection = $('#funcionarios-section');
-    const $fotosCard = $('#fotos-card');
-    const $planosCard = $('#planos-card');
-    const $finalCard = $('#final-card');
-
-    let contratoActual = null;
-
-    function ocultarDatosOrden() {
-        $infoSection.hide();
-        $insumosSection.hide();
-        $serviciosSection.hide();
-        $funcionariosSection.hide();
-        $fotosCard.hide();
-        $planosCard.hide();
-        $finalCard.hide();
-        $('#info-solicitud, #info-visita, #info-presupuesto, #info-contrato, #insumos-list, #servicios-list, #funcionarios-list').empty();
-        contratoActual = null;
-        $('#btn-ver-contrato').hide();
-    }
+    const datosOrden = @json($datosOrden);
 
     function numToLetras(numero) {
         numero = parseInt(numero);
@@ -752,6 +744,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return letras.trim();
     }
+
+    let contratoActual = null;
 
     $('#btn-ver-contrato').on('click', function() {
         if (!contratoActual) return;
@@ -872,362 +866,233 @@ document.addEventListener('DOMContentLoaded', function () {
         new bootstrap.Modal(document.getElementById('modalContratoCompleto')).show();
     });
 
-    function cargarInfoCliente(clienteId) {
-        $infoClienteCompleto.hide();
-        $.getJSON(`/servicio_realizado/cliente-info/${clienteId}`, function(data) {
-            $('#info-cliente-completo-body').html(`
-                <div class="detail-row"><i class="fas fa-building"></i><span><strong>Razón Social:</strong> ${data.razon_social}</span></div>
-                <div class="detail-row"><i class="fas fa-id-card"></i><span><strong>RUC:</strong> ${data.ruc}</span></div>
-                ${data.persona ? `<div class="detail-row"><i class="fas fa-user"></i><span><strong>Persona de Contacto:</strong> ${data.persona}</span></div>` : ''}
-                <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Dirección:</strong> ${data.direccion}</span></div>
-                <div class="detail-row"><i class="fas fa-phone"></i><span><strong>Teléfono:</strong> ${data.telefono}</span></div>
-                <div class="detail-row"><i class="fas fa-envelope"></i><span><strong>Email:</strong> ${data.email}</span></div>
-                <div class="detail-row"><i class="fas fa-flag"></i><span><strong>Estado:</strong> ${data.estado}</span></div>
-                <div class="detail-row"><i class="fas fa-user-edit"></i><span><strong>Registrado por:</strong> ${data.registrado_por}</span></div>
-                <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha de Registro:</strong> ${data.fecha}</span></div>
-            `);
-            $infoClienteCompleto.show();
-        }).fail(function() {
-            $infoClienteCompleto.hide();
-        });
-    }
-
-    function cargarInfoObra(obraId) {
-        $infoObraCompleto.hide();
-        $.getJSON(`/servicio_realizado/obra-info/${obraId}`, function(data) {
-            $('#info-obra-completo-body').html(`
-                <div class="detail-row"><i class="fas fa-hard-hat"></i><span><strong>Descripción:</strong> ${data.descripcion}</span></div>
-                <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Ubicación:</strong> ${data.ubicacion}</span></div>
-                <div class="detail-row"><i class="fas fa-building"></i><span><strong>Cliente:</strong> ${data.cliente}</span></div>
-                <div class="detail-row"><i class="fas fa-ruler-combined"></i><span><strong>Metros Cuadrados:</strong> ${data.metros_cuadrados}</span></div>
-                <div class="detail-row"><i class="fas fa-layer-group"></i><span><strong>Niveles:</strong> ${data.niveles}</span></div>
-                <div class="detail-row"><i class="fas fa-sticky-note"></i><span><strong>Observación:</strong> ${data.observacion}</span></div>
-                <div class="detail-row"><i class="fas fa-flag"></i><span><strong>Estado:</strong> ${data.estado}</span></div>
-                <div class="detail-row"><i class="fas fa-user-edit"></i><span><strong>Registrado por:</strong> ${data.registrado_por}</span></div>
-                <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha de Registro:</strong> ${data.fecha}</span></div>
-            `);
-            $infoObraCompleto.show();
-        }).fail(function() {
-            $infoObraCompleto.hide();
-        });
-    }
-
-    function cargarObras(clienteId) {
-        $obraSelect.empty().append('<option value="">Cargando obras...</option>').trigger('change');
-        $ordenSelect.empty().append('<option value="">Primero seleccione una obra</option>').prop('disabled', true).trigger('change');
-        ocultarDatosOrden();
-
-        $.getJSON(`/servicio_realizado/obras-por-cliente/${clienteId}`, function(obras) {
-            $obraSelect.empty().append('<option value="">Seleccione una obra</option>');
-            if (obras && obras.length > 0) {
-                $.each(obras, function(i, obra) {
-                    $obraSelect.append(`<option value="${obra.id}">${obra.descripcion}</option>`);
-                });
-                $obraSelect.prop('disabled', false);
-            } else {
-                $obraSelect.append('<option value="">No hay obras con orden pendiente</option>');
-            }
-            $obraSelect.trigger('change');
-        }).fail(function() {
-            $obraSelect.empty().append('<option value="">Error al cargar obras</option>').trigger('change');
-        });
-    }
-
-    function cargarOrdenes(obraId) {
-        $ordenSelect.empty().append('<option value="">Cargando órdenes...</option>').trigger('change');
-        ocultarDatosOrden();
-
-        $.getJSON(`/servicio_realizado/ordenes-por-obra/${obraId}`, function(ordenes) {
-            $ordenSelect.empty().append('<option value="">Seleccione una orden de servicio</option>');
-            if (ordenes && ordenes.length > 0) {
-                $.each(ordenes, function(i, orden) {
-                    $ordenSelect.append(`<option value="${orden.id}">Orden Nro ${orden.nro}</option>`);
-                });
-                $ordenSelect.prop('disabled', false);
-            } else {
-                $ordenSelect.append('<option value="">No hay órdenes pendientes</option>');
-            }
-            $ordenSelect.trigger('change');
-        }).fail(function() {
-            $ordenSelect.empty().append('<option value="">Error al cargar órdenes</option>').trigger('change');
-        });
-    }
-
-    function cargarDatosOrden(ordenId) {
-        ocultarDatosOrden();
-
-        $.getJSON(`/servicio_realizado/datos-por-orden/${ordenId}`, function(data) {
-            const serviciosSolicitados = (data.solicitud_servicio.servicios && data.solicitud_servicio.servicios.length > 0)
-                ? data.solicitud_servicio.servicios.join(', ')
-                : 'Sin servicios';
-            $('#info-solicitud').html(`
-                <div class="detail-row"><i class="fas fa-hashtag"></i><span><strong>Nro:</strong> ${data.solicitud_servicio.id ?? '-'}</span></div>
-                <div class="detail-row"><i class="fas fa-user"></i><span><strong>Registrado por:</strong> ${data.solicitud_servicio.usuario}</span></div>
-                <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha:</strong> ${data.solicitud_servicio.fecha}</span></div>
-                <div class="detail-row"><i class="fas fa-tools"></i><span><strong>Servicios solicitados:</strong> ${serviciosSolicitados}</span></div>
-            `);
-            const fotosGaleria = (data.visita_previa.fotos && data.visita_previa.fotos.length > 0)
-                ? data.visita_previa.fotos.map(foto => `
-                    <div class="file-item">
-                        <img src="${foto.url}" alt="Foto">
-                        <div class="file-info">
-                            <a href="${foto.url}" target="_blank">Ver imagen</a>
-                            <small>${foto.fecha}</small>
-                        </div>
+    function renderDatosOrden(data) {
+        const serviciosSolicitados = (data.solicitud_servicio.servicios && data.solicitud_servicio.servicios.length > 0)
+            ? data.solicitud_servicio.servicios.join(', ')
+            : 'Sin servicios';
+        $('#info-solicitud').html(`
+            <div class="detail-row"><i class="fas fa-hashtag"></i><span><strong>Nro:</strong> ${data.solicitud_servicio.id ?? '-'}</span></div>
+            <div class="detail-row"><i class="fas fa-user"></i><span><strong>Registrado por:</strong> ${data.solicitud_servicio.usuario}</span></div>
+            <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha:</strong> ${data.solicitud_servicio.fecha}</span></div>
+            <div class="detail-row"><i class="fas fa-tools"></i><span><strong>Servicios solicitados:</strong> ${serviciosSolicitados}</span></div>
+        `);
+        const fotosGaleria = (data.visita_previa.fotos && data.visita_previa.fotos.length > 0)
+            ? data.visita_previa.fotos.map(foto => `
+                <div class="file-item">
+                    <img src="${foto.url}" alt="Foto">
+                    <div class="file-info">
+                        <a href="${foto.url}" target="_blank">Ver imagen</a>
+                        <small>${foto.fecha}</small>
                     </div>
-                `).join('')
-                : '<p class="text-muted mb-0" style="font-size:0.78rem;">Sin fotografías cargadas.</p>';
+                </div>
+            `).join('')
+            : '<p class="text-muted mb-0" style="font-size:0.78rem;">Sin fotografías cargadas.</p>';
 
-            const planosGaleria = (data.visita_previa.planos && data.visita_previa.planos.length > 0)
-                ? data.visita_previa.planos.map(plano => `
-                    <div class="file-item">
-                        ${plano.es_pdf
-                            ? `<embed src="${plano.url}" type="application/pdf" class="file-pdf-preview">`
-                            : `<img src="${plano.url}" alt="Plano">`}
-                        <div class="file-info">
-                            <a href="${plano.url}" target="_blank">${plano.es_pdf ? 'Ver PDF completo' : 'Ver archivo'}</a>
-                            <small>${plano.fecha}</small>
-                        </div>
+        const planosGaleria = (data.visita_previa.planos && data.visita_previa.planos.length > 0)
+            ? data.visita_previa.planos.map(plano => `
+                <div class="file-item">
+                    ${plano.es_pdf
+                        ? `<embed src="${plano.url}" type="application/pdf" class="file-pdf-preview">`
+                        : `<img src="${plano.url}" alt="Plano">`}
+                    <div class="file-info">
+                        <a href="${plano.url}" target="_blank">${plano.es_pdf ? 'Ver PDF completo' : 'Ver archivo'}</a>
+                        <small>${plano.fecha}</small>
                     </div>
-                `).join('')
-                : '<p class="text-muted mb-0" style="font-size:0.78rem;">Sin planos cargados.</p>';
+                </div>
+            `).join('')
+            : '<p class="text-muted mb-0" style="font-size:0.78rem;">Sin planos cargados.</p>';
 
-            $('#info-visita').html(`
-                <div class="detail-row"><i class="fas fa-hashtag"></i><span><strong>Nro:</strong> ${data.visita_previa.id ?? '-'}</span></div>
-                <div class="detail-row"><i class="fas fa-user"></i><span><strong>Registrado por:</strong> ${data.visita_previa.usuario}</span></div>
-                <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha de Visita:</strong> ${data.visita_previa.fecha_visita}</span></div>
-                <div class="detail-row" style="flex-direction:column;"><span><i class="fas fa-camera me-1"></i><strong>Fotografías:</strong></span><div class="file-gallery">${fotosGaleria}</div></div>
-                <div class="detail-row" style="flex-direction:column;"><span><i class="fas fa-file-alt me-1"></i><strong>Planos:</strong></span><div class="file-gallery">${planosGaleria}</div></div>
-            `);
-            const formatGs = (valor) => `₲ ${Number(valor || 0).toLocaleString('es-PY')}`;
+        $('#info-visita').html(`
+            <div class="detail-row"><i class="fas fa-hashtag"></i><span><strong>Nro:</strong> ${data.visita_previa.id ?? '-'}</span></div>
+            <div class="detail-row"><i class="fas fa-user"></i><span><strong>Registrado por:</strong> ${data.visita_previa.usuario}</span></div>
+            <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha de Visita:</strong> ${data.visita_previa.fecha_visita}</span></div>
+            <div class="detail-row" style="flex-direction:column;"><span><i class="fas fa-camera me-1"></i><strong>Fotografías:</strong></span><div class="file-gallery">${fotosGaleria}</div></div>
+            <div class="detail-row" style="flex-direction:column;"><span><i class="fas fa-file-alt me-1"></i><strong>Planos:</strong></span><div class="file-gallery">${planosGaleria}</div></div>
+        `);
+        const formatGs = (valor) => `₲ ${Number(valor || 0).toLocaleString('es-PY')}`;
 
-            const serviciosPresupuestoHtml = (data.presupuesto.servicios && data.presupuesto.servicios.length > 0)
-                ? data.presupuesto.servicios.map(servicioData => `
-                    <div class="precio-servicio-block">
-                        <div class="precio-servicio-header">${servicioData.servicio}</div>
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
+        const serviciosPresupuestoHtml = (data.presupuesto.servicios && data.presupuesto.servicios.length > 0)
+            ? data.presupuesto.servicios.map(servicioData => `
+                <div class="precio-servicio-block">
+                    <div class="precio-servicio-header">${servicioData.servicio}</div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Ensayo</th>
+                                    <th style="width:110px;" class="text-end">Precio Unit.</th>
+                                    <th style="width:80px;" class="text-center">Cantidad</th>
+                                    <th style="width:100px;" class="text-center">Impuesto</th>
+                                    <th style="width:100px;" class="text-end">IVA</th>
+                                    <th style="width:120px;" class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${servicioData.ensayos.map(ensayo => `
                                     <tr>
-                                        <th>Ensayo</th>
-                                        <th style="width:110px;" class="text-end">Precio Unit.</th>
-                                        <th style="width:80px;" class="text-center">Cantidad</th>
-                                        <th style="width:100px;" class="text-center">Impuesto</th>
-                                        <th style="width:100px;" class="text-end">IVA</th>
-                                        <th style="width:120px;" class="text-end">Subtotal</th>
+                                        <td>${ensayo.descripcion}</td>
+                                        <td class="text-end">${formatGs(ensayo.precio_unitario)}</td>
+                                        <td class="text-center">${ensayo.cantidad}</td>
+                                        <td class="text-center"><span class="tag tag-secondary">${ensayo.impuesto}</span></td>
+                                        <td class="text-end">${formatGs(ensayo.iva)}</td>
+                                        <td class="text-end"><span class="amount">${formatGs(ensayo.subtotal)}</span></td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    ${servicioData.ensayos.map(ensayo => `
-                                        <tr>
-                                            <td>${ensayo.descripcion}</td>
-                                            <td class="text-end">${formatGs(ensayo.precio_unitario)}</td>
-                                            <td class="text-center">${ensayo.cantidad}</td>
-                                            <td class="text-center"><span class="tag tag-secondary">${ensayo.impuesto}</span></td>
-                                            <td class="text-end">${formatGs(ensayo.iva)}</td>
-                                            <td class="text-end"><span class="amount">${formatGs(ensayo.subtotal)}</span></td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `).join('')
-                : '<p class="text-muted mb-0" style="font-size:0.8rem;">Sin detalles de presupuesto.</p>';
-
-            const impuestosTipoHtml = Object.entries(data.presupuesto.impuestos_por_tipo || {}).map(([tipo, monto]) => `
-                <div class="totals-row"><span>IVA ${tipo}</span><strong>${formatGs(monto)}</strong></div>
-            `).join('');
-
-            const desgloseServicioHtml = (data.presupuesto.servicios || []).map(servicioData => `
-                <div class="totals-row"><span>${servicioData.servicio}</span><strong>${formatGs(servicioData.subtotal_servicio)}</strong></div>
-            `).join('');
-
-            $('#info-presupuesto').html(`
-                <div class="presupuesto-encabezado">
-                    <div class="detail-row"><i class="fas fa-hashtag"></i><span><strong>N° Presupuesto:</strong> ${data.presupuesto.numero_presupuesto}</span></div>
-                    <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha:</strong> ${data.presupuesto.fecha}</span></div>
-                    <div class="detail-row"><i class="fas fa-hourglass-half"></i><span><strong>Validez:</strong> ${data.presupuesto.validez} días</span></div>
-                    <div class="detail-row"><i class="fas fa-percent"></i><span><strong>Anticipo:</strong> ${data.presupuesto.anticipo}%</span></div>
-                    <div class="detail-row"><i class="fas fa-user"></i><span><strong>Registrado por:</strong> ${data.presupuesto.usuario}</span></div>
-                </div>
-                <div class="detail-row"><i class="fas fa-align-left"></i><span><strong>Descripción:</strong> ${data.presupuesto.descripcion}</span></div>
-                ${data.presupuesto.observacion ? `<div class="detail-row"><i class="fas fa-sticky-note"></i><span><strong>Observación:</strong> ${data.presupuesto.observacion}</span></div>` : ''}
-
-                <div class="mt-3">${serviciosPresupuestoHtml}</div>
-
-                <div class="totals-grid">
-                    <div class="totals-box">
-                        <div class="totals-box-title">Desglose por Servicio</div>
-                        ${desgloseServicioHtml}
-                    </div>
-                    <div class="totals-box">
-                        <div class="totals-box-title">Totales</div>
-                        ${impuestosTipoHtml}
-                        <div class="totals-row"><span>Total Servicios</span><strong>${formatGs(data.presupuesto.total_servicios)}</strong></div>
-                        <div class="totals-row"><span>Total Impuestos</span><strong>${formatGs(data.presupuesto.total_impuestos)}</strong></div>
-                        <div class="totals-row totals-final"><span>TOTAL GENERAL</span><strong>${formatGs(data.presupuesto.total_general)}</strong></div>
-                        <div class="totals-row"><span>Anticipo (${data.presupuesto.anticipo}%)</span><strong>${formatGs(data.presupuesto.monto_anticipo)}</strong></div>
+                                `).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            `);
-            const montoContrato = parseFloat(data.contrato.monto) || 0;
-            const montoEtapa = (pct) => montoContrato && pct != null ? formatGs(montoContrato * (parseFloat(pct) / 100)) : '-';
-            const etapaPago = (icono, label, pct) => `
-                <div class="pago-stage">
-                    <div class="pago-stage-label">
-                        <span><i class="fas ${icono} me-1"></i>${label}</span>
-                        <span class="pago-stage-pct">${pct != null ? pct + '%' : '-'}</span>
+            `).join('')
+            : '<p class="text-muted mb-0" style="font-size:0.8rem;">Sin detalles de presupuesto.</p>';
+
+        const impuestosTipoHtml = Object.entries(data.presupuesto.impuestos_por_tipo || {}).map(([tipo, monto]) => `
+            <div class="totals-row"><span>IVA ${tipo}</span><strong>${formatGs(monto)}</strong></div>
+        `).join('');
+
+        const desgloseServicioHtml = (data.presupuesto.servicios || []).map(servicioData => `
+            <div class="totals-row"><span>${servicioData.servicio}</span><strong>${formatGs(servicioData.subtotal_servicio)}</strong></div>
+        `).join('');
+
+        $('#info-presupuesto').html(`
+            <div class="presupuesto-encabezado">
+                <div class="detail-row"><i class="fas fa-hashtag"></i><span><strong>N° Presupuesto:</strong> ${data.presupuesto.numero_presupuesto}</span></div>
+                <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha:</strong> ${data.presupuesto.fecha}</span></div>
+                <div class="detail-row"><i class="fas fa-hourglass-half"></i><span><strong>Validez:</strong> ${data.presupuesto.validez} días</span></div>
+                <div class="detail-row"><i class="fas fa-percent"></i><span><strong>Anticipo:</strong> ${data.presupuesto.anticipo}%</span></div>
+                <div class="detail-row"><i class="fas fa-user"></i><span><strong>Registrado por:</strong> ${data.presupuesto.usuario}</span></div>
+            </div>
+            <div class="detail-row"><i class="fas fa-align-left"></i><span><strong>Descripción:</strong> ${data.presupuesto.descripcion}</span></div>
+            ${data.presupuesto.observacion ? `<div class="detail-row"><i class="fas fa-sticky-note"></i><span><strong>Observación:</strong> ${data.presupuesto.observacion}</span></div>` : ''}
+
+            <div class="mt-3">${serviciosPresupuestoHtml}</div>
+
+            <div class="totals-grid">
+                <div class="totals-box">
+                    <div class="totals-box-title">Desglose por Servicio</div>
+                    ${desgloseServicioHtml}
+                </div>
+                <div class="totals-box">
+                    <div class="totals-box-title">Totales</div>
+                    ${impuestosTipoHtml}
+                    <div class="totals-row"><span>Total Servicios</span><strong>${formatGs(data.presupuesto.total_servicios)}</strong></div>
+                    <div class="totals-row"><span>Total Impuestos</span><strong>${formatGs(data.presupuesto.total_impuestos)}</strong></div>
+                    <div class="totals-row totals-final"><span>TOTAL GENERAL</span><strong>${formatGs(data.presupuesto.total_general)}</strong></div>
+                    <div class="totals-row"><span>Anticipo (${data.presupuesto.anticipo}%)</span><strong>${formatGs(data.presupuesto.monto_anticipo)}</strong></div>
+                </div>
+            </div>
+        `);
+        const montoContrato = parseFloat(data.contrato.monto) || 0;
+        const montoEtapa = (pct) => montoContrato && pct != null ? formatGs(montoContrato * (parseFloat(pct) / 100)) : '-';
+        const etapaPago = (icono, label, pct) => `
+            <div class="pago-stage">
+                <div class="pago-stage-label">
+                    <span><i class="fas ${icono} me-1"></i>${label}</span>
+                    <span class="pago-stage-pct">${pct != null ? pct + '%' : '-'}</span>
+                </div>
+                <div class="pago-stage-monto">${montoEtapa(pct)}</div>
+            </div>
+        `;
+        $('#info-contrato').html(`
+            <div class="contrato-resumen-grid">
+                <div class="detail-row"><i class="fas fa-hashtag"></i><span><strong>N° Contrato:</strong> ${String(data.contrato.id ?? '-').padStart(3, '0')}</span></div>
+                <div class="detail-row"><i class="fas fa-coins"></i><span><strong>Monto Total:</strong> ₲ ${data.contrato.monto ? parseFloat(data.contrato.monto).toLocaleString('es-PY') : '-'}</span></div>
+                <div class="detail-row"><i class="fas fa-calendar-check"></i><span><strong>Fecha de Firma:</strong> ${data.contrato.fecha_firma}</span></div>
+                <div class="detail-row"><i class="fas fa-clock"></i><span><strong>Plazo de Ejecución:</strong> ${data.contrato.plazo_dias ?? '-'} días</span></div>
+                <div class="detail-row"><i class="fas fa-shield-alt"></i><span><strong>Garantía:</strong> ${data.contrato.garantia_meses ?? '-'} meses</span></div>
+            </div>
+            <div class="totals-box-title">Condición de Pago</div>
+            <div class="pago-stages">
+                ${etapaPago('fa-hand-holding-usd', 'Anticipo', data.contrato.anticipo)}
+                ${etapaPago('fa-tasks', 'Mitad de Obra', data.contrato.pago_mitad)}
+                ${etapaPago('fa-flag-checkered', 'Pago Final', data.contrato.pago_final)}
+            </div>
+        `);
+        contratoActual = data.contrato;
+        $('#btn-ver-contrato').toggle(!!contratoActual.id);
+
+        // Insumos utilizados confirmados (solo informativo, agrupados en tarjetas)
+        const $insumosList = $('#insumos-list');
+        $insumosList.empty();
+        if (data.insumos_utilizados && data.insumos_utilizados.length > 0) {
+            data.insumos_utilizados.forEach(function(insumo) {
+                const detallesHtml = insumo.detalles.length > 0
+                    ? insumo.detalles.map(d => `
+                        <div class="insumo-card-detalle-item">
+                            <span class="insumo-nombre">${d.descripcion}</span>
+                            <span class="tag tag-secondary">${d.marca}</span>
+                            <span class="insumo-cantidad">${d.cantidad} ${d.unidad}</span>
+                        </div>
+                    `).join('')
+                    : '<p class="text-muted mb-0" style="font-size:0.74rem;">Sin detalle.</p>';
+
+                $insumosList.append(`
+                    <div class="insumo-card">
+                        <div class="insumo-card-header">
+                            <span class="insumo-card-nro">Nro ${insumo.nro}</span>
+                            <span class="tag ms-auto">${insumo.estado}</span>
+                        </div>
+                        <div class="insumo-card-meta">
+                            <span><i class="fas fa-user"></i>${insumo.usuario}</span>
+                            <span><i class="fas fa-calendar"></i>${insumo.fecha_registro ?? '-'}</span>
+                        </div>
+                        <div class="insumo-card-detalles">${detallesHtml}</div>
                     </div>
-                    <div class="pago-stage-monto">${montoEtapa(pct)}</div>
-                </div>
-            `;
-            $('#info-contrato').html(`
-                <div class="contrato-resumen-grid">
-                    <div class="detail-row"><i class="fas fa-hashtag"></i><span><strong>N° Contrato:</strong> ${String(data.contrato.id ?? '-').padStart(3, '0')}</span></div>
-                    <div class="detail-row"><i class="fas fa-coins"></i><span><strong>Monto Total:</strong> ₲ ${data.contrato.monto ? parseFloat(data.contrato.monto).toLocaleString('es-PY') : '-'}</span></div>
-                    <div class="detail-row"><i class="fas fa-calendar-check"></i><span><strong>Fecha de Firma:</strong> ${data.contrato.fecha_firma}</span></div>
-                    <div class="detail-row"><i class="fas fa-clock"></i><span><strong>Plazo de Ejecución:</strong> ${data.contrato.plazo_dias ?? '-'} días</span></div>
-                    <div class="detail-row"><i class="fas fa-shield-alt"></i><span><strong>Garantía:</strong> ${data.contrato.garantia_meses ?? '-'} meses</span></div>
-                </div>
-                <div class="totals-box-title">Condición de Pago</div>
-                <div class="pago-stages">
-                    ${etapaPago('fa-hand-holding-usd', 'Anticipo', data.contrato.anticipo)}
-                    ${etapaPago('fa-tasks', 'Mitad de Obra', data.contrato.pago_mitad)}
-                    ${etapaPago('fa-flag-checkered', 'Pago Final', data.contrato.pago_final)}
-                </div>
-            `);
-            contratoActual = data.contrato;
-            $('#btn-ver-contrato').toggle(!!contratoActual.id);
-            $infoSection.show();
+                `);
+            });
+        } else {
+            $insumosList.html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay insumos utilizados confirmados para esta orden de servicio.</p>');
+        }
 
-            // Insumos utilizados confirmados (solo informativo, agrupados en tarjetas)
-            const $insumosList = $('#insumos-list');
-            $insumosList.empty();
-            if (data.insumos_utilizados && data.insumos_utilizados.length > 0) {
-                data.insumos_utilizados.forEach(function(insumo) {
-                    const detallesHtml = insumo.detalles.length > 0
-                        ? insumo.detalles.map(d => `
-                            <div class="insumo-card-detalle-item">
-                                <span class="insumo-nombre">${d.descripcion}</span>
-                                <span class="tag tag-secondary">${d.marca}</span>
-                                <span class="insumo-cantidad">${d.cantidad} ${d.unidad}</span>
-                            </div>
-                        `).join('')
-                        : '<p class="text-muted mb-0" style="font-size:0.74rem;">Sin detalle.</p>';
+        // Servicios realizados (solo informativo)
+        const $serviciosList = $('#servicios-list');
+        $serviciosList.empty();
+        if (data.servicios && data.servicios.length > 0) {
+            data.servicios.forEach(function(servicioData) {
+                const checks = servicioData.ensayos.map(ensayo => `
+                    <div class="servicio-check servicio-check-readonly">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>${ensayo.descripcion} — Cantidad: ${ensayo.cantidad}</span>
+                    </div>
+                `).join('');
+                $serviciosList.append(`
+                    <div class="servicio-group">
+                        <h6>${servicioData.servicio}</h6>
+                        <div class="servicios-grid">${checks}</div>
+                    </div>
+                `);
+            });
+        } else {
+            $serviciosList.html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay servicios registrados en el presupuesto.</p>');
+        }
 
-                    $insumosList.append(`
-                        <div class="insumo-card">
-                            <input type="hidden" name="insumos_utilizados[]" value="${insumo.id}">
-                            <div class="insumo-card-header">
-                                <span class="insumo-card-nro">Nro ${insumo.nro}</span>
-                                <span class="tag ms-auto">${insumo.estado}</span>
-                            </div>
-                            <div class="insumo-card-meta">
-                                <span><i class="fas fa-user"></i>${insumo.usuario}</span>
-                                <span><i class="fas fa-calendar"></i>${insumo.fecha_registro ?? '-'}</span>
-                            </div>
-                            <div class="insumo-card-detalles">${detallesHtml}</div>
+        // Funcionarios asignados (solo informativo)
+        const $funcionariosList = $('#funcionarios-list');
+        $funcionariosList.empty();
+        if (data.funcionarios && data.funcionarios.length > 0) {
+            data.funcionarios.forEach(function(funcionario) {
+                $funcionariosList.append(`
+                    <div class="funcionario-card">
+                        <div class="funcionario-card-header">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="funcionario-nombre">${funcionario.nombre}</span>
+                            <span class="tag ms-auto">${funcionario.cargo}</span>
                         </div>
-                    `);
-                });
-            } else {
-                $insumosList.html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay insumos utilizados confirmados para esta orden de servicio.</p>');
-            }
-            $insumosSection.show();
-
-            // Servicios realizados (solo informativo)
-            const $serviciosList = $('#servicios-list');
-            $serviciosList.empty();
-            if (data.servicios && data.servicios.length > 0) {
-                data.servicios.forEach(function(servicioData) {
-                    const checks = servicioData.ensayos.map(ensayo => `
-                        <div class="servicio-check servicio-check-readonly">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <span>${ensayo.descripcion} — Cantidad: ${ensayo.cantidad}</span>
-                        </div>
-                    `).join('');
-                    $serviciosList.append(`
-                        <div class="servicio-group">
-                            <h6>${servicioData.servicio}</h6>
-                            <div class="servicios-grid">${checks}</div>
-                        </div>
-                    `);
-                });
-            } else {
-                $serviciosList.html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay servicios registrados en el presupuesto.</p>');
-            }
-            $serviciosSection.show();
-
-            // Funcionarios asignados (solo informativo)
-            const $funcionariosList = $('#funcionarios-list');
-            $funcionariosList.empty();
-            if (data.funcionarios && data.funcionarios.length > 0) {
-                data.funcionarios.forEach(function(funcionario) {
-                    $funcionariosList.append(`
-                        <div class="funcionario-card">
-                            <div class="funcionario-card-header">
-                                <i class="fas fa-user-circle"></i>
-                                <span class="funcionario-nombre">${funcionario.nombre}</span>
-                                <span class="tag ms-auto">${funcionario.cargo}</span>
-                            </div>
-                            <div class="detail-row"><i class="fas fa-id-card"></i><span><strong>CI:</strong> ${funcionario.ci}</span></div>
-                            <div class="detail-row"><i class="fas fa-phone"></i><span><strong>Teléfono:</strong> ${funcionario.telefono}</span></div>
-                            <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Dirección:</strong> ${funcionario.direccion}</span></div>
-                            <div class="detail-row"><i class="fas fa-calendar-plus"></i><span><strong>Fecha de Ingreso:</strong> ${funcionario.fecha_ingreso}</span></div>
-                            <div class="detail-row"><i class="fas fa-flag"></i><span><strong>Estado:</strong> ${funcionario.estado}</span></div>
-                        </div>
-                    `);
-                });
-            } else {
-                $funcionariosList.html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay funcionarios asignados a esta orden de servicio.</p>');
-            }
-            $funcionariosSection.show();
-
-            $fotosCard.show();
-            $planosCard.show();
-            $finalCard.show();
-        }).fail(function() {
-            ocultarDatosOrden();
-        });
+                        <div class="detail-row"><i class="fas fa-id-card"></i><span><strong>CI:</strong> ${funcionario.ci}</span></div>
+                        <div class="detail-row"><i class="fas fa-phone"></i><span><strong>Teléfono:</strong> ${funcionario.telefono}</span></div>
+                        <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Dirección:</strong> ${funcionario.direccion}</span></div>
+                        <div class="detail-row"><i class="fas fa-calendar-plus"></i><span><strong>Fecha de Ingreso:</strong> ${funcionario.fecha_ingreso}</span></div>
+                        <div class="detail-row"><i class="fas fa-flag"></i><span><strong>Estado:</strong> ${funcionario.estado}</span></div>
+                    </div>
+                `);
+            });
+        } else {
+            $funcionariosList.html('<p class="text-muted mb-0" style="font-size:0.8rem;">No hay funcionarios asignados a esta orden de servicio.</p>');
+        }
     }
 
-    $clienteSelect.on('change', function() {
-        const clienteId = $(this).val();
-        if (clienteId) {
-            cargarInfoCliente(clienteId);
-            cargarObras(clienteId);
-        } else {
-            $infoClienteCompleto.hide();
-            $infoObraCompleto.hide();
-            $obraSelect.empty().append('<option value="">Primero seleccione un cliente</option>').prop('disabled', true).trigger('change');
-            $ordenSelect.empty().append('<option value="">Primero seleccione una obra</option>').prop('disabled', true).trigger('change');
-            ocultarDatosOrden();
-        }
-    });
+    renderDatosOrden(datosOrden);
 
-    $obraSelect.on('change', function() {
-        const obraId = $(this).val();
-        if (obraId) {
-            cargarInfoObra(obraId);
-            cargarOrdenes(obraId);
-        } else {
-            $infoObraCompleto.hide();
-            $ordenSelect.empty().append('<option value="">Primero seleccione una obra</option>').prop('disabled', true).trigger('change');
-            ocultarDatosOrden();
-        }
-    });
-
-    $ordenSelect.on('change', function() {
-        const ordenId = $(this).val();
-        if (ordenId) {
-            cargarDatosOrden(ordenId);
-        } else {
-            ocultarDatosOrden();
-        }
-    });
-
-    // Manejo de archivos: vista previa, contador y eliminación
+    // Manejo de archivos nuevos: vista previa, contador y eliminación
     function handleFileSelect(event, type) {
         const files = event.target.files;
         const previewContainer = $(`#${type}-preview`);
@@ -1235,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         previewContainer.empty();
 
-        const label = type === 'fotos' ? 'fotos' : 'archivos';
+        const label = type === 'fotos' ? 'fotos nuevas' : 'archivos nuevos';
         countElement.text(`${files.length} ${label} seleccionado${files.length === 1 ? '' : 's'}`);
 
         Array.from(files).forEach((file, index) => {
@@ -1309,5 +1174,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $('#fotos-input').on('change', function(e) { handleFileSelect(e, 'fotos'); });
     $('#planos-input').on('change', function(e) { handleFileSelect(e, 'planos'); });
+
+    // Quitar archivos ya cargados (existentes en el servidor)
+    $('.remove-existing').on('click', function() {
+        const type = $(this).data('type');
+        const id = $(this).data('id');
+        const $item = $(this).closest('.file-preview');
+
+        $(`#${type}-eliminar-inputs`).append(
+            `<input type="hidden" name="${type}_eliminar[]" value="${id}">`
+        );
+        $item.remove();
+    });
 });
 </script>

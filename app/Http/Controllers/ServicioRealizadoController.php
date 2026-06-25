@@ -134,6 +134,11 @@ class ServicioRealizadoController extends Controller
 
     public function datosPorOrden($orden_servicio_id)
     {
+        return response()->json($this->datosOrdenArray($orden_servicio_id));
+    }
+
+    private function datosOrdenArray($orden_servicio_id)
+    {
         $ordenServicio = OrdenServicio::with([
             'cliente',
             'obra',
@@ -148,6 +153,8 @@ class ServicioRealizadoController extends Controller
             'presupuestoServicio.visitaPrevia.solicitudServicio.usuario',
             'presupuestoServicio.visitaPrevia.solicitudServicio.detalles.servicio',
             'funcionarios.funcionario.persona',
+            'funcionarios.funcionario.cargo',
+            'funcionarios.funcionario.estado',
         ])->findOrFail($orden_servicio_id);
 
         $contrato = $ordenServicio->contrato;
@@ -155,8 +162,9 @@ class ServicioRealizadoController extends Controller
         $visitaPrevia = $presupuesto->visitaPrevia ?? null;
         $solicitudServicio = $visitaPrevia->solicitudServicio ?? null;
 
-        $insumosUtilizados = InsumoUtilizado::with('detalles.insumo.unidadMedida', 'estado')
+        $insumosUtilizados = InsumoUtilizado::with('detalles.insumo.unidadMedida', 'detalles.insumo.marca', 'estado', 'usuario')
             ->where('orden_servicio_id', $ordenServicio->id)
+            ->where('estado_id', 4) // Confirmado
             ->get()
             ->map(function ($insumoUtilizado) {
                 return [
@@ -164,9 +172,11 @@ class ServicioRealizadoController extends Controller
                     'nro' => $insumoUtilizado->nro,
                     'fecha_registro' => $insumoUtilizado->fecha_registro ? $insumoUtilizado->fecha_registro->format('d/m/Y') : null,
                     'estado' => $insumoUtilizado->estado->descripcion ?? '-',
+                    'usuario' => $insumoUtilizado->usuario->usuario ?? '-',
                     'detalles' => $insumoUtilizado->detalles->map(function ($detalle) {
                         return [
                             'descripcion' => $detalle->insumo->descripcion ?? '-',
+                            'marca' => $detalle->insumo->marca->descripcion ?? '-',
                             'unidad' => $detalle->insumo->unidadMedida->descripcion ?? '-',
                             'cantidad' => $detalle->cantidad,
                         ];
@@ -265,14 +275,21 @@ class ServicioRealizadoController extends Controller
         $montoAnticipo = $presupuesto ? round($totalGeneralPresupuesto * $presupuesto->anticipo / 100) : 0;
 
         $funcionarios = $ordenServicio->funcionarios->map(function ($asignacion) {
-            $persona = $asignacion->funcionario->persona ?? null;
+            $funcionario = $asignacion->funcionario;
+            $persona = $funcionario->persona ?? null;
             return [
                 'id' => $asignacion->funcionario_id,
                 'nombre' => trim(($persona->nombre ?? '') . ' ' . ($persona->apellido ?? '')) ?: '-',
+                'ci' => $persona->ci ?? '-',
+                'telefono' => $persona->telefono ?? '-',
+                'direccion' => $persona->direccion ?? '-',
+                'cargo' => $funcionario->cargo->descripcion ?? '-',
+                'fecha_ingreso' => $funcionario->fecha_ingreso ? $funcionario->fecha_ingreso->format('d/m/Y') : '-',
+                'estado' => $funcionario->estado->descripcion ?? '-',
             ];
         })->values();
 
-        return response()->json([
+        return [
             'id' => $ordenServicio->id,
             'nro' => $ordenServicio->nro,
             'cliente' => $ordenServicio->cliente->razon_social ?? '-',
@@ -329,7 +346,7 @@ class ServicioRealizadoController extends Controller
             'insumos_utilizados' => $insumosUtilizados,
             'servicios' => $servicios,
             'funcionarios' => $funcionarios,
-        ]);
+        ];
     }
 
     public function store(Request $request)
@@ -371,6 +388,8 @@ class ServicioRealizadoController extends Controller
                 ]);
             }
 
+            $ordenServicio->update(['estado_id' => 4]); // Confirmado
+
             Storage::disk('public')->makeDirectory('servicios_realizados/fotos');
             Storage::disk('public')->makeDirectory('servicios_realizados/planos');
 
@@ -404,6 +423,140 @@ class ServicioRealizadoController extends Controller
 
             return back()->withInput()
                         ->with('error', 'Error al registrar el servicio realizado: ' . $e->getMessage());
+        }
+    }
+
+    public function confirmar($id)
+    {
+        $servicioRealizado = ServicioRealizado::findOrFail($id);
+
+        if ($servicioRealizado->estado_id != 3) {
+            return back()->with('error', 'Solo se pueden confirmar servicios realizados en estado Pendiente.');
+        }
+
+        $servicioRealizado->update(['estado_id' => 4]);
+
+        return redirect()->route('servicio_realizado.index')
+            ->with('success', 'Servicio realizado confirmado correctamente.');
+    }
+
+    public function anular($id)
+    {
+        $servicioRealizado = ServicioRealizado::with('ordenServicio')->findOrFail($id);
+
+        if ($servicioRealizado->estado_id != 3) {
+            return back()->with('error', 'Solo se pueden anular servicios realizados en estado Pendiente.');
+        }
+
+        DB::transaction(function () use ($servicioRealizado) {
+            $servicioRealizado->update(['estado_id' => 5]);
+
+            if ($servicioRealizado->ordenServicio) {
+                $servicioRealizado->ordenServicio->update(['estado_id' => 3]);
+            }
+        });
+
+        return redirect()->route('servicio_realizado.index')
+            ->with('success', 'Servicio realizado anulado correctamente.');
+    }
+
+    public function edit($id)
+    {
+        $servicioRealizado = ServicioRealizado::with([
+            'cliente.estado',
+            'cliente.persona',
+            'cliente.usuario',
+            'obra.estado',
+            'obra.usuario',
+            'ordenServicio',
+            'fotos',
+            'planos',
+        ])->findOrFail($id);
+
+        if ($servicioRealizado->estado_id != 3) {
+            return redirect()->route('servicio_realizado.index')
+                ->with('error', 'Solo se pueden editar servicios realizados en estado Pendiente.');
+        }
+
+        $datosOrden = $this->datosOrdenArray($servicioRealizado->orden_servicio_id);
+
+        return view('servicio_realizado.edit', compact('servicioRealizado', 'datosOrden'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $servicioRealizado = ServicioRealizado::findOrFail($id);
+
+        if ($servicioRealizado->estado_id != 3) {
+            return redirect()->route('servicio_realizado.index')
+                ->with('error', 'Solo se pueden editar servicios realizados en estado Pendiente.');
+        }
+
+        $request->validate([
+            'observacion' => 'nullable|string',
+            'fotos.*' => 'nullable|file|image',
+            'planos.*' => 'nullable|file',
+            'fotos_eliminar' => 'nullable|array',
+            'fotos_eliminar.*' => 'exists:servicio_realizado_fotos,id',
+            'planos_eliminar' => 'nullable|array',
+            'planos_eliminar.*' => 'exists:servicio_realizado_planos,id',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $servicioRealizado->update([
+                'observacion' => $request->observacion,
+            ]);
+
+            foreach ($request->input('fotos_eliminar', []) as $fotoId) {
+                $foto = ServicioRealizadoFoto::where('servicio_realizado_id', $servicioRealizado->id)->find($fotoId);
+                if ($foto) {
+                    Storage::disk('public')->delete('servicios_realizados/fotos/' . $foto->nombre_foto);
+                    $foto->delete();
+                }
+            }
+
+            foreach ($request->input('planos_eliminar', []) as $planoId) {
+                $plano = ServicioRealizadoPlano::where('servicio_realizado_id', $servicioRealizado->id)->find($planoId);
+                if ($plano) {
+                    Storage::disk('public')->delete('servicios_realizados/planos/' . $plano->nombre_plano);
+                    $plano->delete();
+                }
+            }
+
+            Storage::disk('public')->makeDirectory('servicios_realizados/fotos');
+            Storage::disk('public')->makeDirectory('servicios_realizados/planos');
+
+            if ($request->hasFile('fotos')) {
+                foreach ($request->file('fotos') as $foto) {
+                    $path = $foto->store('servicios_realizados/fotos', 'public');
+                    ServicioRealizadoFoto::create([
+                        'servicio_realizado_id' => $servicioRealizado->id,
+                        'nombre_foto' => basename($path),
+                    ]);
+                }
+            }
+
+            if ($request->hasFile('planos')) {
+                foreach ($request->file('planos') as $plano) {
+                    $path = $plano->store('servicios_realizados/planos', 'public');
+                    ServicioRealizadoPlano::create([
+                        'servicio_realizado_id' => $servicioRealizado->id,
+                        'nombre_plano' => basename($path),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('servicio_realizado.index')
+                            ->with('success', 'Servicio realizado actualizado exitosamente.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return back()->withInput()
+                        ->with('error', 'Error al actualizar el servicio realizado: ' . $e->getMessage());
         }
     }
 }

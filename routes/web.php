@@ -273,6 +273,10 @@ Route::get('/insumos-por-obra/{obra_id}', [InsumoUtilizadoController::class, 'in
 Route::get('/servicio_realizado', [ServicioRealizadoController::class, 'index'])->name('servicio_realizado.index');
 Route::get('/servicio_realizado/create', [ServicioRealizadoController::class, 'create'])->name('servicio_realizado.create');
 Route::post('/servicio_realizado', [ServicioRealizadoController::class, 'store'])->name('servicio_realizado.store');
+Route::get('/servicio_realizado/{id}/edit', [ServicioRealizadoController::class, 'edit'])->name('servicio_realizado.edit');
+Route::put('/servicio_realizado/{id}', [ServicioRealizadoController::class, 'update'])->name('servicio_realizado.update');
+Route::post('/servicio_realizado/{id}/anular', [ServicioRealizadoController::class, 'anular'])->name('servicio_realizado.anular');
+Route::patch('/servicio_realizado/{id}/confirmar', [ServicioRealizadoController::class, 'confirmar'])->name('servicio_realizado.confirmar');
 Route::get('/servicio_realizado/cliente-info/{cliente_id}', [ServicioRealizadoController::class, 'clienteInfo'])->name('servicio_realizado.cliente.info');
 Route::get('/servicio_realizado/obra-info/{obra_id}', [ServicioRealizadoController::class, 'obraInfo'])->name('servicio_realizado.obra.info');
 Route::get('/servicio_realizado/obras-por-cliente/{cliente_id}', [ServicioRealizadoController::class, 'obrasPorCliente'])->name('servicio_realizado.obras.por.cliente');
