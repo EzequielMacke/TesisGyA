@@ -101,10 +101,11 @@
                                         <th style="width:80px;" class="text-center">N°</th>
                                         <th>Cliente</th>
                                         <th>Obra</th>
+                                        <th>Servicios solicitados</th>
+                                        <th style="width:130px;">Registrado por</th>
                                         <th style="width:100px;" class="text-center">Fecha</th>
                                         <th style="width:110px;">Estado</th>
                                         <th>Observación</th>
-                                        <th>Detalle</th>
                                         <th style="width:70px;" class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
@@ -119,6 +120,17 @@
                                             </td>
                                             <td>
                                                 <span class="cell-text" title="{{ $solicitud->obra->descripcion }}">{{ $solicitud->obra->descripcion }}</span>
+                                            </td>
+                                            <td>
+                                                @if($solicitud->detalles && $solicitud->detalles->count())
+                                                    @php $serviciosNombres = $solicitud->detalles->pluck('servicio.descripcion')->filter()->join(', '); @endphp
+                                                    <span class="cell-text" title="{{ $serviciosNombres }}">{{ $serviciosNombres }}</span>
+                                                @else
+                                                    <span class="text-muted">Sin servicios</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="cell-text" title="{{ $solicitud->usuario->usuario ?? '-' }}">{{ $solicitud->usuario->usuario ?? '-' }}</span>
                                             </td>
                                             <td class="text-center">
                                                 {{ \Carbon\Carbon::parse($solicitud->fecha)->format('d/m/Y') }}
@@ -143,15 +155,6 @@
                                                     <span class="cell-text" title="{{ $solicitud->observacion }}">{{ Str::limit($solicitud->observacion, 28) }}</span>
                                                 @else
                                                     <span class="text-muted">—</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($solicitud->detalles && $solicitud->detalles->count())
-                                                    <span class="tag tag-secondary" title="{{ $solicitud->detalles->pluck('servicio.descripcion')->filter()->join(', ') }}">
-                                                        {{ $solicitud->detalles->count() }} servicio(s)
-                                                    </span>
-                                                @else
-                                                    <span class="text-muted">Sin detalle</span>
                                                 @endif
                                             </td>
                                             <td class="text-center">
@@ -210,6 +213,7 @@
                 <div class="modal-body">
                     <div class="detail-row"><i class="fas fa-building"></i><span><strong>Cliente:</strong> <span id="verCliente"></span></span></div>
                     <div class="detail-row"><i class="fas fa-map-marker-alt"></i><span><strong>Obra:</strong> <span id="verObra"></span></span></div>
+                    <div class="detail-row"><i class="fas fa-user"></i><span><strong>Registrado por:</strong> <span id="verUsuario"></span></span></div>
                     <div class="detail-row"><i class="fas fa-calendar"></i><span><strong>Fecha:</strong> <span id="verFecha"></span></span></div>
                     <div class="detail-row"><i class="fas fa-flag"></i><span><strong>Estado:</strong> <span id="verEstado"></span></span></div>
                     <div class="detail-row"><i class="fas fa-sticky-note"></i><span><strong>Observación:</strong> <span id="verObservacion"></span></span></div>
@@ -328,7 +332,7 @@
 
 #solicitudesTable {
     width: 100%;
-    min-width: 920px;
+    min-width: 1120px;
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -454,6 +458,7 @@
             'numero' => str_pad($s->id, 3, '0', STR_PAD_LEFT),
             'cliente' => $s->cliente->razon_social,
             'obra' => $s->obra->descripcion,
+            'usuario' => $s->usuario->usuario ?? '-',
             'fecha' => \Carbon\Carbon::parse($s->fecha)->format('d/m/Y'),
             'estado' => $s->estado->descripcion,
             'observacion' => $s->observacion,
@@ -470,6 +475,7 @@ function abrirVerDetalle(id) {
     document.getElementById('verNumero').textContent = '#' + data.numero;
     document.getElementById('verCliente').textContent = data.cliente;
     document.getElementById('verObra').textContent = data.obra;
+    document.getElementById('verUsuario').textContent = data.usuario;
     document.getElementById('verFecha').textContent = data.fecha;
     document.getElementById('verEstado').textContent = data.estado;
     document.getElementById('verObservacion').textContent = data.observacion || 'Sin observación';

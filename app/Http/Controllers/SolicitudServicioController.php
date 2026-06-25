@@ -21,6 +21,7 @@ class SolicitudServicioController extends Controller
         $clientes = Cliente::orderBy('razon_social')->get();
 
         $query = SolicitudServicio::with([
+            'usuario',
             'cliente',
             'obra',
             'estado',
@@ -77,6 +78,7 @@ class SolicitudServicioController extends Controller
         ]);
 
         $solicitud = SolicitudServicio::create([
+            'usuario_id' => session('user_id'),
             'cliente_id' => $request->cliente_id,
             'obra_id' => $request->obra_id,
             'fecha' => $request->fecha,

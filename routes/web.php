@@ -273,6 +273,8 @@ Route::get('/insumos-por-obra/{obra_id}', [InsumoUtilizadoController::class, 'in
 Route::get('/servicio_realizado', [ServicioRealizadoController::class, 'index'])->name('servicio_realizado.index');
 Route::get('/servicio_realizado/create', [ServicioRealizadoController::class, 'create'])->name('servicio_realizado.create');
 Route::post('/servicio_realizado', [ServicioRealizadoController::class, 'store'])->name('servicio_realizado.store');
+Route::get('/servicio_realizado/cliente-info/{cliente_id}', [ServicioRealizadoController::class, 'clienteInfo'])->name('servicio_realizado.cliente.info');
+Route::get('/servicio_realizado/obra-info/{obra_id}', [ServicioRealizadoController::class, 'obraInfo'])->name('servicio_realizado.obra.info');
 Route::get('/servicio_realizado/obras-por-cliente/{cliente_id}', [ServicioRealizadoController::class, 'obrasPorCliente'])->name('servicio_realizado.obras.por.cliente');
 Route::get('/servicio_realizado/ordenes-por-obra/{obra_id}', [ServicioRealizadoController::class, 'ordenesPorObra'])->name('servicio_realizado.ordenes.por.obra');
 Route::get('/servicio_realizado/datos-por-orden/{orden_servicio_id}', [ServicioRealizadoController::class, 'datosPorOrden'])->name('servicio_realizado.datos.por.orden');

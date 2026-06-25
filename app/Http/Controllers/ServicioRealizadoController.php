@@ -73,6 +73,40 @@ class ServicioRealizadoController extends Controller
         return view('servicio_realizado.create', compact('clientes'));
     }
 
+    public function clienteInfo($cliente_id)
+    {
+        $cliente = Cliente::with(['estado', 'persona', 'usuario'])->findOrFail($cliente_id);
+
+        return response()->json([
+            'razon_social' => $cliente->razon_social,
+            'ruc' => $cliente->ruc,
+            'direccion' => $cliente->direccion ?? '-',
+            'telefono' => $cliente->telefono ?? '-',
+            'email' => $cliente->email ?? '-',
+            'fecha' => $cliente->fecha ? Carbon::parse($cliente->fecha)->format('d/m/Y') : '-',
+            'estado' => $cliente->estado->descripcion ?? '-',
+            'persona' => $cliente->persona ? trim($cliente->persona->nombre . ' ' . $cliente->persona->apellido) : null,
+            'registrado_por' => $cliente->usuario->usuario ?? '-',
+        ]);
+    }
+
+    public function obraInfo($obra_id)
+    {
+        $obra = Obra::with(['estado', 'usuario', 'cliente'])->findOrFail($obra_id);
+
+        return response()->json([
+            'descripcion' => $obra->descripcion,
+            'ubicacion' => $obra->ubicacion ?? '-',
+            'metros_cuadrados' => $obra->metros_cuadrados ?? '-',
+            'niveles' => $obra->niveles ?? '-',
+            'observacion' => $obra->observacion ?? '-',
+            'fecha' => $obra->fecha ? Carbon::parse($obra->fecha)->format('d/m/Y') : '-',
+            'estado' => $obra->estado->descripcion ?? '-',
+            'cliente' => $obra->cliente->razon_social ?? '-',
+            'registrado_por' => $obra->usuario->usuario ?? '-',
+        ]);
+    }
+
     public function obrasPorCliente($cliente_id)
     {
         // Solo obras del cliente con al menos una orden de servicio pendiente
@@ -103,8 +137,16 @@ class ServicioRealizadoController extends Controller
         $ordenServicio = OrdenServicio::with([
             'cliente',
             'obra',
-            'contrato',
-            'presupuestoServicio.visitaPrevia.solicitudServicio',
+            'contrato.cliente',
+            'presupuestoServicio.usuario',
+            'presupuestoServicio.detalles.servicio',
+            'presupuestoServicio.detalles.ensayo',
+            'presupuestoServicio.detalles.impuesto',
+            'presupuestoServicio.visitaPrevia.usuario',
+            'presupuestoServicio.visitaPrevia.fotos',
+            'presupuestoServicio.visitaPrevia.planos',
+            'presupuestoServicio.visitaPrevia.solicitudServicio.usuario',
+            'presupuestoServicio.visitaPrevia.solicitudServicio.detalles.servicio',
             'funcionarios.funcionario.persona',
         ])->findOrFail($orden_servicio_id);
 
@@ -150,6 +192,78 @@ class ServicioRealizadoController extends Controller
                 ];
             })->values();
 
+        $fotosVisita = $visitaPrevia
+            ? $visitaPrevia->fotos->map(function ($foto) {
+                return [
+                    'url' => Storage::disk('public')->url('visitas_previas/fotos/' . $foto->ruta_foto),
+                    'fecha' => $foto->fecha ? Carbon::parse($foto->fecha)->format('d/m/Y') : '-',
+                ];
+            })->values()
+            : collect();
+
+        $planosVisita = $visitaPrevia
+            ? $visitaPrevia->planos->map(function ($plano) {
+                return [
+                    'url' => Storage::disk('public')->url('visitas_previas/planos/' . $plano->ruta_plano),
+                    'fecha' => $plano->fecha ? Carbon::parse($plano->fecha)->format('d/m/Y') : '-',
+                    'es_pdf' => strtolower(pathinfo($plano->ruta_plano, PATHINFO_EXTENSION)) === 'pdf',
+                ];
+            })->values()
+            : collect();
+
+        $presupuestoServicios = collect();
+        $totalServiciosPresupuesto = 0;
+        $totalImpuestosPresupuesto = 0;
+        $impuestosPorTipo = [];
+
+        if ($presupuesto) {
+            $detallesPorServicio = $presupuesto->detalles->groupBy(function ($detalle) {
+                return $detalle->servicio->descripcion ?? 'Sin Servicio';
+            });
+
+            foreach ($detallesPorServicio as $servicioNombre => $detallesServicio) {
+                $subtotalServicio = 0;
+                $ensayos = [];
+
+                foreach ($detallesServicio as $detalle) {
+                    $subtotal = round($detalle->precio_unitario * $detalle->cantidad);
+                    $ivaMonto = 0;
+                    if ($detalle->impuesto_id == 2) {
+                        $ivaMonto = round($subtotal / 11);
+                    } elseif ($detalle->impuesto_id == 3) {
+                        $ivaMonto = round($subtotal / 21);
+                    }
+
+                    $subtotalServicio += $subtotal;
+                    $totalServiciosPresupuesto += $subtotal;
+                    $totalImpuestosPresupuesto += $ivaMonto;
+
+                    if ($ivaMonto > 0) {
+                        $tipo = $detalle->impuesto->descripcion ?? '-';
+                        $impuestosPorTipo[$tipo] = ($impuestosPorTipo[$tipo] ?? 0) + $ivaMonto;
+                    }
+
+                    $ensayos[] = [
+                        'descripcion' => $detalle->ensayo->descripcion ?? '-',
+                        'precio_unitario' => $detalle->precio_unitario,
+                        'cantidad' => $detalle->cantidad,
+                        'impuesto' => $detalle->impuesto->descripcion ?? '-',
+                        'iva' => $ivaMonto,
+                        'subtotal' => $subtotal,
+                    ];
+                }
+
+                $presupuestoServicios->push([
+                    'servicio' => $servicioNombre,
+                    'ensayos' => $ensayos,
+                    'subtotal_servicio' => $subtotalServicio,
+                ]);
+            }
+        }
+
+        $totalGeneralPresupuesto = $totalServiciosPresupuesto + $totalImpuestosPresupuesto;
+        $montoAnticipo = $presupuesto ? round($totalGeneralPresupuesto * $presupuesto->anticipo / 100) : 0;
+
         $funcionarios = $ordenServicio->funcionarios->map(function ($asignacion) {
             $persona = $asignacion->funcionario->persona ?? null;
             return [
@@ -166,22 +280,51 @@ class ServicioRealizadoController extends Controller
             'contrato' => [
                 'id' => $contrato->id ?? null,
                 'fecha_firma' => $contrato && $contrato->fecha_firma ? $contrato->fecha_firma->format('d/m/Y') : '-',
+                'fecha_firma_dia' => $contrato && $contrato->fecha_firma ? $contrato->fecha_firma->format('d') : '___',
+                'fecha_firma_mes' => $contrato && $contrato->fecha_firma ? $contrato->fecha_firma->format('m') : '___',
+                'fecha_firma_anio' => $contrato && $contrato->fecha_firma ? $contrato->fecha_firma->format('Y') : '___',
                 'monto' => $contrato->monto ?? null,
                 'plazo_dias' => $contrato->plazo_dias ?? null,
                 'garantia_meses' => $contrato->garantia_meses ?? null,
+                'anticipo' => $contrato->anticipo ?? null,
+                'pago_mitad' => $contrato->pago_mitad ?? null,
+                'pago_final' => $contrato->pago_final ?? null,
+                'ciudad' => $contrato->ciudad ?? '-',
+                'observaciones' => $contrato->observaciones ?? null,
+                'cliente_razon_social' => $contrato?->cliente->razon_social ?? '-',
+                'cliente_direccion' => $contrato?->cliente->direccion ?? '-',
+                'cliente_ruc' => $contrato?->cliente->ruc ?? '-',
             ],
             'presupuesto' => [
                 'id' => $presupuesto->id ?? null,
                 'numero_presupuesto' => $presupuesto->numero_presupuesto ?? '-',
                 'descripcion' => $presupuesto->descripcion ?? '-',
+                'fecha' => $presupuesto && $presupuesto->fecha ? Carbon::parse($presupuesto->fecha)->format('d/m/Y') : '-',
+                'validez' => $presupuesto->validez ?? '-',
+                'anticipo' => $presupuesto->anticipo ?? 0,
+                'observacion' => $presupuesto->observacion ?? null,
+                'usuario' => $presupuesto?->usuario->usuario ?? '-',
+                'servicios' => $presupuestoServicios,
+                'impuestos_por_tipo' => $impuestosPorTipo,
+                'total_servicios' => $totalServiciosPresupuesto,
+                'total_impuestos' => $totalImpuestosPresupuesto,
+                'total_general' => $totalGeneralPresupuesto,
+                'monto_anticipo' => $montoAnticipo,
             ],
             'visita_previa' => [
                 'id' => $visitaPrevia->id ?? null,
                 'fecha_visita' => $visitaPrevia && $visitaPrevia->fecha_visita ? Carbon::parse($visitaPrevia->fecha_visita)->format('d/m/Y') : '-',
+                'usuario' => $visitaPrevia?->usuario->usuario ?? '-',
+                'fotos' => $fotosVisita,
+                'planos' => $planosVisita,
             ],
             'solicitud_servicio' => [
                 'id' => $solicitudServicio->id ?? null,
                 'fecha' => $solicitudServicio && $solicitudServicio->fecha ? Carbon::parse($solicitudServicio->fecha)->format('d/m/Y') : '-',
+                'usuario' => $solicitudServicio?->usuario->usuario ?? '-',
+                'servicios' => $solicitudServicio
+                    ? $solicitudServicio->detalles->pluck('servicio.descripcion')->filter()->values()
+                    : [],
             ],
             'insumos_utilizados' => $insumosUtilizados,
             'servicios' => $servicios,
