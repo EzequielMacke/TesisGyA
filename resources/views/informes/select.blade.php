@@ -31,6 +31,105 @@
                     </div>
                     <i class="fas fa-chevron-right informe-arrow"></i>
                 </a>
+
+                <a href="{{ route('informes.cuentas_pagar.form') }}" class="informe-card">
+                    <div class="informe-icon">
+                        <i class="fas fa-money-check-alt"></i>
+                    </div>
+                    <div class="informe-info">
+                        <h3>Cuentas a Pagar</h3>
+                        <p>Listado de cuentas a pagar filtrado por proveedor, estado y rango de fecha de vencimiento, con totales.</p>
+                    </div>
+                    <i class="fas fa-chevron-right informe-arrow"></i>
+                </a>
+
+                <a href="{{ route('informes.compras.form') }}" class="informe-card">
+                    <div class="informe-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <div class="informe-info">
+                        <h3>Compras</h3>
+                        <p>Listado de compras (facturas) filtrado por proveedor, estado y rango de fechas, con totales.</p>
+                    </div>
+                    <i class="fas fa-chevron-right informe-arrow"></i>
+                </a>
+
+                <a href="{{ route('informes.libro_compras.form') }}" class="informe-card">
+                    <div class="informe-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="informe-info">
+                        <h3>Libro de Compras</h3>
+                        <p>Detalle de facturas y notas de crédito/débito con desglose de IVA, filtrado por proveedor, tipo de documento y fechas.</p>
+                    </div>
+                    <i class="fas fa-chevron-right informe-arrow"></i>
+                </a>
+
+                <a href="{{ route('informes.pedidos_compra.form') }}" class="informe-card">
+                    <div class="informe-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="informe-info">
+                        <h3>Pedidos de Compra</h3>
+                        <p>Listado de pedidos de compra filtrado por depósito, estado y rango de fechas, con cantidad de ítems.</p>
+                    </div>
+                    <i class="fas fa-chevron-right informe-arrow"></i>
+                </a>
+
+                <a href="{{ route('informes.inventario.form') }}" class="informe-card">
+                    <div class="informe-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="informe-info">
+                        <h3>Inventario</h3>
+                        <p>Stock actual de insumos filtrado por depósito y obra, con marca y unidad de medida.</p>
+                    </div>
+                    <i class="fas fa-chevron-right informe-arrow"></i>
+                </a>
+
+                <a href="{{ route('informes.presupuestos_servicio.form') }}" class="informe-card">
+                    <div class="informe-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="informe-info">
+                        <h3>Presupuestos de Servicio</h3>
+                        <p>Listado de presupuestos de servicio filtrado por cliente, estado y rango de fechas, con totales.</p>
+                    </div>
+                    <i class="fas fa-chevron-right informe-arrow"></i>
+                </a>
+
+                <a href="{{ route('informes.reclamos.form') }}" class="informe-card">
+                    <div class="informe-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="informe-info">
+                        <h3>Reclamos</h3>
+                        <p>Listado de reclamos filtrado por cliente, estado y rango de fechas, con observaciones.</p>
+                    </div>
+                    <i class="fas fa-chevron-right informe-arrow"></i>
+                </a>
+
+                <a href="{{ route('informes.insumos_utilizados.form') }}" class="informe-card">
+                    <div class="informe-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="informe-info">
+                        <h3>Insumos Utilizados</h3>
+                        <p>Detalle de insumos consumidos en órdenes de servicio, filtrado por obra, estado y rango de fechas.</p>
+                    </div>
+                    <i class="fas fa-chevron-right informe-arrow"></i>
+                </a>
+
+                <a href="{{ route('informes.orden_servicio.form') }}" class="informe-card">
+                    <div class="informe-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="informe-info">
+                        <h3>Órdenes de Servicio</h3>
+                        <p>Listado de órdenes de servicio filtrado por cliente, estado y rango de fechas, con cantidad de ensayos.</p>
+                    </div>
+                    <i class="fas fa-chevron-right informe-arrow"></i>
+                </a>
             </div>
 
         </div>

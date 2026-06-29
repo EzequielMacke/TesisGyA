@@ -144,6 +144,24 @@ Route::get('/presupuesto-compra-aprobado/{id}', [PresupuestoCompraAprobadoContro
 Route::get('/informes', [InformeController::class, 'index'])->name('informes.index');
 Route::get('/informes/presupuestos-compra', [InformeController::class, 'presupuestosCompraForm'])->name('informes.presupuestos_compra.form');
 Route::get('/informes/presupuestos-compra/pdf', [InformeController::class, 'presupuestosCompraPdf'])->name('informes.presupuestos_compra.pdf');
+Route::get('/informes/cuentas-pagar', [InformeController::class, 'cuentasPagarForm'])->name('informes.cuentas_pagar.form');
+Route::get('/informes/cuentas-pagar/pdf', [InformeController::class, 'cuentasPagarPdf'])->name('informes.cuentas_pagar.pdf');
+Route::get('/informes/compras', [InformeController::class, 'comprasForm'])->name('informes.compras.form');
+Route::get('/informes/compras/pdf', [InformeController::class, 'comprasPdf'])->name('informes.compras.pdf');
+Route::get('/informes/libro-compras', [InformeController::class, 'libroComprasForm'])->name('informes.libro_compras.form');
+Route::get('/informes/libro-compras/pdf', [InformeController::class, 'libroComprasPdf'])->name('informes.libro_compras.pdf');
+Route::get('/informes/pedidos-compra', [InformeController::class, 'pedidosCompraForm'])->name('informes.pedidos_compra.form');
+Route::get('/informes/pedidos-compra/pdf', [InformeController::class, 'pedidosCompraPdf'])->name('informes.pedidos_compra.pdf');
+Route::get('/informes/inventario', [InformeController::class, 'inventarioForm'])->name('informes.inventario.form');
+Route::get('/informes/inventario/pdf', [InformeController::class, 'inventarioPdf'])->name('informes.inventario.pdf');
+Route::get('/informes/presupuestos-servicio', [InformeController::class, 'presupuestosServicioForm'])->name('informes.presupuestos_servicio.form');
+Route::get('/informes/presupuestos-servicio/pdf', [InformeController::class, 'presupuestosServicioPdf'])->name('informes.presupuestos_servicio.pdf');
+Route::get('/informes/reclamos', [InformeController::class, 'reclamosForm'])->name('informes.reclamos.form');
+Route::get('/informes/reclamos/pdf', [InformeController::class, 'reclamosPdf'])->name('informes.reclamos.pdf');
+Route::get('/informes/insumos-utilizados', [InformeController::class, 'insumosUtilizadosForm'])->name('informes.insumos_utilizados.form');
+Route::get('/informes/insumos-utilizados/pdf', [InformeController::class, 'insumosUtilizadosPdf'])->name('informes.insumos_utilizados.pdf');
+Route::get('/informes/orden-servicio', [InformeController::class, 'ordenServicioForm'])->name('informes.orden_servicio.form');
+Route::get('/informes/orden-servicio/pdf', [InformeController::class, 'ordenServicioPdf'])->name('informes.orden_servicio.pdf');
 
 // Rutas para órdenes de compra
 Route::get('/orden-compra', [OrdenCompraController::class, 'index'])->name('orden_compra.index');
