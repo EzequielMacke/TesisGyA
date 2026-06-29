@@ -154,6 +154,41 @@ class ReclamoController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        $reclamo = Reclamo::with(['cliente', 'obra', 'servicioRealizado', 'usuario', 'estado', 'fotos', 'planos'])->findOrFail($id);
+
+        return view('reclamos.show', compact('reclamo'));
+    }
+
+    public function confirmar($id)
+    {
+        $reclamo = Reclamo::findOrFail($id);
+
+        if ($reclamo->estado_id != 3) {
+            return back()->with('error', 'Solo se pueden confirmar reclamos en estado Pendiente.');
+        }
+
+        $reclamo->update(['estado_id' => 4]);
+
+        return redirect()->route('reclamos.index')
+            ->with('success', 'Reclamo confirmado correctamente.');
+    }
+
+    public function anular($id)
+    {
+        $reclamo = Reclamo::findOrFail($id);
+
+        if ($reclamo->estado_id != 3) {
+            return back()->with('error', 'Solo se pueden anular reclamos en estado Pendiente.');
+        }
+
+        $reclamo->update(['estado_id' => 5]);
+
+        return redirect()->route('reclamos.index')
+            ->with('success', 'Reclamo anulado correctamente.');
+    }
+
     public function edit($id)
     {
         $reclamo = Reclamo::with(['cliente', 'obra', 'servicioRealizado', 'fotos', 'planos'])->findOrFail($id);

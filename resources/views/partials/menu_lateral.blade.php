@@ -162,6 +162,11 @@
                 <span class="sidebar-label">Presupuestar Pedidos</span>
             </a>
 
+            <a href="{{ route('informes.index') }}" class="sidebar-link {{ request()->routeIs('informes.*') ? 'is-active' : '' }}">
+                <i class="fas fa-chart-bar sidebar-icon"></i>
+                <span class="sidebar-label">Informes</span>
+            </a>
+
             <a href="#" class="sidebar-link">
                 <i class="fas fa-user sidebar-icon"></i>
                 <span class="sidebar-label">Mi Perfil</span>
@@ -170,6 +175,11 @@
             <a href="#" class="sidebar-link">
                 <i class="fas fa-cog sidebar-icon"></i>
                 <span class="sidebar-label">Configuración</span>
+            </a>
+
+            <a href="{{ route('manual_usuario.index') }}" class="sidebar-link {{ request()->routeIs('manual_usuario.*') ? 'is-active' : '' }}">
+                <i class="fas fa-book sidebar-icon"></i>
+                <span class="sidebar-label">Manual de Usuario</span>
             </a>
 
         </div>
