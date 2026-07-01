@@ -29,6 +29,8 @@ class DatabaseSeeder extends Seeder
             EnsayoSeeder::class,
             ClienteSeeder::class,
             ObraSeeder::class,
+            ModuloSeeder::class,
+            PermisoSeeder::class,
         ]);
     }
 }

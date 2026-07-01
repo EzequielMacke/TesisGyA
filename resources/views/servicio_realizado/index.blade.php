@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-clipboard-check"></i> Servicios Realizados</h2>
                     <small>Gestión de los servicios realizados por obra</small>
                 </div>
+                @if(session('permisos.ser_rea.agregar'))
                 <a href="{{ route('servicio_realizado.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Registrar Servicio Realizado
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -154,9 +156,12 @@
                                                         </a>
                                                     @endif
                                                     @if($servicioRealizado->estado_id == 3)
+                                                        @if(session('permisos.ser_rea.editar'))
                                                         <a href="{{ route('servicio_realizado.edit', $servicioRealizado->id) }}" class="btn-icon btn-icon-secondary" title="Editar">
                                                             <i class="fas fa-pen"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.ser_rea.anular'))
                                                         <button type="button" class="btn-icon btn-icon-success" title="Confirmar"
                                                                 onclick="abrirConfirmar({{ $servicioRealizado->id }})">
                                                             <i class="fas fa-check"></i>
@@ -165,6 +170,7 @@
                                                                 onclick="abrirAnular({{ $servicioRealizado->id }})">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

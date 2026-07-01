@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Permiso;
 use App\Models\Persona;
 use App\Models\Proveedor;
 use App\Models\User;
@@ -204,10 +205,25 @@ class LoginController extends Controller
 
             // Agregar información del cargo a la sesión
             session([
-                'user_cargo' => $user->cargo->descripcion,
+                'user_cargo'    => $user->cargo->descripcion,
                 'user_cargo_id' => $user->cargo_id,
                 'user_sucursal' => $user->sucursal ? $user->sucursal->descripcion : 'Sin sucursal',
             ]);
+
+            // Cargar permisos del cargo en sesión
+            $permisos = Permiso::where('cargo_id', $user->cargo_id)
+                ->with('modulo')
+                ->get()
+                ->mapWithKeys(function ($p) {
+                    return [$p->modulo->codigo => [
+                        'ver'     => (bool) $p->ver,
+                        'agregar' => (bool) $p->agregar,
+                        'editar'  => (bool) $p->editar,
+                        'anular'  => (bool) $p->anular,
+                    ]];
+                })
+                ->toArray();
+            session(['permisos' => $permisos]);
 
             // Si es proveedor (cargo_id = 3), verificar si tiene datos completos
             if ($user->cargo_id == 3) {

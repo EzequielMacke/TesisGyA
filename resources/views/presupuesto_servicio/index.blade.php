@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-file-invoice-dollar"></i> Presupuestos de Servicio</h2>
                     <small>Gestión de presupuestos de servicios para clientes</small>
                 </div>
+                @if(session('permisos.pre_ser.agregar'))
                 <a href="{{ route('presupuesto_servicio.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nuevo Presupuesto
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -148,13 +150,17 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($presupuesto->estado_id == 3)
+                                                        @if(session('permisos.pre_ser.editar'))
                                                         <a href="{{ route('presupuesto_servicio.edit', $presupuesto->id) }}" class="btn-icon" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.pre_ser.anular'))
                                                         <button type="button" class="btn-icon danger" title="Anular"
                                                                 onclick="abrirAnular({{ $presupuesto->id }}, '{{ $presupuesto->numero_presupuesto }}')">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

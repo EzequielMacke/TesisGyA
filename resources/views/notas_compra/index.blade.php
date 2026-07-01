@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-file-alt"></i> Notas de Compra</h2>
                     <small>Gestión de notas de crédito y débito de proveedores</small>
                 </div>
+                @if(session('permisos.not_com.agregar'))
                 <a href="{{ route('notas_compra.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nueva Nota
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -181,9 +183,12 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($nota->estado_id === 3)
+                                                        @if(session('permisos.not_com.editar'))
                                                         <a href="{{ route('notas_compra.edit', $nota->id) }}" class="btn-icon" title="Editar">
                                                             <i class="fas fa-pencil-alt"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.not_com.anular'))
                                                         <form action="{{ route('notas_compra.aprobar', $nota->id) }}" method="POST"
                                                               onsubmit="return confirm('¿Confirmar aprobación de la nota {{ $nota->nro_nota }}?')">
                                                             @csrf
@@ -198,6 +203,7 @@
                                                                 <i class="fas fa-ban"></i>
                                                             </button>
                                                         </form>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

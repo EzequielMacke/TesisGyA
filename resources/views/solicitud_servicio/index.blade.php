@@ -18,9 +18,11 @@
                     <h2><i class="fas fa-file-alt"></i> Solicitudes de Servicio</h2>
                     <small>Gestión de solicitudes de servicio de clientes</small>
                 </div>
+                @if(session('permisos.sol_ser.agregar'))
                 <a href="{{ route('solicitud_servicio.create') }}" class="btn btn-success">
                     <i class="fas fa-plus me-2"></i>Nueva Solicitud
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -160,13 +162,17 @@
                                             <td class="text-center">
                                                 <div class="btn-group">
                                                     @if($solicitud->estado_id == 3)
+                                                        @if(session('permisos.sol_ser.editar'))
                                                         <a href="{{ route('solicitud_servicio.edit', $solicitud->id) }}" class="btn-icon" title="Editar">
                                                             <i class="fas fa-pen"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.sol_ser.anular'))
                                                         <button type="button" class="btn-icon danger" title="Anular"
                                                                 onclick="abrirAnular({{ $solicitud->id }}, '{{ str_pad($solicitud->id, 3, '0', STR_PAD_LEFT) }}')">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                     <button type="button" class="btn-icon" title="Ver Detalle"
                                                             onclick="abrirVerDetalle({{ $solicitud->id }})">

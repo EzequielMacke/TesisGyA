@@ -16,10 +16,12 @@
                 <h1 class="page-title">Marcas</h1>
                 <p class="page-sub">Gestión de marcas de insumos</p>
             </div>
+            @if(session('permisos.mar.agregar'))
             <button class="btn-nuevo" data-bs-toggle="modal" data-bs-target="#modalCrear">
                 <i class="fas fa-plus"></i>
                 Nueva Marca
             </button>
+            @endif
         </div>
 
         @if(session('success'))
@@ -83,25 +85,31 @@
                                 <td>
                                     <div class="action-btns">
                                         @if($marca->estado->id == 1)
+                                            @if(session('permisos.mar.editar'))
                                             <button type="button"
                                                     class="action-btn action-edit"
                                                     title="Editar"
                                                     onclick="abrirEditar({{ $marca->id }}, '{{ addslashes($marca->descripcion) }}', '{{ $marca->fecha->format('Y-m-d') }}')">
                                                 <i class="fas fa-pencil-alt"></i>
                                             </button>
+                                            @endif
+                                            @if(session('permisos.mar.anular'))
                                             <button type="button"
                                                     class="action-btn action-delete"
                                                     title="Desactivar"
                                                     onclick="abrirDesactivar({{ $marca->id }}, '{{ addslashes($marca->descripcion) }}')">
                                                 <i class="fas fa-ban"></i>
                                             </button>
+                                            @endif
                                         @else
+                                            @if(session('permisos.mar.anular'))
                                             <button type="button"
                                                     class="action-btn action-activate"
                                                     title="Activar"
                                                     onclick="abrirActivar({{ $marca->id }}, '{{ addslashes($marca->descripcion) }}')">
                                                 <i class="fas fa-check"></i>
                                             </button>
+                                            @endif
                                         @endif
                                     </div>
                                 </td>

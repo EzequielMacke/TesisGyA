@@ -16,10 +16,12 @@
                 <h1 class="page-title">Insumos</h1>
                 <p class="page-sub">Gestión de insumos de construcción</p>
             </div>
+            @if(session('permisos.ins.agregar'))
             <button class="btn-nuevo" data-bs-toggle="modal" data-bs-target="#modalCrear">
                 <i class="fas fa-plus"></i>
                 Nuevo Insumo
             </button>
+            @endif
         </div>
 
         @if(session('success'))
@@ -93,25 +95,31 @@
                                 <td>
                                     <div class="action-btns">
                                         @if($insumo->estado->id == 1)
+                                            @if(session('permisos.ins.editar'))
                                             <button type="button"
                                                     class="action-btn action-edit"
                                                     title="Editar"
                                                     onclick="abrirEditar({{ $insumo->id }}, '{{ addslashes($insumo->descripcion) }}', {{ $insumo->marca_id }}, {{ $insumo->unidad_medida_id }}, '{{ $insumo->fecha->format('Y-m-d') }}')">
                                                 <i class="fas fa-pencil-alt"></i>
                                             </button>
+                                            @endif
+                                            @if(session('permisos.ins.anular'))
                                             <button type="button"
                                                     class="action-btn action-delete"
                                                     title="Desactivar"
                                                     onclick="abrirDesactivar({{ $insumo->id }}, '{{ addslashes($insumo->descripcion) }}')">
                                                 <i class="fas fa-ban"></i>
                                             </button>
+                                            @endif
                                         @else
+                                            @if(session('permisos.ins.anular'))
                                             <button type="button"
                                                     class="action-btn action-activate"
                                                     title="Activar"
                                                     onclick="abrirActivar({{ $insumo->id }}, '{{ addslashes($insumo->descripcion) }}')">
                                                 <i class="fas fa-check"></i>
                                             </button>
+                                            @endif
                                         @endif
                                     </div>
                                 </td>

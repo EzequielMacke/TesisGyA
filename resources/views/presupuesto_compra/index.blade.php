@@ -146,10 +146,12 @@
                                                        class="btn-icon" title="Ver Detalle">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
+                                                    @if(session('permisos.pre_ped.agregar'))
                                                     <a href="{{ route('presupuesto_compra.create', $pedido->id) }}"
                                                        class="btn-icon" title="{{ $pedido->presupuestos_count > 0 ? 'Nuevo Presupuesto' : 'Crear Primer Presupuesto' }}">
                                                         <i class="fas fa-plus"></i>
                                                     </a>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>

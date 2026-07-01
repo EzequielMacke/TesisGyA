@@ -18,9 +18,11 @@
                     <h2><i class="fas fa-check-circle"></i> Presupuestos Aprobados</h2>
                     <small>Gestión de presupuestos aprobados para compras</small>
                 </div>
+                @if(session('permisos.pres_apr.agregar'))
                 <a href="{{ route('presupuesto_compra_aprobado.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Aprobar Presupuesto
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}

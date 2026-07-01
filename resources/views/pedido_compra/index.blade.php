@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-shopping-cart"></i> Pedidos de Compra</h2>
                     <small>Gestión y seguimiento de pedidos</small>
                 </div>
+                @if(session('permisos.ped_com.agregar'))
                 <a href="{{ route('pedido_compra.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nuevo Pedido
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -167,16 +169,20 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($pedido->estado_id == 3)
+                                                        @if(session('permisos.ped_com.editar'))
                                                         <a href="{{ route('pedido_compra.edit', $pedido->id) }}"
                                                            class="btn-icon" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.ped_com.anular'))
                                                         <button type="button"
                                                                 class="btn-icon danger"
                                                                 title="Anular"
                                                                 onclick="anularPedido({{ $pedido->id }})">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

@@ -18,9 +18,11 @@
                     <h2><i class="fas fa-truck"></i> Movimiento de Insumos</h2>
                     <small>Traslados de insumos entre depósitos y obras</small>
                 </div>
+                @if(session('permisos.mov_ins.agregar'))
                 <a href="{{ route('movimiento_insumos.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nuevo Movimiento
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -167,6 +169,7 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($movimiento->estado_id == 3)
+                                                        @if(session('permisos.mov_ins.anular'))
                                                         <button type="button" class="btn-icon success" title="Confirmar llegada"
                                                                 onclick="abrirConfirmar({{ $movimiento->id }}, '{{ str_pad($movimiento->id, 3, '0', STR_PAD_LEFT) }}')">
                                                             <i class="fas fa-check"></i>
@@ -175,6 +178,7 @@
                                                                 onclick="abrirAnular({{ $movimiento->id }}, '{{ str_pad($movimiento->id, 3, '0', STR_PAD_LEFT) }}')">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

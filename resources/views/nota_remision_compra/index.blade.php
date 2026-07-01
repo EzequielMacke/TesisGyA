@@ -18,9 +18,11 @@
                     <h2><i class="fas fa-truck"></i> Notas de Remisión de Compra</h2>
                     <small>Gestión de notas de remisión de mercaderías recibidas</small>
                 </div>
+                @if(session('permisos.not_rem.agregar'))
                 <a href="{{ route('nota_remision_compra.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nueva Nota de Remisión
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -155,13 +157,17 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($nota->estado_id == 3)
+                                                        @if(session('permisos.not_rem.editar'))
                                                         <a href="#" class="btn-icon" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.not_rem.anular'))
                                                         <button type="button" class="btn-icon danger" title="Anular"
                                                                 onclick="anularNota({{ $nota->id }})">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                     <button type="button" class="btn-icon" onclick="window.print()" title="Imprimir">
                                                         <i class="fas fa-print"></i>

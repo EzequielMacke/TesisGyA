@@ -18,9 +18,11 @@
                     <h2><i class="fas fa-file-contract"></i> Órdenes de Compra</h2>
                     <small>Gestión de órdenes de compra generadas desde presupuestos aprobados</small>
                 </div>
+                @if(session('permisos.ord_com.agregar'))
                 <a href="{{ route('orden_compra.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nueva Orden
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -158,13 +160,17 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($orden->estado_id == 3)
+                                                        @if(session('permisos.ord_com.editar'))
                                                         <a href="#" class="btn-icon" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.ord_com.anular'))
                                                         <button type="button" class="btn-icon danger" title="Anular"
                                                                 onclick="anularOrden({{ $orden->id }})">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                     <button type="button" class="btn-icon" onclick="window.print()" title="Imprimir">
                                                         <i class="fas fa-print"></i>

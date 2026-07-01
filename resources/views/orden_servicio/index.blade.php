@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-tasks"></i> Órdenes de Servicio</h2>
                     <small>Gestión de órdenes de servicio generadas a partir de los contratos</small>
                 </div>
+                @if(session('permisos.ord_ser.agregar'))
                 <a href="{{ route('orden_servicio.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Crear Orden de Servicio
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -154,15 +156,19 @@
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     @if($orden->estado_id == 3)
+                                                        @if(session('permisos.ord_ser.editar'))
                                                         <a href="{{ route('orden_servicio.edit', $orden->id) }}" class="btn-icon btn-icon-primary" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.ord_ser.anular'))
                                                         <button type="button" class="btn-icon btn-icon-danger btn-anular" title="Anular"
                                                                 data-bs-toggle="modal" data-bs-target="#anularModal"
                                                                 data-nro="{{ $orden->nro }}"
                                                                 data-url="{{ route('orden_servicio.anular', $orden->id) }}">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

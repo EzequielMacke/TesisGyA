@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-boxes"></i> Insumos Utilizados</h2>
                     <small>Gestión de los insumos utilizados en cada orden de servicio</small>
                 </div>
+                @if(session('permisos.ins_uti.agregar'))
                 <a href="{{ route('insumos_utilizados.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Cargar Insumos Utilizados
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -145,19 +147,21 @@
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     @if($insumoUtilizado->estado_id == 3 && $insumoUtilizado->ordenServicio->estado_id == 3)
+                                                        @if(session('permisos.ins_uti.editar'))
                                                         <a href="{{ route('insumos_utilizados.edit', $insumoUtilizado->id) }}" class="btn-icon btn-icon-primary" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                    @endif
-                                                    @if($insumoUtilizado->estado_id == 3 && $insumoUtilizado->ordenServicio->estado_id == 3)
+                                                        @endif
+                                                        @if(session('permisos.ins_uti.anular'))
                                                         <button type="button" class="btn-icon btn-icon-success btn-confirmar" title="Confirmar"
                                                                 data-bs-toggle="modal" data-bs-target="#confirmarModal"
                                                                 data-nro="{{ $insumoUtilizado->nro }}"
                                                                 data-url="{{ route('insumos_utilizados.confirmar', $insumoUtilizado->id) }}">
                                                             <i class="fas fa-check"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
-                                                    @if(in_array($insumoUtilizado->estado_id, [3, 4]) && $insumoUtilizado->ordenServicio->estado_id == 3)
+                                                    @if(in_array($insumoUtilizado->estado_id, [3, 4]) && $insumoUtilizado->ordenServicio->estado_id == 3 && session('permisos.ins_uti.anular'))
                                                         <button type="button" class="btn-icon btn-icon-danger btn-anular" title="Anular"
                                                                 data-bs-toggle="modal" data-bs-target="#anularModal"
                                                                 data-nro="{{ $insumoUtilizado->nro }}"

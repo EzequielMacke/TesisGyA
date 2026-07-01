@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-exclamation-circle"></i> Reclamos del Cliente</h2>
                     <small>Gestión de los reclamos registrados por obra</small>
                 </div>
+                @if(session('permisos.rec_cli.agregar'))
                 <a href="{{ route('reclamos.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Registrar Reclamo
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -149,9 +151,12 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($reclamo->estado_id == 3)
+                                                        @if(session('permisos.rec_cli.editar'))
                                                         <a href="{{ route('reclamos.edit', $reclamo->id) }}" class="btn-icon btn-icon-secondary" title="Editar">
                                                             <i class="fas fa-pen"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.rec_cli.anular'))
                                                         <button type="button" class="btn-icon btn-icon-success" title="Confirmar"
                                                                 onclick="abrirConfirmar({{ $reclamo->id }})">
                                                             <i class="fas fa-check"></i>
@@ -160,6 +165,7 @@
                                                                 onclick="abrirAnular({{ $reclamo->id }})">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

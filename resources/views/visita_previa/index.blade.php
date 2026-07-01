@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-clipboard-list"></i> Visitas Previas</h2>
                     <small>Gestión de visitas previas a obras de clientes</small>
                 </div>
+                @if(session('permisos.vis_pre.agregar'))
                 <a href="{{ route('visita_previa.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nueva Visita Previa
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -162,13 +164,17 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($visita->estado_id == 3)
+                                                        @if(session('permisos.vis_pre.editar'))
                                                         <a href="{{ route('visita_previa.edit', $visita->id) }}" class="btn-icon" title="Editar">
                                                             <i class="fas fa-pen"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.vis_pre.anular'))
                                                         <button type="button" class="btn-icon danger" title="Anular"
                                                                 onclick="abrirAnular({{ $visita->id }})">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

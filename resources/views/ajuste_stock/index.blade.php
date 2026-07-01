@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-sliders-h"></i> Ajuste de Inventario</h2>
                     <small>Registro de entradas y salidas manuales de stock</small>
                 </div>
+                @if(session('permisos.aju_inv.agregar'))
                 <a href="{{ route('ajuste_stocks.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nuevo Ajuste
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -173,9 +175,12 @@
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     @if($ajuste->estado_id == 3)
+                                                        @if(session('permisos.aju_inv.editar'))
                                                         <a href="{{ route('ajuste_stocks.edit', $ajuste->id) }}" class="btn-icon" title="Editar ajuste">
                                                             <i class="fas fa-pencil-alt"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.aju_inv.anular'))
                                                         <button type="button" class="btn-icon success" title="Confirmar ajuste"
                                                                 onclick="abrirConfirmar({{ $ajuste->id }}, '{{ str_pad($ajuste->id, 3, '0', STR_PAD_LEFT) }}')">
                                                             <i class="fas fa-check"></i>
@@ -184,6 +189,7 @@
                                                                 onclick="abrirAnular({{ $ajuste->id }}, '{{ str_pad($ajuste->id, 3, '0', STR_PAD_LEFT) }}')">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

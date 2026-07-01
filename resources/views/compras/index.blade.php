@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-file-invoice-dollar"></i> Compras (Facturas de Proveedor)</h2>
                     <small>Gestión de facturas de compra y sus relaciones</small>
                 </div>
+                @if(session('permisos.fac_com.agregar'))
                 <a href="{{ route('compras.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nueva Compra
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -161,9 +163,12 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($compra->estado_id === 3)
+                                                        @if(session('permisos.fac_com.editar'))
                                                         <a href="{{ route('compras.edit', $compra->id) }}" class="btn-icon" title="Editar">
                                                             <i class="fas fa-pencil-alt"></i>
                                                         </a>
+                                                        @endif
+                                                        @if(session('permisos.fac_com.anular'))
                                                         <form action="{{ route('compras.aprobar', $compra->id) }}" method="POST"
                                                               onsubmit="return confirm('¿Aprobar la compra {{ $compra->nro_factura }}? Se generarán las cuentas a pagar y el registro en libro de compras.')">
                                                             @csrf
@@ -171,8 +176,6 @@
                                                                 <i class="fas fa-check"></i>
                                                             </button>
                                                         </form>
-                                                    @endif
-                                                    @if($compra->estado_id === 3)
                                                         <form action="{{ route('compras.anular', $compra->id) }}" method="POST"
                                                               onsubmit="return confirm('¿Anular la compra {{ $compra->nro_factura }}? Esta acción no se puede deshacer.')">
                                                             @csrf
@@ -180,6 +183,7 @@
                                                                 <i class="fas fa-ban"></i>
                                                             </button>
                                                         </form>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

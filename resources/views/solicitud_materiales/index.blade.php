@@ -18,9 +18,11 @@
                     <h2><i class="fas fa-clipboard-list"></i> Solicitudes de Insumos</h2>
                     <small>Gestión de solicitudes de insumos para obras y depósitos</small>
                 </div>
+                @if(session('permisos.sol_ins.agregar'))
                 <a href="{{ route('solicitud_materiales.create') }}" class="btn btn-success">
                     <i class="fas fa-plus me-2"></i>Nueva Solicitud
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
@@ -162,12 +164,12 @@
                                                     <button type="button" class="btn-icon" title="Ver detalle" data-bs-toggle="modal" data-bs-target="#detalleModal{{ $solicitud->id }}">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
-                                                    @if($solicitud->puedeEditarse())
+                                                    @if($solicitud->puedeEditarse() && session('permisos.sol_ins.editar'))
                                                         <a href="{{ route('solicitud_materiales.edit', $solicitud->id) }}" class="btn-icon" title="Editar solicitud">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     @endif
-                                                    @if($solicitud->estado_id == 3)
+                                                    @if($solicitud->estado_id == 3 && session('permisos.sol_ins.anular'))
                                                         <button type="button" class="btn-icon danger" title="Anular solicitud"
                                                                 onclick="abrirAnular({{ $solicitud->id }}, '{{ str_pad($solicitud->id, 3, '0', STR_PAD_LEFT) }}')">
                                                             <i class="fas fa-ban"></i>

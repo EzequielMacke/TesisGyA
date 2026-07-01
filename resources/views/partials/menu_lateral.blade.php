@@ -42,13 +42,22 @@
         {{-- Menú --}}
         <div class="sidebar-menu">
 
+            @php
+                $p = session('permisos', []);
+                $showGesInv  = !empty($p['inv']['ver']) || !empty($p['sol_ins']['ver']) || !empty($p['mov_ins']['ver']) || !empty($p['aju_inv']['ver']);
+                $showCompra  = !empty($p['ped_com']['ver']) || !empty($p['pres_apr']['ver']) || !empty($p['ord_com']['ver']) || !empty($p['not_rem']['ver']) || !empty($p['fac_com']['ver']) || !empty($p['not_com']['ver']);
+                $showServicio= !empty($p['sol_ser']['ver']) || !empty($p['vis_pre']['ver']) || !empty($p['pre_ser']['ver']) || !empty($p['cont']['ver']) || !empty($p['ord_ser']['ver']) || !empty($p['ins_uti']['ver']) || !empty($p['ser_rea']['ver']) || !empty($p['rec_cli']['ver']);
+                $showRef     = !empty($p['mar']['ver']) || !empty($p['ins']['ver']);
+            @endphp
+
             <a href="{{ route('menu.index') }}"
                class="sidebar-link {{ request()->routeIs('menu.*') ? 'is-active' : '' }}">
                 <i class="fas fa-home sidebar-icon"></i>
                 <span class="sidebar-label">Dashboard</span>
             </a>
 
-            {{-- Gestión de Insumos --}}
+            {{-- Gestión de Inventario --}}
+            @if($showGesInv)
             @php $insumosOpen = request()->routeIs('inventario.*', 'solicitud_materiales.*', 'movimiento_insumos.*', 'ajuste_stocks.*'); @endphp
             <div class="sidebar-group {{ $insumosOpen ? 'is-open' : '' }}">
                 <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
@@ -57,23 +66,33 @@
                     <i class="fas fa-chevron-down group-chevron"></i>
                 </button>
                 <div class="sidebar-sublinks">
+                    @if(!empty($p['inv']['ver']))
                     <a href="{{ route('inventario.index') }}" class="sidebar-sublink {{ request()->routeIs('inventario.*') ? 'is-active' : '' }}">
                         <i class="fas fa-warehouse"></i><span>Inventario</span>
                     </a>
+                    @endif
+                    @if(!empty($p['sol_ins']['ver']))
                     <a href="{{ route('solicitud_materiales.index') }}" class="sidebar-sublink {{ request()->routeIs('solicitud_materiales.*') ? 'is-active' : '' }}">
                         <i class="fas fa-clipboard-list"></i><span>Solicitud de Insumos</span>
                     </a>
+                    @endif
+                    @if(!empty($p['mov_ins']['ver']))
                     <a href="{{ route('movimiento_insumos.index') }}" class="sidebar-sublink {{ request()->routeIs('movimiento_insumos.*') ? 'is-active' : '' }}">
                         <i class="fas fa-truck"></i><span>Movimiento de Insumos</span>
                     </a>
+                    @endif
+                    @if(!empty($p['aju_inv']['ver']))
                     <a href="{{ route('ajuste_stocks.index') }}" class="sidebar-sublink {{ request()->routeIs('ajuste_stocks.*') ? 'is-active' : '' }}">
                         <i class="fas fa-sliders-h"></i><span>Ajuste de Inventario</span>
                     </a>
+                    @endif
                 </div>
             </div>
+            @endif
 
             {{-- Compra --}}
-            @php $compraOpen = request()->routeIs('pedido_compra.*','presupuesto_compra_aprobado.*','orden_compra.*','nota_remision_compra.*','compras.*'); @endphp
+            @if($showCompra)
+            @php $compraOpen = request()->routeIs('pedido_compra.*','presupuesto_compra_aprobado.*','orden_compra.*','nota_remision_compra.*','compras.*','notas_compra.*'); @endphp
             <div class="sidebar-group {{ $compraOpen ? 'is-open' : '' }}">
                 <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
                     <i class="fas fa-shopping-cart sidebar-icon"></i>
@@ -81,29 +100,43 @@
                     <i class="fas fa-chevron-down group-chevron"></i>
                 </button>
                 <div class="sidebar-sublinks">
+                    @if(!empty($p['ped_com']['ver']))
                     <a href="{{ route('pedido_compra.index') }}" class="sidebar-sublink {{ request()->routeIs('pedido_compra.*') ? 'is-active' : '' }}">
                         <i class="fas fa-file-alt"></i><span>Pedidos de Compra</span>
                     </a>
+                    @endif
+                    @if(!empty($p['pres_apr']['ver']))
                     <a href="{{ route('presupuesto_compra_aprobado.index') }}" class="sidebar-sublink {{ request()->routeIs('presupuesto_compra_aprobado.*') ? 'is-active' : '' }}">
                         <i class="fas fa-check-circle"></i><span>Presupuestos Aprobados</span>
                     </a>
+                    @endif
+                    @if(!empty($p['ord_com']['ver']))
                     <a href="{{ route('orden_compra.index') }}" class="sidebar-sublink {{ request()->routeIs('orden_compra.*') ? 'is-active' : '' }}">
                         <i class="fas fa-file-contract"></i><span>Órdenes de Compra</span>
                     </a>
+                    @endif
+                    @if(!empty($p['not_rem']['ver']))
                     <a href="{{ route('nota_remision_compra.index') }}" class="sidebar-sublink {{ request()->routeIs('nota_remision_compra.*') ? 'is-active' : '' }}">
                         <i class="fas fa-truck"></i><span>Notas de Remisión</span>
                     </a>
+                    @endif
+                    @if(!empty($p['fac_com']['ver']))
                     <a href="{{ route('compras.index') }}" class="sidebar-sublink {{ request()->routeIs('compras.*') ? 'is-active' : '' }}">
                         <i class="fas fa-file-invoice-dollar"></i><span>Compras</span>
                     </a>
+                    @endif
+                    @if(!empty($p['not_com']['ver']))
                     <a href="{{ route('notas_compra.index') }}" class="sidebar-sublink {{ request()->routeIs('notas_compra.*') ? 'is-active' : '' }}">
                         <i class="fas fa-file-alt"></i><span>Notas de Compra</span>
                     </a>
+                    @endif
                 </div>
             </div>
+            @endif
 
             {{-- Servicio --}}
-            @php $servicioOpen = request()->routeIs('solicitud_servicio.*','visita_previa.*','presupuesto_servicio.*','contrato.*','orden_servicio.*','insumos_utilizados.*','servicio_realizado.*'); @endphp
+            @if($showServicio)
+            @php $servicioOpen = request()->routeIs('solicitud_servicio.*','visita_previa.*','presupuesto_servicio.*','contrato.*','orden_servicio.*','insumos_utilizados.*','servicio_realizado.*','reclamos.*'); @endphp
             <div class="sidebar-group {{ $servicioOpen ? 'is-open' : '' }}">
                 <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
                     <i class="fas fa-tools sidebar-icon"></i>
@@ -111,34 +144,52 @@
                     <i class="fas fa-chevron-down group-chevron"></i>
                 </button>
                 <div class="sidebar-sublinks">
+                    @if(!empty($p['sol_ser']['ver']))
                     <a href="{{ route('solicitud_servicio.index') }}" class="sidebar-sublink {{ request()->routeIs('solicitud_servicio.*') ? 'is-active' : '' }}">
                         <i class="fas fa-file-alt"></i><span>Solicitud de Servicio</span>
                     </a>
+                    @endif
+                    @if(!empty($p['vis_pre']['ver']))
                     <a href="{{ route('visita_previa.index') }}" class="sidebar-sublink {{ request()->routeIs('visita_previa.*') ? 'is-active' : '' }}">
                         <i class="fas fa-clipboard-list"></i><span>Visitas Previas</span>
                     </a>
+                    @endif
+                    @if(!empty($p['pre_ser']['ver']))
                     <a href="{{ route('presupuesto_servicio.index') }}" class="sidebar-sublink {{ request()->routeIs('presupuesto_servicio.*') ? 'is-active' : '' }}">
                         <i class="fas fa-file-invoice-dollar"></i><span>Presupuestos de Servicio</span>
                     </a>
+                    @endif
+                    @if(!empty($p['cont']['ver']))
                     <a href="{{ route('contrato.index') }}" class="sidebar-sublink {{ request()->routeIs('contrato.*') ? 'is-active' : '' }}">
                         <i class="fas fa-file-contract"></i><span>Contratos</span>
                     </a>
+                    @endif
+                    @if(!empty($p['ord_ser']['ver']))
                     <a href="{{ route('orden_servicio.index') }}" class="sidebar-sublink {{ request()->routeIs('orden_servicio.*') ? 'is-active' : '' }}">
                         <i class="fas fa-tasks"></i><span>Orden de Servicio</span>
                     </a>
+                    @endif
+                    @if(!empty($p['ins_uti']['ver']))
                     <a href="{{ route('insumos_utilizados.index') }}" class="sidebar-sublink {{ request()->routeIs('insumos_utilizados.*') ? 'is-active' : '' }}">
                         <i class="fas fa-boxes"></i><span>Insumos Utilizados</span>
                     </a>
+                    @endif
+                    @if(!empty($p['ser_rea']['ver']))
                     <a href="{{ route('servicio_realizado.index') }}" class="sidebar-sublink {{ request()->routeIs('servicio_realizado.*') ? 'is-active' : '' }}">
                         <i class="fas fa-clipboard-check"></i><span>Servicios Realizados</span>
                     </a>
+                    @endif
+                    @if(!empty($p['rec_cli']['ver']))
                     <a href="{{ route('reclamos.index') }}" class="sidebar-sublink {{ request()->routeIs('reclamos.*') ? 'is-active' : '' }}">
                         <i class="fas fa-exclamation-circle"></i><span>Reclamos del Cliente</span>
                     </a>
+                    @endif
                 </div>
             </div>
+            @endif
 
             {{-- Referenciales --}}
+            @if($showRef)
             @php $refOpen = request()->routeIs('marca.*','insumo.*'); @endphp
             <div class="sidebar-group {{ $refOpen ? 'is-open' : '' }}">
                 <button class="sidebar-link sidebar-group-btn" type="button" onclick="toggleGroup(this)">
@@ -147,40 +198,55 @@
                     <i class="fas fa-chevron-down group-chevron"></i>
                 </button>
                 <div class="sidebar-sublinks">
+                    @if(!empty($p['mar']['ver']))
                     <a href="{{ route('marca.index') }}" class="sidebar-sublink {{ request()->routeIs('marca.*') ? 'is-active' : '' }}">
                         <i class="fas fa-tag"></i><span>Marcas</span>
                     </a>
+                    @endif
+                    @if(!empty($p['ins']['ver']))
                     <a href="{{ route('insumo.index') }}" class="sidebar-sublink {{ request()->routeIs('insumo.*') ? 'is-active' : '' }}">
                         <i class="fas fa-boxes"></i><span>Insumos</span>
                     </a>
+                    @endif
                 </div>
             </div>
+            @endif
 
+            @if(!empty($p['pre_ped']['ver']))
             <a href="{{ route('presupuesto_compra.index') }}"
                class="sidebar-link {{ request()->routeIs('presupuesto_compra.*') ? 'is-active' : '' }}">
                 <i class="fas fa-file-invoice-dollar sidebar-icon"></i>
                 <span class="sidebar-label">Presupuestar Pedidos</span>
             </a>
+            @endif
 
+            @if(!empty($p['inf']['ver']))
             <a href="{{ route('informes.index') }}" class="sidebar-link {{ request()->routeIs('informes.*') ? 'is-active' : '' }}">
                 <i class="fas fa-chart-bar sidebar-icon"></i>
                 <span class="sidebar-label">Informes</span>
             </a>
+            @endif
 
+            @if(!empty($p['mper']['ver']))
             <a href="#" class="sidebar-link">
                 <i class="fas fa-user sidebar-icon"></i>
                 <span class="sidebar-label">Mi Perfil</span>
             </a>
+            @endif
 
+            @if(!empty($p['conf']['ver']))
             <a href="#" class="sidebar-link">
                 <i class="fas fa-cog sidebar-icon"></i>
                 <span class="sidebar-label">Configuración</span>
             </a>
+            @endif
 
+            @if(!empty($p['man_usu']['ver']))
             <a href="{{ route('manual_usuario.index') }}" class="sidebar-link {{ request()->routeIs('manual_usuario.*') ? 'is-active' : '' }}">
                 <i class="fas fa-book sidebar-icon"></i>
                 <span class="sidebar-label">Manual de Usuario</span>
             </a>
+            @endif
 
         </div>
 

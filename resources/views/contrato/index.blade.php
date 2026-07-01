@@ -17,9 +17,11 @@
                     <h2><i class="fas fa-file-contract"></i> Contratos</h2>
                     <small>Gestión de contratos de servicios con clientes</small>
                 </div>
+                @if(session('permisos.cont.agregar'))
                 <a href="{{ route('contrato.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Crear Contrato
                 </a>
+                @endif
             </div>
 
             {{-- Alerts --}}
